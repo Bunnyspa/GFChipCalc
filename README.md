@@ -1,7 +1,10 @@
 # GFChipCalculator
 Girls' Frontline HOC Chip Calculator
 
-# Downloads
-Latest version: https://github.com/Bunnyspa/GFChipCalc/releases/latest
+## Requirements
+- Java is required to run JAR files.
 
-Utility Files: https://github.com/Bunnyspa/GFChipCalc/releases/tag/util
+
+## Downloads
+- Latest version: https://github.com/Bunnyspa/GFChipCalc/releases/latest
+- (Optional) Utility Files: https://github.com/Bunnyspa/GFChipCalc/releases/tag/util
