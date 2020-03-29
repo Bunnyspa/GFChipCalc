@@ -573,7 +573,7 @@ public class IO {
 
         try {
             for (Locale locale : getInternalLocales()) {
-                String filePath = PATH_EX_LANG + "/" + locale.getLanguage() + "_" + locale.getCountry() + ".properties";
+                String filePath = PATH_EX_LANG + "/" + locale.toLanguageTag() + ".properties";
                 String fileContent = Language.getFileContent(locale);
                 write(filePath, fileContent);
             }

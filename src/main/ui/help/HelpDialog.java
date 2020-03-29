@@ -12,7 +12,7 @@ import main.util.IO;
  */
 public class HelpDialog extends JDialog {
 
-    private static final String LINK_CHANGELOG = "https://drive.google.com/open?id=1ekGRvd3anlfUWBJ_pBTfYR6N79g4rWc0";
+    private static final String LINK_CHANGELOG = "https://github.com/Bunnyspa/GFChipCalc/blob/master/changelog.md";
 
     private final App app;
 
@@ -35,8 +35,6 @@ public class HelpDialog extends JDialog {
         changelogButton.setText(app.getText(Language.HELP_CHANGELOG));
         aboutButton.setText(app.getText(Language.HELP_ABOUT));
         closeButton.setText(app.getText(Language.ACTION_CLOSE));
-
-        changelogButton.setVisible(false); // TODO: visible?
 
         addListeners();
         pack();

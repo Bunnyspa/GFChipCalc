@@ -25,7 +25,7 @@ public class App {
 
     public static final String NAME_KR = "소녀전선 칩셋 조합기";
     public static final String NAME_EN = "Girls' Frontline HOC Chip Calculator";
-    public static final Version VERSION = new Version(6, 7, 0);
+    public static final Version VERSION = new Version(6, 7, 1);
 
     // <editor-fold defaultstate="collapsed" desc="Colors">
     private static final Color[] COLORS_DEFAULT = { // <editor-fold defaultstate="collapsed">

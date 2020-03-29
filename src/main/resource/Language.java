@@ -24,7 +24,7 @@ public class Language {
     public static final Locale JA_JP = Locale.forLanguageTag("ja-JP");
     public static final Locale[] LOCALES = {KO_KR, EN_US, JA_JP};
 
-    private static final Map<Locale, Map<String, String>> LANGMAP = Resources.readInternalProp();
+    private static final Map<Locale, Properties> LANGMAP = Resources.readInternalProp();
 
     // <editor-fold defaultstate="collapsed" desc="Map">
     // ACTION
@@ -385,24 +385,25 @@ public class Language {
             return prop.getProperty(key);
         }
         if (KO_KR.equals(locale) && LANGMAP.get(KO_KR).containsKey(key)) {
-            return LANGMAP.get(KO_KR).get(key);
+            return LANGMAP.get(KO_KR).getProperty(key);
         }
         if (JA_JP.equals(locale) && LANGMAP.get(JA_JP).containsKey(key)) {
-            return LANGMAP.get(JA_JP).get(key);
+            return LANGMAP.get(JA_JP).getProperty(key);
         }
-        return LANGMAP.get(EN_US).get(key);
+        return LANGMAP.get(EN_US).getProperty(key);
     }
 
     public static String getFileContent(Locale locale) {
-        Map<String, String> map;
+        Properties prop;
         if (LANGMAP.containsKey(locale)) {
-            map = LANGMAP.get(locale);
+            prop = LANGMAP.get(locale);
         } else {
             return "";
         }
         StringBuilder sb = new StringBuilder();
         sb.append("# ").append(App.VERSION.toData()).append(System.lineSeparator());
-        List<String> keyList = new ArrayList<>(map.keySet());
+        List<String> keyList = new ArrayList<>();
+        prop.keySet().forEach((k) -> keyList.add(k.toString()));
         Collections.sort(keyList);
         String prevKeyPrefix = "";
         for (String key : keyList) {
@@ -410,7 +411,7 @@ public class Language {
             if (!prevKeyPrefix.isEmpty() && !prevKeyPrefix.equals(keyPrefix)) {
                 sb.append(System.lineSeparator());
             }
-            String value = map.get(key);
+            String value = prop.getProperty(key);
             sb.append(key).append("=").append(value).append(System.lineSeparator());
             prevKeyPrefix = keyPrefix;
         }

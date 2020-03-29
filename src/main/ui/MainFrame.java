@@ -2579,7 +2579,6 @@ public class MainFrame extends JFrame {
 
         fileTextArea.setBackground(java.awt.SystemColor.control);
         fileTextArea.setColumns(20);
-        fileTextArea.setFont(fileTAPanel.getFont());
         fileTextArea.setLineWrap(true);
         fileTextArea.setRows(5);
         fileTextArea.setEnabled(false);
@@ -2816,7 +2815,7 @@ public class MainFrame extends JFrame {
                 .addComponent(invBrkPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(invHitPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE)
+                .addGap(0, 1, Short.MAX_VALUE)
                 .addComponent(invRldPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 

@@ -9,13 +9,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Stream;
+import java.util.Properties;
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -165,26 +166,19 @@ public class Resources {
         return out;
     }
 
-    public static Map<Locale, Map<String, String>> readInternalProp() {
-        Map<Locale, Map<String, String>> out = new HashMap<>();
+    public static Map<Locale, Properties> readInternalProp() {
+        Map<Locale, Properties> out = new HashMap<>();
+
         for (Locale locale : Language.LOCALES) {
-            out.put(locale, new HashMap<>());
+            URL url = App.class.getResource(RESOURCE_PATH + "language/" + locale.toLanguageTag() + ".properties");
+            try (Reader r = new InputStreamReader(url.openStream(), IO.UTF8)) {
+                Properties props = new Properties();
+                props.load(r);
+                out.put(locale, props);
+            } catch (Exception ex) {
+            }
         }
-
-        URL url = App.class.getResource(RESOURCE_PATH + "language.txt");
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))) {
-            Stream<String> lines = br.lines();
-            lines.forEach((l) -> {
-                if (!l.startsWith("//")) {
-                    String[] split = l.split("\t");
-                    out.get(Language.EN_US).put(split[0], split[1]);
-                    out.get(Language.KO_KR).put(split[0], split[2]);
-                    out.get(Language.JA_JP).put(split[0], split[3]);
-                }
-            });
-        } catch (Exception ex) {
-        }
+ 
         return out;
-
     }
 }
