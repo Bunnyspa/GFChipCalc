@@ -540,3 +540,8 @@
 
 ### Removed
 - Open inventory file: .txt extension
+
+## 6.7.1 (3/29/2020)
+
+### Fixed
+- Text error for non-English settings
