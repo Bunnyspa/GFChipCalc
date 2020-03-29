@@ -1,5 +1,7 @@
-# GFChipCalculator
-Girls' Frontline HOC Chip Calculator
+# Girls' Frontline HOC Chip Calculator  
+This application is a free fan-made application.  
+Girls' Frontline and its related images are registered trademarks of Shanghai Sunborn Network Technology Co., Ltd.  
+This application is not affiliated with Shanghai Sunborn Network Technology Co., Ltd. in any way.
 
 ## Requirements
 Java is required to run JAR files.
