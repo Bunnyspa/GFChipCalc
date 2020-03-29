@@ -1,0 +1,259 @@
+// Current Version: 6.7.0	en-US	ko-KR	ja-JP	zh-CN
+// UNIT	// Units	//	//	//
+UNIT_PT	{0}pt	{0}pt	{0}pt	
+UNIT_COUNT	{0}	{0}개	{0}個	
+UNIT_STAR	{0} star	{0}성	{0}星	
+UNIT_STAR_SHORT	{0}★	{0}★	{0}★	
+UNIT_CELL	{0} tile	{0}칸	{0}マス	
+UNIT_CELLTYPE	{0} type {1}	{0}칸 {1}형	{0}マス {1}型	
+UNIT_LEVEL	Level {0}	{0}강	{0}強化	
+// CHIP	// Chip attributes	//	//	//
+CHIP_COLOR_ORANGE	Orange	주황	オレンジ	
+CHIP_COLOR_BLUE	Blue	파랑	青	
+CHIP_STAT_DMG	Le	살상	殺傷	
+CHIP_STAT_BRK	Pi	파쇄	破砕	
+CHIP_STAT_HIT	Pr	정밀	精密	
+CHIP_STAT_RLD	Re	장전	装填	
+CHIP_STAT_DMG_LONG	Lethality	살상력	殺傷	
+CHIP_STAT_BRK_LONG	Pierce	파쇄력	破砕	
+CHIP_STAT_HIT_LONG	Precision	정밀성	精密	
+CHIP_STAT_RLD_LONG	Reload	장전	装填	
+CHIP_COLOR	Color	색상	色	
+CHIP_STAR	Rarity	레어도	レア度	
+CHIP_TAG	Tag	태그	タグ	
+CHIP_MARK	Mark	마킹	マーキング	
+CHIP_PT	Point	포인트	ポイント	
+CHIP_TICKET	Ticket	교정권	較正チケット	
+CHIP_XP	XP Needed	필요 강화치	強化経験値	
+CHIP_LEVEL	Level	강화	強化	
+// ACTION	// Action buttons	//	//	//
+ACTION_OK	OK	확인	OK	
+ACTION_CANCEL	Cancel	취소	キャンセル	
+ACTION_APPLY	Apply	적용	適用	
+ACTION_CLOSE	Close	닫기	閉じる	
+ACTION_ADD	Add	추가	追加	
+ACTION_DEL	Delete	삭제	削除	
+// NEWVER	// New version dialog window	//	//	//
+NEWVER_CONFIRM_TITLE	New Version Available	새 버전	新バージョン	
+NEWVER_CONFIRM_BODY	Version {0} is available. Would you like to download the new version?	{0} 버전이 있습니다. 다운로드 하시겠습니까?	{0}バージョンがあります ダウンロードしますか?	
+NEWVER_ERROR_TITLE	Web Browser Error	웹브라우저를 열 수 없음	ウェブブラウザが開かれません	
+NEWVER_ERROR_BODY	An error occurred while opening the web browser.	에러가 발생하여 웹브라우저를 열 수 없습니다.	エラーか発生しておりウェブブラウザが開けられません	
+// TIP	// Tool tip texts	//	//	//
+TIP_DISPLAY	Language, font, and color settings	언어/글꼴/색상 설정	言語/フォント/色 設定	
+TIP_HELP	Help (F1)	도움말 (F1)	ヘルプ (F1)	
+TIP_IMAGE	Scan an image to load Chips	이미지를 스캔하여 칩셋 정보를 불러옵니다	イメージをスキャンしてチップセットデータを抽出します	
+TIP_PROXY	Extract Chip data with a proxy server	프록시로 칩셋 데이터를 추출합니다	プロキシでチップセットデータを抽出します	
+TIP_POOL	Chip Pool	칩 모양 리스트	チップの形のリスト	
+TIP_POOL_ROTATE_LEFT	Rotate pool counter-clockwise (< or [)	모양 시계반대방향으로 회전 (< 또는 [)	形 反時計回りに回転 (< または [)	
+TIP_POOL_ROTATE_RIGHT	Rotate pool clockwise (> or ])	모양 시계방향으로 회전 (> 또는 ])	形 時計回りに回転 (> または ])	
+TIP_POOL_SORT_ORDER	Reverse pool order (R)	모양 정렬 순서 (R)	形 ソート順 (R)	
+TIP_POOL_STAR	Pool rarity	레어도	レア度	
+TIP_POOL_COLOR	Change pool color (C)	모양 색상 변경 (C)	形 色変更 (C)	
+TIP_POOLWINDOW	Hide/Show left panel	좌측 패널 숨기기/보이기	左パネル 非表示/表示	
+TIP_ADD	Add to inventory (Space)	인벤토리에 추가 (Space)	インベントリーに追加 (Space)	
+TIP_INV	Chip Inventory List	칩 인벤토리 리스트	チップインベントリーリスト	
+TIP_INV_NEW	New inventory (Ctrl+N)	새 인벤토리 (Ctrl+N)	新しいインベントリー (Ctrl+N)	
+TIP_INV_OPEN	Open inventory (Ctrl+O)	인벤토리 열기 (Ctrl+O)	インベントリー読み込み (Ctrl+O)	
+TIP_INV_SAVE	Save inventory (Ctrl+S)	인벤토리 저장 (Ctrl+S)	インベントリー保存 (Ctrl+S)	
+TIP_INV_SAVEAS	Save inventory as (Ctrl+Shift+S)	다른 이름으로 저장 (Ctrl+Shift+S)	別の名前で保存 (Ctrl+Shift+S)	
+TIP_INV_SORT_ORDER	Reverse inventory order (R)	인벤토리 정렬 순서 (R)	インベントリーソート順 (R)	
+TIP_INV_SORT_TYPE	Set inventory sorting order	인벤토리 정렬 방식	インベントリーソート方式	
+TIP_INV_FILTER	Filter (Ctrl+F)	필터 (Ctrl+F)	フィルタ (Ctrl+F)	
+TIP_INV_STAT	Show as stats/Points (Ctrl+D)	스텟/포인트 표시 (Ctrl+D)	ステータス/ポイント表示切り替え (Ctrl+D)	
+TIP_INV_APPLY	Apply all (A)	모두 적용 (A)	全て適用 (A)	
+TIP_INV_STAR	Change selected Chip rarity	레어도	レア度	
+TIP_INV_COLOR	Change selected Chip color (C)	칩 색상 변경 (C)	チップ色変更 (C)	
+TIP_INV_ENHANCEMENT	Change selected Chip enhancement level (-,+)	강화 레벨 (-,+)	強化レベル (-,+)	
+TIP_INV_ROTATE_LEFT	Rotate selected Chips counter-clockwise (< or [)	칩 시계반대방향으로 회전 (< 또는 [)	チップ反時計回りに回転 (< または [)	
+TIP_INV_ROTATE_RIGHT	Rotate selected Chips clockwise (> or ])	칩 시계방향으로 회전 (> 또는 ])	チップ時計回りに回転 (> または ])	
+TIP_INV_DELETE	Delete selected Chips (Delete)	칩 지우기 (Delete)	チップ消し (Delete)	
+TIP_INV_MARK	Mark selected Chip (M)	마킹 (M)	マーキング (M)	
+TIP_INV_TAG	Manage tags (T)	태그 설정 (T)	タグ設定 (T)	
+TIP_BOARD_NAME	HOC (C)	화력소대 (C)	火力小隊 (C)	
+TIP_BOARD_STAR	HOC grade	등급	グレード	
+TIP_RESEARCH_OLD	Application update required to join the research	업데이트하셔야 연구에 참여하실 수 있습니다	リサーチに参加するにはアップデートが必要です	
+TIP_COMB_LIST	Calculation Result List	조합 리스트	組み合わせリスト	
+TIP_COMB_CHIPLIST	Calculation Result Chip List	조합 칩 리스트	組み合わせチップリスト	
+TIP_COMB_SETTING	Calculation settings (Ctrl+E)	조합 설정 (Ctrl+E)	組み合わせ設定 (Ctrl+E)	
+TIP_COMB_SHOWPROGIMAGE	Show/Hide calculation process	조합중 이미지 표시/숨기기	組み合わせ中にイメージ表示/非常示	
+TIP_COMB_START	Calculate (F5)	조합 (F5)	組み合わせ開始 (F5)	
+TIP_COMB_STAT	Stat Details	스텟 세부정보	ステータス詳細	
+TIP_COMB_OPEN	Open results	결과 열기	結果読み込み…	
+TIP_COMB_SAVE	Save results	결과 저장	結果保存…	
+TIP_COMB_MARK	Mark Chips (M)	마킹 (M)	マーキング (M)	
+TIP_COMB_TAG	Manage tags (T)	태그 설정 (T)	タグ設定 (T)	
+// HELP	// Help window	//	//	//
+HELP_TITLE	Help	도움말	ヘルプ	
+HELP_CHIP	Chip	칩셋 도움말	チップセットについて	
+HELP_CHIP_INFO_POINT_TITLE	Point	포인트	ポイント	
+HELP_CHIP_INFO_POINT_BODY	Each Chip has hidden attributes called <b>Points</b>.<br>Each Chip has number of Points equal to the number of tiles.<br>Stat value for each Point is constant and is different for each stat type. (See below)	각 칩에는 <b>포인트(pt)</b>라고 불리는 숨겨진 스텟이 있다.<br>칩이 가질 수 있는 총 포인트 수는 칸 수와 같다.<br>포인트당 스텟 배율은 고정이며 스텟 종류에 따라 다르다. (하단 참고)	それぞれのチップには<b>ポイント(pt)</b>と呼ばれる隠しステータスがある<br>チップが持てられる総ポイントの数はチップのマスと同じである<br>ポイント当たりのステータスの倍率は固定でありステータスの種類によって違う(下参考)	
+HELP_CHIP_INFO_EFFICIENCY_TITLE	Efficiency	효율	効率	
+HELP_CHIP_INFO_EFFICIENCY_BODY	Stat efficiency is determined by the rarity and the number of tiles.<br>On exception, <b>5-tile Chips</b> have two types: <b>Type A</b> and <b>Type B</b>.<br>Generally, <b>Type B</b> Chips are more complex in shape than <b>Type A</b> Chips, but there is no specific rule for dividing the two. (See right)<br><b>5-tile (Type B)</b> and <b>6-tile</b> Chips have maximum efficiency per tile. (See below)	스텟 효율은 레어도와 칸 수에 따라 달라진다.<br>예외로 <b>5칸</b> 칩의 경우 <b>A형</b>과 <b>B형</b> 두 가지로 나뉜다.<br>보통 <b>5칸 B형</b> 칩 모양이 <b>5칸 A형</b> 칩 모양보다 더 복잡하지만 어떤 룰에 의해 나눠진게 아니다. (우측 참고)<br><b>5칸 B형</b> 칩과 <b>6칸</b> 칩은 칸 수 기준 최대 효율을 낸다. (하단 참고)	ステータス効率は星の個数とマスの数によって変わる<br>例外に <b>5マス</b>チップの場合 <b>A型</b>と<b>B型</b> 二つに分かれる<br>一般的に <b>5マス B型</b>チップの形が <b>5マス A型</b>チップの形より複雑だがとあるルールとかで分けられた訳ではない(右参考)<br><b>5マス B型</b>チップと<b>6マス</b>チップはマス数基準で最大効率を出す(下参考)	
+HELP_CHIP_INFO_COLOR_TITLE	Color and Same Color Bonus	색상과 공명	色と共鳴	
+HELP_CHIP_INFO_COLOR_BODY	Same Color Bonus is given if the Chip color and the circuit color matches.<br>The bonuses are added based on the number of tiles filled with Chips with the same color. (See below)<br>The bonus stats do not count towards the stat capacity.	칩의 색과 보드의 색이 같을 경우 공명 보상을 얻을 수 있다.<br>공명 보상은 같은 색 칩들의 총 칸 수를 기준으로 구간마다 스텟을 추가한다. (하단 참고)<br>이 스텟은 스텟 최대치와 별개로 추가된다.	チップの色とボードの色が同じ場合共鳴補償が得られる<br>共鳴補償は同じ色のチップの総マス数を基準にしてセクター当たりにステータスが追加される(下参考)<br>このステータスはステータスの最大値とは別で追加される	
+HELP_CHIP_INFO_CALC_TITLE	Calculation	스텟 계산	ステータス計算	
+HELP_CHIP_INFO_CALC_BODY	Stats are calculated as following:<br><b>Base Stat</b> = Round Up[Point &times; Stat Multiplier per Point &times; Efficiency by Size and Rarity(%)]<br><b>Final Stat</b> = Round Up[Base Stat &times; Enhancement Multiplier(1.0-2.5)]<br>Stat loss can happen with Chips with high Points due to rounding. (See below)	스텟의 계산식은 대략 다음과 같다.<br><b>강화 전 스텟</b> = 올림[포인트 &times; 포인트당 스텟 배율 &times; 레어도 및 칸 수 효율(%)]<br><b>최종 스텟</b> = 올림[강화 전 스텟 &times; 강화 배율(1.0~2.5배)]<br>올림으로 인해 각 스텟의 포인트가 너무 높으면 스텟 손실이 일어난다. (하단 참고)	ステータスの算式は大体次の通りである<br><b>強化前のステータス</b> = 切り上げ[ポイント &times; ポイント当たりのステータス倍率 &times; レア度及びマス数の効率(%)]<br><b>最終ステータス</b> = 切り上げ[強化前のステータス &times; 強化倍率(1.0~2.5倍)]<br>切り上げで各のステータスのポイントが高すぎるとステータスの損失が起こる (下参考)	
+HELP_CHIP_COL_CELL	Size	칸 수	マスの大きさ	
+HELP_CHIP_COL_LEVEL	Lv.	레벨	レベル	
+HELP_CHIP_COLOR_SECTION	Increment	구간	セクター	
+HELP_CHIP_COLOR_CUMULATIVE	Cumulative	누적	累積	
+HELP_CHIP_CALC_DESC	<b>Loss</b>: (Stat at P pts) - P &times; (Stat at 1 pt)	<b>손실 계산</b>: (P포인트 스텟) - P &times; (1포인트 스텟)	<b>損失の計算</b>: (Pポイント ステータス) - P &times; (1ポイント ステータス)	
+HELP_CHIP_CALC_STAT	Stat	스텟	ステータス	
+HELP_CHIP_CALC_LOSS	Loss	손실	損失	
+HELP_APP_IMPORT	Importing Chips	칩셋 불러오기	チップセットロード	
+HELP_APP_IMPORT_PROXY	This application can read login packets with a built-in proxy server.<br>Press the button with the icon on the left and start the extraction.	이 프로그램은 내장된 프록시 서버로 로그인 패킷을 읽을 수 있습니다.<br>좌측 아이콘이 있는 버튼을 눌러 프록시 서버를 가동시킨 후 추출을 진행하시면 됩니다.	当プログラムは内装されたプロキシサーバーでログインパケットを読み取れます<br>左のアイコンが描かれたボターンでプロキシサーバーを稼動させて抽出を勧めてください	
+HELP_APP_IMPORT_IMAGESCAN	You can scan screenshot images of your Chip inventory in this application.<br>The scan result may not be accurate. Check all the results and modify them if necessary.	칩셋 인벤토리 스크린샷 이미지를 이 프로그램에서 스캔할 수 있습니다.<br>스캔 결과는 정확하지 않을 수 있습니다. 반드시 체크하시고 필요에 따라 수정하시기 바랍니다.	チップセットのインベントリーのキャプチャーイメージファイルをこのプログラムでスキャンできます<br>スキャンは不確かである可能性があります 必ず確認して必要に応じて修正してください	
+HELP_APP_IMPORT_OPEN	You can open a JSON file generated by a different application that can read your login packet.	로그인 패킷을 읽을 수 있는 타 프로그램에서 제공하는 JSON 파일을 직접 불러올 수 있습니다.	ログインパケットを読み取れる別のプログラムで提供するJSONファイルをここで読み取ることが出来ます	
+HELP_APP_OPTIMIZE	Optimizing Calculations	조합 최적화하기	組み合わせの最適化	
+HELP_APP_OPTIMIZE_FILTER	You can exclude Chips from the calculation by using the filter option.<br>Filtering may speed up the calculation drastically.<br>If you loaded your Chips with the proxy server or a JSON file, you can exclude equipped Chips by filtering tags.	필터 기능으로 조합에 필요하지 않은 칩셋을 제외할 수 있습니다.<br>필터 기능을 잘 이용하면 조합 속도가 매우 빨라질 수 있습니다.<br>프록시 서버나 JSON 파일로 칩셋을 불러왔을 경우 태그 제외로 이미 장착한 칩을 제외시킬 수 있습니다.	フィルター機能で組み合わせに必要ないチップセットを除外できます<br>フィルター機能を上手く使えば、組み合わせの速度を早めることが出来ます<br>プロキシサーバーやJSONファイルでチップセットをロードした場合<br>タグ除外で既に装着されたチップを除外できます	
+HELP_APP_OPTIMIZE_SETTING	You can set custom stat capacities or Point caps.<br>Some HOCs have more stat capacities than Chips can fill.<br>In this case try the presets which the GFL community has found them optimal.<br>The presets also have filter presets to optimize calculations.	조합 스텟이나 PT를 직접 설정할 수 있습니다.<br>일부 화력소대는 칩으로 스텟을 전부 채우지 못할 수도 있습니다.<br>이 경우 소녀전선 커뮤니티에서 연구한 프리셋을 사용해보세요.<br>프리셋은 조합을 최적화 하기 위한 필터 프리셋도 포함되어 있습니다.	組み合わせのステータスやPTを直接設定出来ます<br>一部の火力小隊はチップではステータスを全部満たすことが出来ない場合もあります<br>この場合ドルフロのコミュニティから研究されたプリセットを使ってみてください<br>プリセットは組み合わせを最適化する為のフィルタープリセットも含まれてます	
+HELP_APP_OPTIMIZE_MARK	Mark feature is used to include a portion of Chips you have marked in the calculations.<br>It is rarely used but great for some occasions.<br>e.g. Including at least 3 of your max-leveled Chips.	마킹 기능은 조합에 자신이 원하는 칩을 일부 포함시킬 때 사용합니다.<br>이 기능은 많이 사용되지 않지만 일부 상황에서 유용하게 사용됩니다.<br>예) 만렙 칩셋을 최소 3개 포함하고 싶을 때	マーキング機能は組み合わせに自分が必要とするチップを一部含ませる時に使用します<br>この機能は多くは使われませんが一部の状況では有用に使えます<br>※ フル強化したチップセットを最低３つ含ませたい時	
+HELP_PROGRAM	Application	프로그램 도움말	プログラムヘルプ	
+HELP_PROXY	Proxy	프록시 도움말	プロキシヘルプ	
+HELP_PROXY_DESC	The setting method may differ for each device.<br>If you are logging in with the device other than this PC such as smartphones, this PC and the device must be connected to the same router.<br>Check the firewall settings if your device cannot log in.<br>You can also use android emulators to fetch the data.	기기마다 설정 방법이 다를 수 있습니다.<br>이 컴퓨터가 아닌 스마트폰 등 다른 기기에서 로그인 하는 경우 두 기기가 같은 라우터에 연결되어 있어야 합니다.<br>로그인이 안되는 경우 방화벽을 체크해보세요.<br>안드로이드 에뮬레이터로도 데이터를 읽을 수 있습니다.	機器によって設定方法が変わることがあります<br>このパソコンではなく他のスマートフォンなどの機器からログインする場合<br>二つの機器を同じルーターに接続する必要があります<br>ログインが出来ない場合ファイヤウォールをチェックしてください<br>Androidエミュレーターでもデータを読み込めます	
+HELP_CHANGELOG	Changelog	업데이트 정보	アプデ情報	
+HELP_ABOUT	About	정보	情報	
+// LEGEND	// Icon legend (shown at the bottom right side, below the result area)	//	//	//
+LEGEND_EQUIPPED	Equipped	사용중	使用中	
+LEGEND_ROTATED	Rotated	회전	回転	
+// DISPLAY	// Display settings window	//	//	//
+DISPLAY_TITLE	Display Settings	언어/글꼴/색상 설정	言語/フォント/色 設定	
+DISPLAY_LANGUAGE_TITLE	Language	언어	言語	
+DISPLAY_LANGUAGE_PREVIEW	-	가나다	日本語あいうえおアイウエオ	
+DISPLAY_HOWTO_ADDLANGUAGE	To add language, create a "language" folder next to the application and place the *.properties file in the folder.	언어를 추가하시려면 "language" 폴더를 프로그램 위치에 생성한 후 *.properties 파일을 안에 넣으세요.	言語を追加する場合 "language" フォルダーをプログラムの位置に生成した後 *.properties ファイルを中に入れてください	
+DISPLAY_EXPORT	Export Language Files	언어 파일 내보내기	言語ファイルを取り出す	
+DISPLAY_EXPORT_DONE_TITLE	Export	내보내기	取り出す	
+DISPLAY_EXPORT_DONE_BODY	Export complete. Check the {0} folder.	저장되었습니다. {0} 폴더를 확인하세요.	保存しました {0} フォルダを確認してください	
+DISPLAY_EXPORT_FAIL_TITLE	Export Failed	내보내기 실패	取り出し失敗	
+DISPLAY_EXPORT_FAIL_BODY	Export failed.	저장 실패했습니다.	保存に失敗しました	
+DISPLAY_COLORFONT_TITLE	Color and Font	색상과 글꼴	色合い&フォント	
+DISPLAY_COLOR_NORMAL	Default color mode	기본 색상	基本色	
+DISPLAY_COLOR_COLORBLIND	Colorblind color mode	색맹/색약 전용 색상	色盲/色弱専用色	
+DISPLAY_FONT_RESET	Reset font size	글꼴 크기 리셋	フォントサイズリセット	
+// IMAGE	// Image scan window	//	//	//
+IMAGE_TITLE	Image Scan	이미지 스캔	イメージスキャン	
+IMAGE_OPEN	Open Image	이미지 열기	イメージ読み込み	
+IMAGE_OPEN_EXT	Image files	이미지 파일	イメージファイル	
+IMAGE_OVERLAPPED_TITLE	Overlapped	겹침	選択領域重複	
+IMAGE_OVERLAPPED_BODY	The selected area is overlapped with the area already selected.	선택한 영역과 이미 추가된 영역이 겹칩니다.	選んだ領域と既に追加された領域が重なっています	
+// PROXY	// Proxy extraction window	//	//	//
+PROXY_TITLE	Proxy Extraction	프록시로 데이터 추출	プロキシでデータ抽出	
+PROXY_WARNING	Warning - This application's proxy server is implemented only to extract data.<br>I am not responsible for any problems caused by this proxy server if used for other than its purpose.	이 프로그램의 프록시 서버는 데이터를 추출하기 위해 필요한 기능만 넣었습니다.<br>이 프록시 서버로 본 용도외 이용시 생기는 문제는 책임지지 않습니다.	このプログラムのプロキシサーバーはデータを抽出するための機能だけを入れています<br>このプロキシサーバーで本来の用途以外の使用で生ずる問題には責任を取りません	
+PROXY_STAGE1_INST	Connect your phone Wi-Fi to where your computer is connected and set the proxy settings and (re-)login.	휴대폰에서 컴퓨터가 연결한 공유기에 연결하고 프록시 설정 후 게임에서 (재)로그인하세요.	携帯からパソコンが繋がってる アドホックネットワークにつないでプロキシ設定後 ゲームを (再)ログインしてください	
+PROXY_STAGE1_INFO	Proxy server running<br>Proxy host name: {0}<br>Proxy port: {1}	프록시 서버 가동중<br>프록시 호스트 이름: {0}<br>프록시 포트: {1}	プロキシサーバー稼働中<br>プロキシホスト名: {0}<br>プロキシポート: {1}	
+PROXY_STAGE2_INST	Reset the proxy setting on your phone and press OK in this window.	휴대폰에서 프록시 설정을 원래대로 돌리신 후 프로그램에서 확인 버튼을 누르세요.	携帯からプロキシ設定を元に戻した後 プログラムのOKボターンを押してください	
+PROXY_STAGE2_INFO	Extraction completed. The Chips will be sorted by acquired dates in descending order when loaded.<br>Total number of Chips: {0}<br>Tags: {1}	데이터 추출 완료. 획득순서 내림차순으로 불러옵니다.<br>총 칩 갯수: {0}<br>태그: {1}	データ抽出完了 獲得順 下行性でロードします<br>総チップ数: {0}<br>タグ: {1}	
+PROXY_ERROR_INST	A problem has occurred. Please close and open this window again.	문제가 발생했습니다. 창을 닫은 후 다시 시도해주세요.	問題が発生しました ウィンドウを閉じてやり直してください	
+PROXY_ERROR_INFO	Cannot open to port {0} at this moment.	포트 {0}번으로 프록시 서버를 열 수 없음	Port {0}で プロキシサーバーを開けられません	
+// SORT	// Sort options	//	//	//
+SORT_CUSTOM	Unsorted	사용자 지정 정렬	ユーザー設定ソート	
+SORT_CELL	Size	칸수	マス枠	
+SORT_ENHANCEMENT	Enhancement Level	강화레벨	強化レベル	
+SORT_STAR	Rarity	레어도	レア度	
+SORT_PT	Points	PT	PT	
+// FILTER	// Filter options window	//	//	//
+FILTER_TITLE	Inventory Filter	인벤토리 필터	インベントリーフィルター	
+FILTER_ENABLED	Filter enabled: {0}/{1}	필터 적용중: {0}개 / {1}개	フィルター適用中: {0}個 / {1}個	
+FILTER_DISABLED	Filter disabled: {0}	필터 없음: {0}개	フィルター無し: {0}個	
+FILTER_GROUP_STAR	Rarity	레어도	レア度	
+FILTER_GROUP_COLOR	Color	색상	色	
+FILTER_GROUP_CELL	Size	칸 수	マスの大きさ	
+FILTER_GROUP_MARK	Marked/Unmarked	마킹 여부	マーキング状態	
+FILTER_GROUP_PT	PT Range	포인트 범위	ポイントの枠	
+FILTER_GROUP_ENHANCEMENT	Enhancement Level Range	강화 레벨 범위	強化レベルの枠	
+FILTER_GROUP_TAG_INCLUDE	Tags to Include	태그 포함	タグ含む	
+FILTER_GROUP_TAG_EXCLUDE	Tags to Exclude	태그 제외	タグ除外	
+FILTER_PRESET	Apply Filter Preset	필터 프리셋 적용	フィルタープリセット適用	
+FILTER_RESET	Reset filter	필터 초기화	フィルターリセット	
+FILTER_TAG_RESET	Reset tag selections	태그 초기화	タグリセット	
+// APPLY	// Apply All window	//	//	//
+APPLY_TITLE	Apply All	모두 적용	全て適用	
+APPLY_MARK_ALL	Mark all	마킹	マーキング	
+APPLY_MARK_NONE	Unmark all	마킹 해제	マーキング解除	
+APPLY_CONFIRM_DESC	It will be applied to all (filtered) Chips, and this action is irreversible. Do you wish to continue?	모든 (필터된) 칩에 적용되며 복구할 수 없습니다. 적용하시겠습니까?	全ての(選択された)チップに適用され元に戻せません、続けますか?	
+APPLY_TAG_DESC	Double-click a tag to add to all (filtered) Chips.<br>The background is highlighted if all Chips contain the tag, and double-clicking it will remove the tag instead.	태그를 더블클릭시 모든 (필터된) 칩에 추가합니다.<br>모든 칩이 가진 태그는 배경색이 있으며 더블클릭시 제거합니다.	タグを2回クリックすると全ての(フィルターされた)チップに付きます<br>全てのチップに付けられたタグには背景色があり2回クリックで消えます	
+// STAT	// Stat detail window	//	//	//
+STAT_TITLE	Stat Details	스텟 세부정보	ステータス詳細	
+STAT_TOTAL	Total	총합	総計	
+STAT_TOTAL_OLD	(old version) Total	(구버전) 총합	(旧バージョン)総計	
+STAT_HOC	HOC	화력소대	火力小隊	
+STAT_CHIP	Chip	칩셋	チップ	
+STAT_RESONANCE	Resonance	공명	共鳴	
+STAT_VERSION	Iteration	버전	バージョン	
+STAT_RLD_FIRERATE	Fire Rate	연사속도	連鎖速度	
+STAT_RLD_DELAY	Delay	딜레이	ディレー	
+STAT_RLD_DELAY_FRAME	{0} Frames	{0} 프레임	{0} フレーム	
+STAT_RLD_DELAY_SECOND	{0} Seconds	{0} 초	{0} 秒	
+// TAG	// Tag setting window	//	//	//
+TAG_NONE	No tags	태그 없음	タグ無し	
+TAG_TITLE	Manage Tags	태그 설정	タグ設定	
+TAG_DESC	Unused tags will be deleted from the list automatically.	더이상 사용하지 않는 태그는 자동으로 삭제됩니다.	使われないタグは自動で削除されます	
+// CSET	// Calculation settings window	//	//	//
+CSET_TITLE	Calculation Settings	조합 설정	組み合わせ設定	
+CSET_GROUP_STAT	Stat	스텟	ステータス	
+CSET_GROUP_MARK	Mark	마킹	マーキング	
+CSET_GROUP_SORT	Sort by	정렬순서	ソート順番	
+CSET_GROUP_MISC	Misc.	기타	その他	
+CSET_DEFAULT_STAT	Default Stat	기본 스텟	基本ステータス	
+CSET_STAT	Stat	스텟	ステータス	
+CSET_PT	Point	포인트	ポイント	
+CSET_PRESET	Presets	프리셋	プリセット	
+CSET_PRESET_OPTION	Option {0}	옵션 {0}	設定 {0}	
+CSET_MARK_CELL	# of Tiles	칸 갯수	マスの数	
+CSET_MARK_CHIP	# of Chips	칩 갯수	チップの数	
+CSET_MARK_DESC	Useful for including some of the Chips you want.	원하는 칩을 일부 포함 시킬때 유용합니다.	特定のチップを一部含ませる時に有用です	
+CSET_SORT_TICKET	# of Tickets	교정권 갯수순	較正チケット使用量順	
+CSET_SORT_XP	Enhancement XP	강화 경험치순	強化経験値順	
+CSET_MAXLEVEL_DESC	Assume max Chip level for the calculation	스텟 계산시 최대 강화 레벨 적용	ステータス計算時最大強化レベル適用	
+CSET_COLOR_DESC	Only use Chips with the same color as the circuit color	보드와 맞는 색상의 칩만 사용	ボードと合う色のチップだけ使用	
+CSET_ROTATION_DESC	Rotate if needed (Calibration tickets will be used)	칩 회전 (교정권 사용)	チップ回転(較正チケット使用)	
+CSET_CONFIRM_FILTER_TITLE	Apply Recommended Filter	추천 필터 적용	推奨フィルターの適用	
+CSET_CONFIRM_FILTER_BODY	Would you also like to apply for the chip filter preset?	칩셋 필터 프리셋도 같이 적용하시겠습니까?	選択したプリセットに合うフィルターを適用しますか?	
+// RESEARCH	// Research window	//	//	//
+RESEARCH_TITLE	Research	연구	リサーチ	
+RESEARCH_WTF	If some HOCs are missing "5-6 Tile" fast calculations, you can help updating them here.<br>This research is completely optional, and there are no individual rewards for running this research.<br>You need an internet connection to receive tasks and send results.<br><b>If the server does not respond, the server is most likely closed because no more research is needed.</b><br>Increasing the number of threads can speed the process but can slow down your computer.	일부 화력소대에 "5~6칸" 빠른 조합이 없는 경우 여기서 업데이트를 도와줄 수 있습니다.<br>이 작업은 완전히 선택사항이며, 이 작업을 돌려서 얻는 개인 보상은 없습니다.<br>작업을 받고 결과를 전송하기 위해 인터넷 연결이 필요합니다.<br><b>만약 서버가 응답하지 않는경우 더이상 연구가 필요하지 않기 때문에 서버가 닫혔을 가능성이 높습니다.</b><br>스레드를 늘리면 작업이 빨라질 수 있으나 컴퓨터가 느려질 수 있습니다.	一部の火力小隊に"5~6マス"のクイック組み合わせが無い場合ここでデータアップデートの補助が出来ます<br>この作業は任意であり、これによって報酬が与えられることはありません<br>作業をして結果を送るにはインターネット接続が必要です<br>もしサーバーが応答しない場合これ以上研究が不必要なためサーバーが閉じている可能性が高いです<br>スレッドを増やせば作業が早くなるが他の作業が遅くなる可能性があります	
+RESEARCH_THREAD	Threads	스레드	スレッド	
+RESEARCH_START	Start	시작	スタート	
+RESEARCH_STOP	Stop	중지	中止	
+RESEARCH_READY	Ready	준비	準備	
+RESEARCH_EMPTY	Connecting	응답을 기다리는중	応答待ち中	
+RESEARCH_WAITING	Waiting for a task for {1}-star {0}	{1}성 {0} 작업 준비중	★{1} {0} 作業準備中	
+RESEARCH_WORKING	Calculating for {1}-star {0}	{1}성 {0} 연산중	★{1} {0} 演算中	
+// WARNING	// Warning pop-up	//	//	//
+WARNING_HOCMAX	HOC Warning	화력소대 주의	火力小隊注意	
+WARNING_HOCMAX_DESC	This HOC's stat capacity is too big. (100% stat not reachable)<br>Use the presets in the Calculation Settings to get the best results.	스텟을 모두 채울 수 없는 화력소대입니다. (스텟 100% 불가능)<br>가장 좋은 조합결과를 찾기 위해 조합 설정에서 프리셋을 이용하세요.	ステータスの全てを満たすことが出来ない火力小隊です(ステータス100%不可能)<br>もっともいい組み合わせ結果を探すには組み合わせ設定からプリセットをご活用ください	
+WARNING_TIME	Time Warning	시간 주의	時間注意	
+WARNING_TIME_DESC	The calculation may take a long time.<br>Try to exclude sub-optimal chips by using/refining the Filter (above the inventory).<br>Try the filter preset if you are using the stat preset.	시간이 너무 오래 걸립니다.<br>(인벤토리 위에 있는) 필터로 필요없는 칩셋을 제외하는 것을 추천합니다.<br>프리셋을 사용하는 경우 같이 사용할 수 있는 필터 프리셋을 이용해보세요.	組み合わせるのに時間がかかり過ぎます<br>(インベントリー上の)フィルターで必要の無いチップセットを除外することをお勧めします<br>プリセットを使用する場合一緒に使えるフィルタープリセットをご活用してください	
+// COMB	// Calculation	//	//	//
+COMB_REMAINING	{0} left	{0} 남음	{0} 残り	
+COMB_DESC	Click an item on the list<br>to check the result.	리스트를 클릭하여<br>조합 확인	リストをクリックして<br>組み合わせ確認	
+COMB_NONEFOUND	None Found	조합 없음	組み合わせパターン無し	
+COMB_MARK_CONTINUE_TITLE	Mark	마킹 확인	マーキング 確認	
+COMB_MARK_CONTINUE_BODY	Do you wish to mark all Chips used in the result?	조합에 쓰인 칩 모두 마킹하시겠습니까?	組み合わせに使われたチップ全てをマーキングしますか?	
+COMB_DNE_TITLE	Missing	찾기 실패	検索失敗	
+COMB_DNE_BODY	Some of the Chips in the inventory are missing. Do you wish to continue?	조합에 쓰인 칩 일부가 인벤토리에 없습니다. 계속 하시겠습니까?	組み合わせに使われたチップの一部がありません､続けますか?	
+COMB_OPTION_M2_0	Fill 35-36 tiles with 5B+6 Chips	5B+6칸 칩 + 보드 35~36칸	5B+6マスチップ + ボード35~36マス	
+COMB_OPTION_M2_1	With Chips of size 4-6	4칸 ~ 6칸	4マス~6マス	
+COMB_OPTION_M2_2	With Chips of size 1-6	1칸 ~ 6칸	1マス~6マス	
+COMB_OPTION_M2_DESC	Below <b>4-tile Chips</b> can make calculations very slow.<br>Only 6 and 5B Chips have 100% efficiency.<br>(If you want to calculate only with 6 and 5B Chips, exclude 5A Chips with the filter menu.)<br><br><b>[{0}]</b> and <b>[{1}]</b> options are recommended.<br>(<b>[{0}]</b> option will not fill all circuit tiles.)	<b>4칸</b> 미만의 칩을 포함하여 조합할 경우 조합 속도가 매우 느립니다.<br><b>5칸 A형</b> 이하의 칩은 100% 효율이 나오지 않습니다. (좌측 상단 도움말 참조)<br>(5B + 6칸 조합을 하실려면 필터 기능으로 5A 이하를 제외하세요.)<br><br><b>[{0}]</b> 옵션과 <b>[{1}]</b> 옵션을 추천합니다.<br>(<b>[{0}]</b> 옵션은 보드를 모두 채우지 않는 옵션입니다.)	<b>4マス</b> 未満のチップを含めて組み合わせる場合組み合わせ速度が遅くなります<br><b>5マスA型</b>以下のチップは100%効率が出ません(左上ヘルプ参考)<br>(5B + 6マス 組み合わせをする場合フィルター機能で5A以下を除外してください)<br><br><b>[{0}]</b>設定と<b>[{1}]</b>の設定を推薦します<br>(<b>[{0}]</b>設定はボードを全部満たさない設定です)	
+COMB_OPTION_DEFAULT_0	With Chips of size {0}-6	{0} ~ 6칸	{0}マス~6マス	
+COMB_OPTION_DEFAULT_1	With Chips of size 1-6	1칸 ~ 6칸	1マス~6マス	
+COMB_OPTION_DEFAULT_DESC	Below <b>{1} Chips</b> can make calculations very slow.<br>Only <b>6</b> and <b>5 Type B</b> Chips have 100% efficiencies.<br>(If you want to calculate only with 6 and 5B Chips, exclude 5A Chips with the filter menu.)<br><br><b>[{0}]</b> option is recommended.	<b>{1}</b> 미만의 칩을 포함하여 조합할 경우 조합 속도가 매우 느립니다.<br><b>6칸</b>과 <b>5칸 B형</b> 칩만 100% 효율이 나옵니다. (좌측 상단 도움말 참조)<br>(5B + 6칸 조합을 하실려면 필터 기능으로 5A 이하를 제외하세요.)<br><br><b>[{0}]</b> 옵션을 추천합니다.	<b>{1}</b> 未満のチップを含めて組み合わせる場合組み合わせ速度が遅くなります<br><b>6マス</b>と<b>5マスB型</b>のチップだけが100%効率が出ます(左上ヘルプ参考)<br>(5B + 6マス組み合わせをする場合フィルター機能で5A以下を除外してください)<br><br><b>[{0}]</b>の設定を推薦します	
+COMB_OPTION_TITLE	Calculation Options	조합 범위 옵션	組み合わせ範囲設定	
+COMB_ERROR_STAT_TITLE	Missing data	칩 스텟 오류	チップステータス入力エラー	
+COMB_ERROR_STAT_BODY	Please fill all Chip data first.	모든 칩 스텟을 완성해야 조합할 수 있습니다.	全てのチップステータス入力を完了しないと組み合わせることができません	
+// FILE	// File dialog window	//	//	//
+FILE_EXT_INV_OPEN	Inventory Files (*.{0}) or Game Data Files (*.json)	칩 인벤토리 파일 (*.{0}) 또는 게임 데이터 파일 (*.json)	チップインベントリーファイル (*.{0}) または ゲームデータファイル (*.json)	
+FILE_EXT_INV_SAVE	Inventory Files (*.{0})	칩 인벤토리 파일 (*.{0})	チップインベントリーファイル (*.{0})	
+FILE_EXT_COMB	Result Files (*.{0})	칩 조합 파일 (*.{0})	チップ組み合わせファイル (*.{0})	
+FILE_SAVE_TITLE	Save	저장	保存	
+FILE_SAVE_BODY	Do you want to save the inventory?	저장하시겠습니까?	保存しますか?	
+FILE_OVERWRITE_TITLE	Overwrite	덮어쓰기	上書き	
+FILE_OVERWRITE_BODY	The name already exists. Do you wish to overwrite?	파일 이름이 이미 존재합니다. 덮어쓰시겠습니까?	ファイル名がすでに存在します、上書きしますか?	
+// JSON	// JSON dialog (after both file and proxy dialog) window	//	//	//
+JSON_TITLE	JSON Data Filter	JSON 데이터 필터	JSONデータフィルター	
+JSON_FILTER_STAR	Only save {0}-star chips	{0}성만 저장	★{0}だけ 保存	
+JSON_FILTER_SIZE	Only save Chips of size {0}-{1}	{0}~{1}칸 저장	{0}~{1}マス 保存	
+JSON_SHAPETAG	Add shape tags	모양 태그 추가	形タグを追加	
+JSON_MARK	Mark HOC tag Chips	화력소대 태그 칩 마킹	タグしたチップマーキング	
+// Translation provided by	Bunnyspa	Bunnyspa	xpfjqja, apple, naganeko	
