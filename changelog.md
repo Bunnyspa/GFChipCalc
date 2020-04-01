@@ -545,3 +545,8 @@
 
 ### Fixed
 - Text error for non-English settings
+
+## 6.7.2 (4/1/2020)
+
+### Changed
+- Update tool will be downloaded automatically when starting an update
