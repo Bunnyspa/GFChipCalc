@@ -4,17 +4,17 @@ package main.util;
  *
  * @author Bunnyspa
  */
-public class Version {
+public class Version3 {
 
     public final int v1, v2, v3;
 
-    public Version() {
+    public Version3() {
         v1 = 0;
         v2 = 0;
         v3 = 0;
     }
 
-    public Version(String version) {
+    public Version3(String version) {
         String[] verStrs = version.split("\\.");
         if (3 == verStrs.length) {
             v1 = Integer.valueOf(verStrs[0]);
@@ -27,7 +27,7 @@ public class Version {
         }
     }
 
-    public Version(int v1, int v2, int v3) {
+    public Version3(int v1, int v2, int v3) {
         this.v1 = v1;
         this.v2 = v2;
         this.v3 = v3;
@@ -44,7 +44,7 @@ public class Version {
     }
 
     public boolean isCurrent(String version) {
-        Version v = new Version(version);
+        Version3 v = new Version3(version);
         return isCurrent(v.v1, v.v2, v.v3);
     }
 

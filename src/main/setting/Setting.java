@@ -6,7 +6,8 @@ import java.util.Locale;
 import main.App;
 import main.puzzle.Chip;
 import main.util.IO;
-import main.util.Version;
+import main.util.Version2;
+import main.util.Version3;
 
 /**
  *
@@ -40,6 +41,8 @@ public class Setting {
     public static final int DEFAULT_FONTSIZE = 12;
 
     //// Variables ////
+    public Version2 updateVersion;
+
     // Display
     public Locale locale;
     public int fontSize;
@@ -78,11 +81,13 @@ public class Setting {
     public Setting(List<String> generalLines, List<String> boardStatLines) {
         init();
         try {
-            Version v = new Version(generalLines.get(0));
+            Version3 v = new Version3(generalLines.get(0));
             if (v.isCurrent(4, 2, 0)) {
                 generalLines.forEach((line) -> {
                     // Display
-                    if (line.startsWith("APPEARANCE_LANG=") || line.startsWith("DISPLAY_LANG=")) {
+                    if (line.startsWith("UPDATE_VERSION=")) {
+                        updateVersion = new Version2(afterEqual(line));
+                    } else if (line.startsWith("APPEARANCE_LANG=") || line.startsWith("DISPLAY_LANG=")) {
                         locale = Locale.forLanguageTag(afterEqual(line).replace("_", "-"));
                     } else if (line.startsWith("APPEARANCE_FONT=") || line.startsWith("DISPLAY_FONT=")) {
                         String[] parts = afterEqual(line).split(",");
@@ -126,6 +131,9 @@ public class Setting {
                 // Board
                 board = IO.parseBS(boardStatLines);
             } else {
+                updateVersion = App.VERSION_UPDATE;
+
+                locale = Locale.getDefault();
                 fontSize = Integer.valueOf(generalLines.get(1));
 
                 poolOrder = IO.parseBoolean(generalLines.get(2));
@@ -145,6 +153,7 @@ public class Setting {
     }
 
     public final void init() {
+        updateVersion = App.VERSION_UPDATE;
         // Display
         locale = Locale.getDefault();
         fontSize = DEFAULT_FONTSIZE;
@@ -185,6 +194,7 @@ public class Setting {
         List<String> lines = new ArrayList<>();
         lines.add(App.VERSION.toData());
         lines.add("[" + Setting.SECTION_GENERAL + "]");
+        lines.add("UPDATE_VERSION=" + App.VERSION_UPDATE.toData());
 
         lines.add("DISPLAY_LANG=" + locale.getLanguage() + "_" + locale.getCountry());
         lines.add("DISPLAY_FONTSIZE=" + fontSize);

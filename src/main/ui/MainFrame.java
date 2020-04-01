@@ -162,9 +162,10 @@ public class MainFrame extends JFrame {
     }
 
     private void init() {
-        versionLabel.setText("<html><center>Version<br>" + App.VERSION.toString() + "</center></html>");
+        versionLabel.setText("<html><center>Version<br>" + App.VERSION.toData() + "</center></html>");
 
         initImages();
+        initTables();
 
         invComboBoxes.add(invDmgComboBox);
         invComboBoxes.add(invBrkComboBox);
@@ -193,7 +194,6 @@ public class MainFrame extends JFrame {
         researchButton.setVisible(false);
         timeWarningButton.setVisible(false);
 
-        initTables();
         addListeners();
         setting_resetBoard();
 
@@ -281,8 +281,6 @@ public class MainFrame extends JFrame {
                 poolLM.addElement(new Chip(c));
             }
         }
-        // Action
-        pool_setOrder(app.setting.poolOrder);
 
         /* INVENTORY */
         invList.setFixedCellHeight(Chip.getImageHeight(true) + 3);
@@ -2002,6 +2000,7 @@ public class MainFrame extends JFrame {
 
             refreshDisplay();
 
+            pool_setOrder(app.setting.poolOrder);
             poolStarComboBox.setSelectedIndex(5 - app.setting.poolStar);
 
             setPoolPanelVisible(app.setting.poolPanelVisible);

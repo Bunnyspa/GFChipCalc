@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Point;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -30,6 +31,8 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.swing.JOptionPane;
 import main.App;
@@ -60,7 +63,11 @@ public class IO {
 
     private static final String FILENAME_SETTINGS = "settings.dat";
 
-    private static final String URL_GITHUB_LATEST = "https://github.com/Bunnyspa/GFChipCalc/releases/latest";
+    private static final String FILENAME_UPDATE = "GFChipCalc-Update.jar";
+
+    private static final String URL_GITHUB_MAIN = "https://github.com/Bunnyspa/GFChipCalc/releases/latest";
+    private static final String URL_GITHUB_UPDATE = "https://github.com/Bunnyspa/GFChipCalc-Update/releases/latest";
+    private static final String URL_DOWNLOAD_UPDATE = URL_GITHUB_UPDATE + "/download/GFChipCalc-Update.jar";
 
     private static int pre420rotation(String name) {
         if (name.matches("4I|5[IZF]|5Zm|6[ACDIR]")) {
@@ -81,7 +88,7 @@ public class IO {
             Iterator<String> bri = br.lines().iterator();
             if (bri.hasNext()) {
                 String s = bri.next();
-                Version v = new Version(s);
+                Version3 v = new Version3(s);
                 if (v.isCurrent(5, 3, 0)) {
                     Set<Tag> tags = new HashSet<>();
                     bri.forEachRemaining((l) -> chips.add(parseChip(l, tags)));
@@ -97,9 +104,9 @@ public class IO {
                     }
                 } else {
                     // 1.0.0 - 3.0.0
-                    chips.add(new Chip(new Version(), s.split(","), Chip.INVENTORY));
+                    chips.add(new Chip(new Version3(), s.split(","), Chip.INVENTORY));
                     while (bri.hasNext()) {
-                        chips.add(new Chip(new Version(), bri.next().split(","), Chip.INVENTORY));
+                        chips.add(new Chip(new Version3(), bri.next().split(","), Chip.INVENTORY));
                     }
                 }
             }
@@ -125,7 +132,7 @@ public class IO {
     // <editor-fold defaultstate="collapsed" desc="Combination (Pre 5.3.0)">
     private static List<Board> loadCombination(String s, Iterator<String> bri) {
         List<Board> boards = new ArrayList<>();
-        Version v = new Version(s);
+        Version3 v = new Version3(s);
         if (v.isCurrent(4, 0, 0)) {
             if (bri.hasNext()) {
                 String[] info = bri.next().split(",");
@@ -208,7 +215,7 @@ public class IO {
                 int nChip = Integer.valueOf(bri.next());
                 List<Chip> chips = new ArrayList<>();
                 for (int i = 0; i < nChip; i++) {
-                    Chip c = new Chip(new Version(), bri.next().split(","), Chip.COMBINATION);
+                    Chip c = new Chip(new Version3(), bri.next().split(","), Chip.COMBINATION);
                     c.rotate(pre420rotation(c.getName()));
                     chips.add(c);
                 }
@@ -242,7 +249,7 @@ public class IO {
             Iterator<String> bri = br.lines().iterator();
             if (bri.hasNext()) {
                 String s = bri.next();
-                Version v = new Version(s);
+                Version3 v = new Version3(s);
                 if (v.isCurrent(5, 3, 0)) {
                     return parseProgress(v, bri, invChips);
                 } else {
@@ -638,35 +645,47 @@ public class IO {
     }
 
     public static void checkNewVersion(App app) {
+        String mainLatest = getVersion(URL_GITHUB_MAIN, App.VERSION.toData());
+        if (!App.VERSION.isCurrent(mainLatest)) {
+            int retval = JOptionPane.showConfirmDialog(app.mf,
+                    app.getText(Language.NEWVER_CONFIRM_BODY, mainLatest),
+                    app.getText(Language.NEWVER_CONFIRM_TITLE),
+                    JOptionPane.YES_NO_OPTION);
+            if (retval == JOptionPane.YES_OPTION) {
+                if (!runUpdate(app)) {
+                    openWeb(app, app.mf, URL_GITHUB_MAIN);
+                }
+            }
+        }
+    }
+
+    private static String getVersion(String url, String defaultVersion) {
         try {
-            URLConnection con = new URL(URL_GITHUB_LATEST).openConnection();
+            String latest;
+            URLConnection con = new URL(url).openConnection();
             con.connect();
-            String latest = App.VERSION.toData();
             try (InputStream is = con.getInputStream()) {
                 String redirected = con.getURL().toString();
                 latest = redirected.substring(redirected.lastIndexOf("/") + 2);
             }
-
-            if (!App.VERSION.isCurrent(latest)) {
-                int retval = JOptionPane.showConfirmDialog(app.mf,
-                        app.getText(Language.NEWVER_CONFIRM_BODY, latest),
-                        app.getText(Language.NEWVER_CONFIRM_TITLE),
-                        JOptionPane.YES_NO_OPTION);
-                if (retval == JOptionPane.YES_OPTION) {
-                    if (!runProgram()) {
-                        openWeb(app, app.mf, URL_GITHUB_LATEST);
-                    }
-                }
-            }
-        } catch (Exception ex) {
+            return latest;
+        } catch (IOException ex) {
+            return defaultVersion;
         }
     }
 
-    private static boolean runProgram() {
+    private static boolean runUpdate(App app) {
+        String updateLatest = getVersion(URL_GITHUB_UPDATE, app.setting.updateVersion.toData());
         String path = new File("").getAbsolutePath();
         try {
-            String exePath = path + "\\GFChipCalc-Update.jar";
-            if (new File(exePath).exists()) {
+            String exePath = path + "\\" + FILENAME_UPDATE;
+            File exeFile = new File(exePath);
+            if (!app.setting.updateVersion.isCurrent(updateLatest) || !exeFile.exists()) {
+                downloadUpdate();
+                app.setting.updateVersion = new Version2(updateLatest);
+                app.mf.settingFile_save();
+            }
+            if (exeFile.exists()) {
                 ProcessBuilder process = new ProcessBuilder("java", "-jar", exePath);
                 process.directory(new File(path + "\\"));
                 process.start();
@@ -675,6 +694,19 @@ public class IO {
         } catch (IOException ex) {
         }
         return false;
+    }
+
+    private static void downloadUpdate() {
+        try (BufferedInputStream inputStream = new BufferedInputStream(new URL(URL_DOWNLOAD_UPDATE).openStream());
+                FileOutputStream fileOS = new FileOutputStream(FILENAME_UPDATE)) {
+            byte data[] = new byte[1024];
+            int byteContent;
+            while ((byteContent = inputStream.read(data, 0, 1024)) != -1) {
+                fileOS.write(data, 0, byteContent);
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(IO.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public static void openWeb(App app, Component c, String link) {
@@ -806,7 +838,7 @@ public class IO {
     }
 
     //========== Progress ==========//
-    public static Progress parseProgress(Version v, Iterator<String> it, List<Chip> invChips) {
+    public static Progress parseProgress(Version3 v, Iterator<String> it, List<Chip> invChips) {
         int status = Integer.valueOf(it.next());
         String name = it.next();
         int star = Integer.valueOf(it.next());

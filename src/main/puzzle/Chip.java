@@ -23,7 +23,7 @@ import main.util.FRational;
 import main.util.Fn;
 import main.util.IO;
 import main.util.Rational;
-import main.util.Version;
+import main.util.Version3;
 
 /**
  *
@@ -377,7 +377,7 @@ public class Chip implements Serializable {
     public static final int COMBINATION = 1;
 
     // Pre 5.3.0
-    public Chip(Version version, String[] data, int type) {
+    public Chip(Version3 version, String[] data, int type) {
         if (version.isCurrent(4, 0, 0)) {
             // 4.0.0+
             int i = 0;
