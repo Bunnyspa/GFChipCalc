@@ -49,7 +49,7 @@ public class ChipListCellRenderer extends DefaultListCellRenderer {
                 Image image = icon.getImage().getScaledInstance((int) (icon.getIconWidth() * factor), (int) (icon.getIconHeight() * factor), Image.SCALE_SMOOTH);
                 cr.setIcon(new ImageIcon(image));
             }
-            cr.setBackground(isSelected ? app.orange() : Color.WHITE);
+            cr.setBackground(isSelected ? Color.LIGHT_GRAY : Color.WHITE);
             cr.setToolTipText(c.getName());
         } else {
             cr.setIcon(null);

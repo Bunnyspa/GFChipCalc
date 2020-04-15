@@ -550,3 +550,8 @@
 
 ### Changed
 - Update tool will be downloaded automatically when starting an update
+
+## 6.8.0 (4/15/2020)
+
+### Added
+- Chip Frequency: Shows the list of chips used in the calculation.

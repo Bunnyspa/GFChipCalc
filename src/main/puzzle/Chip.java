@@ -620,6 +620,10 @@ public class Chip implements Serializable {
         return rotation;
     }
 
+    public void resetRotation() {
+        this.rotation = this.initRotation;
+    }
+
     public void setInitRotation(int rotation) {
         this.initRotation = rotation % getMaxRotation();
     }
@@ -772,6 +776,11 @@ public class Chip implements Serializable {
         return initLevel;
     }
 
+    public void resetLevel() {
+        this.level = this.initLevel;
+        imageUpdated = false;
+    }
+
     public void setInitLevel(int initLevel) {
         this.initLevel = initLevel;
         this.level = initLevel;
@@ -780,7 +789,6 @@ public class Chip implements Serializable {
 
     public void setMinInitLevel() {
         setInitLevel(0);
-        imageUpdated = false;
     }
 
     public void setMaxLevel() {
@@ -790,7 +798,6 @@ public class Chip implements Serializable {
 
     public void setMaxInitLevel() {
         setInitLevel(LEVEL_MAX);
-        imageUpdated = false;
     }
 
     public static Rational getLevelMult(int level) {

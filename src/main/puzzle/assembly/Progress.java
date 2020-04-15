@@ -1,7 +1,9 @@
 package main.puzzle.assembly;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import main.puzzle.Board;
 import main.puzzle.Chip;
 import main.puzzle.FStat;
@@ -35,7 +37,7 @@ public class Progress {
     public int nComb;
     public int nDone;
     public int nTotal;
-    public final List<Board> boards;
+    private final List<Board> boards;
 
     public Progress(int status, String name, int star,
             List<Chip> chips, Setting setting, int tag) {
@@ -126,7 +128,73 @@ public class Progress {
     }
 
     public List<Board> getBoards() {
-        return boards;
+        return new ArrayList<>(boards);
+    }
+
+    public boolean isBoardEmpty() {
+        return boards.isEmpty();
+    }
+
+    public int getBoardSize() {
+        return boards.size();
+    }
+
+    public void addBoard(Board board) {
+        boards.add(board);
+    }
+
+    public void addBoard(int index, Board board) {
+        boards.add(index, board);
+    }
+
+    public void removeLastBoard() {
+        boards.remove(boards.size() - 1);
+    }
+
+    public Board getBoard(int index) {
+        return boards.get(index);
+    }
+
+    public List<ChipFreq> getChipFreqs() {
+        Map<String, Integer> countMap = new HashMap<>();
+        Map<String, Double> percMap = new HashMap<>();
+        Map<String, Chip> chipIDMap = new HashMap<>();
+        boards.forEach((b) -> {
+            b.getChipIDs().forEach((id) -> {
+                if (!countMap.containsKey(id)) {
+                    countMap.put(id, 0);
+                    percMap.put(id, 0.0);
+                    chipIDMap.put(id, new Chip(b.getChip(id)));
+                }
+                countMap.put(id, countMap.get(id) + 1);
+                percMap.put(id, Double.max(percMap.get(id), b.getStatPerc()));
+            });
+        });
+
+        double max = 1;
+
+        for (String id : countMap.keySet()) {
+            double val = countMap.get(id) * percMap.get(id);
+            if (max < val) {
+                max = val;
+            }
+        }
+
+        final double max_ = max;
+
+        List<ChipFreq> out = new ArrayList<>(countMap.size());
+        countMap.keySet().forEach((id) -> {
+            int count = countMap.get(id);
+            Chip c = chipIDMap.get(id);
+            c.resetRotation();
+            c.resetLevel();
+            double freq = count * percMap.get(id) / max_;
+            out.add(new ChipFreq(c, count, freq));
+        });
+
+        out.sort((o1, o2) -> o1.freq == o2.freq ? 0 : (o1.freq < o2.freq) ? 1 : -1);
+
+        return out;
     }
 
     public String toData() {

@@ -4,10 +4,12 @@ import java.awt.Color;
 import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
-import javax.swing.Timer;
+import javax.swing.JTabbedPane;
 import main.App;
 import main.puzzle.Board;
 import main.puzzle.Chip;
+import main.puzzle.assembly.ChipFreq;
+import main.util.Ref;
 
 /**
  *
@@ -16,27 +18,18 @@ import main.puzzle.Chip;
 public class InvListCellRenderer extends DefaultListCellRenderer {
 
     private final App app;
-    private final JList combList;
-    private final JList combChipList;
-    private boolean blink;
-    private final Timer invListBlinkTimer;
+    private final JTabbedPane combChipListTabbedPane;
+    private final JList combList, combChipList, combChipFreqList;
+    private final Ref<Boolean> blink;
 
-    public InvListCellRenderer(App app, JList invList, JList combList, JList combChipList) {
+    public InvListCellRenderer(App app, JList invList, JList combList, JTabbedPane combChipListTabbedPane, JList combChipList, JList combChipFreqList, Ref<Boolean> blink) {
         super();
         this.app = app;
+        this.combChipListTabbedPane = combChipListTabbedPane;
         this.combList = combList;
         this.combChipList = combChipList;
-        invListBlinkTimer = new Timer(500, (e) -> {
-            blink = !blink;
-            if (invList != null) {
-                invList.repaint();
-            }
-        });
-        invListBlinkTimer.start();
-    }
-
-    public void stopTimer() {
-        invListBlinkTimer.stop();
+        this.combChipFreqList = combChipFreqList;
+        this.blink = blink;
     }
 
     @Override
@@ -58,23 +51,33 @@ public class InvListCellRenderer extends DefaultListCellRenderer {
         }
 
         boolean resultSelected = false;
-        if (!combChipList.isSelectionEmpty()) {
-            Chip chip = (Chip) combChipList.getSelectedValue();
-            if (c.equals(chip)) {
-                resultSelected = true;
+        if (combChipListTabbedPane.getSelectedIndex() == 0) {
+            if (!combChipList.isSelectionEmpty()) {
+                Chip chip = (Chip) combChipList.getSelectedValue();
+                if (c.equals(chip)) {
+                    resultSelected = true;
+                }
+            }
+        } else {
+            if (!combChipFreqList.isSelectionEmpty()) {
+                ChipFreq cf = (ChipFreq) combChipFreqList.getSelectedValue();
+                if (c.equals(cf.chip)) {
+                    resultSelected = true;
+                }
             }
         }
 
         cr.setIcon(c.getImage(app));
-        boolean selBlink = isSelected && blink;
+        boolean selBlink = isSelected && blink.v;
+        Color selColor = app.orange();
         if (resultSelected) {
-            cr.setBackground(selBlink ? app.orange() : app.green());
+            cr.setBackground(selBlink ? selColor : Color.LIGHT_GRAY);
         } else if (combSelected) {
-            cr.setBackground(selBlink ? app.orange() : app.blue());
+            cr.setBackground(selBlink ? selColor : app.blue());
         } else if (!c.isPtValid()) {
-            cr.setBackground(selBlink ? app.orange() : Color.PINK);
+            cr.setBackground(selBlink ? selColor : Color.PINK);
         } else {
-            cr.setBackground(isSelected ? app.orange() : Color.WHITE);
+            cr.setBackground(isSelected ? selColor : Color.WHITE);
         }
 
         //cr.setToolTipText(c.getID().toString()); //DEBUG

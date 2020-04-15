@@ -131,7 +131,7 @@ public class Setting {
                 // Board
                 board = IO.parseBS(boardStatLines);
             } else {
-                updateVersion = App.VERSION_UPDATE;
+                updateVersion = new Version2(1, 0);
 
                 locale = Locale.getDefault();
                 fontSize = Integer.valueOf(generalLines.get(1));
@@ -153,7 +153,7 @@ public class Setting {
     }
 
     public final void init() {
-        updateVersion = App.VERSION_UPDATE;
+        updateVersion = new Version2(1, 0);
         // Display
         locale = Locale.getDefault();
         fontSize = DEFAULT_FONTSIZE;
@@ -194,7 +194,7 @@ public class Setting {
         List<String> lines = new ArrayList<>();
         lines.add(App.VERSION.toData());
         lines.add("[" + Setting.SECTION_GENERAL + "]");
-        lines.add("UPDATE_VERSION=" + App.VERSION_UPDATE.toData());
+        lines.add("UPDATE_VERSION=" + updateVersion.toData());
 
         lines.add("DISPLAY_LANG=" + locale.getLanguage() + "_" + locale.getCountry());
         lines.add("DISPLAY_FONTSIZE=" + fontSize);

@@ -124,9 +124,9 @@ public class Assembler {
         return boardsChanged;
     }
 
-    public List<Board> getBoards() {
+    public AssemblyResult getResult() {
         boardsChanged = false;
-        return new ArrayList<>(progress.boards);
+        return new AssemblyResult(progress.getBoards(), progress.getChipFreqs());
     }
 
     private void setProgBar() {
@@ -153,14 +153,14 @@ public class Assembler {
         board.colorChips();
 
         if (progress.allowRotation || board.getTicketCount() == 0) {
-            if (progress.boards.isEmpty()) {
-                progress.boards.add(board);
+            if (progress.isBoardEmpty()) {
+                progress.addBoard(board);
             } else {
                 int i = 0;
-                int n = progress.boards.size();
+                int n = progress.getBoardSize();
                 boolean insert = false;
                 while (i < n && !insert) {
-                    Board cb = progress.boards.get(i);
+                    Board cb = progress.getBoard(i);
                     if (board.getStatPerc() > cb.getStatPerc()) {
                         insert = true;
                     } else if (board.getStatPerc() == cb.getStatPerc()) {
@@ -183,9 +183,9 @@ public class Assembler {
                     }
                     i++;
                 }
-                progress.boards.add(i - (insert ? 1 : 0), board);
-                if (RESULT_LIMIT > 0 && progress.boards.size() > RESULT_LIMIT) {
-                    progress.boards.remove(progress.boards.size() - 1);
+                progress.addBoard(i - (insert ? 1 : 0), board);
+                if (RESULT_LIMIT > 0 && progress.getBoardSize() > RESULT_LIMIT) {
+                    progress.removeLastBoard();
                 }
             }
             progress.nComb++;

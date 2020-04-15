@@ -42,6 +42,8 @@ import main.puzzle.Chip;
 import main.puzzle.Stat;
 import main.puzzle.Tag;
 import main.puzzle.assembly.Assembler;
+import main.puzzle.assembly.AssemblyResult;
+import main.puzzle.assembly.ChipFreq;
 import main.puzzle.assembly.Progress;
 import main.puzzle.preset.PuzzlePreset;
 import main.resource.Language;
@@ -58,6 +60,7 @@ import main.ui.dialog.ProxyDialog;
 import main.ui.dialog.StatDialog;
 import main.ui.dialog.TagDialog;
 import main.ui.help.HelpDialog;
+import main.ui.renderer.ChipFreqListCellRenderer;
 import main.ui.renderer.ChipListCellRenderer;
 import main.ui.renderer.CombListCellRenderer;
 import main.ui.renderer.InvListCellRenderer;
@@ -66,6 +69,7 @@ import main.ui.tip.TipMouseListener;
 import main.ui.transfer.InvListTransferHandler;
 import main.util.Fn;
 import main.util.IO;
+import main.util.Ref;
 
 /**
  *
@@ -124,12 +128,15 @@ public class MainFrame extends JFrame {
     private String invFile_path = "";
 
     // List
-    private final DefaultListModel<Chip> poolLM = new DefaultListModel<>();
-    private final DefaultListModel<Chip> invLM = new DefaultListModel<>();
+    private final DefaultListModel<Chip> poolLM = new DefaultListModel<>(),
+            invLM = new DefaultListModel<>(),
+            combChipLM = new DefaultListModel<>();
     private final DefaultListModel<Board> combLM = new DefaultListModel<>();
-    private final DefaultListModel<Chip> combChipLM = new DefaultListModel<>();
-    private final InvListCellRenderer invLCR;
+    private final DefaultListModel<ChipFreq> combFreqLM = new DefaultListModel<>();
+
     private int invListMouseDragIndex;
+    private final Ref<Boolean> blink = new Ref<>(false);
+    private final Timer blinkTimer;
 
     // Chip Stat 
     private boolean invStat_loading;
@@ -141,7 +148,7 @@ public class MainFrame extends JFrame {
     private boolean inv_order = DESCENDING;
 
     // Calculator
-    private final Assembler calculator;
+    private final Assembler assembler;
     private Progress progress;
     private long time, pauseTime;
     private long prevDoneTime;
@@ -155,8 +162,12 @@ public class MainFrame extends JFrame {
     public MainFrame(App app) {
         this.app = app;
         initComponents();
-        calculator = new Assembler(app);
-        invLCR = new InvListCellRenderer(app, invList, combList, combChipList);
+        assembler = new Assembler(app);
+        blinkTimer = new Timer(500, (e) -> {
+            blink.v = !blink.v;
+            invList.repaint();
+            combFreqList.repaint();
+        });
         tml = new TipMouseListener(tipLabel);
         init();
     }
@@ -166,6 +177,9 @@ public class MainFrame extends JFrame {
 
         initImages();
         initTables();
+
+        combTabbedPane.add(app.getText(Language.COMB_TAB_RESULT), combResultPanel);
+        combTabbedPane.add(app.getText(Language.COMB_TAB_FREQ), combFreqPanel);
 
         invComboBoxes.add(invDmgComboBox);
         invComboBoxes.add(invBrkComboBox);
@@ -193,6 +207,8 @@ public class MainFrame extends JFrame {
         combStopButton.setVisible(false);
         researchButton.setVisible(false);
         timeWarningButton.setVisible(false);
+
+        blinkTimer.start();
 
         addListeners();
         setting_resetBoard();
@@ -292,7 +308,7 @@ public class MainFrame extends JFrame {
         // Model
         invList.setModel(invLM);
         // Renderer
-        invList.setCellRenderer(invLCR);
+        invList.setCellRenderer(new InvListCellRenderer(app, invList, combList, combTabbedPane, combChipList, combFreqList, blink));
 
         // Transfer Handler
         invList.setTransferHandler(new InvListTransferHandler(this));
@@ -304,18 +320,31 @@ public class MainFrame extends JFrame {
         // Model
         combList.setModel(combLM);
         // Renderer
-        combList.setCellRenderer(new CombListCellRenderer(app));
+        combList.setCellRenderer(new CombListCellRenderer(app, combFreqList));
 
         /* RESULT */
-        combChipList.setFixedCellHeight(Chip.getImageHeight(true) + 3);
-        combChipList.setFixedCellWidth(Chip.getImageWidth(true) + 3);
+        int height = Chip.getImageHeight(true) + 3;
+        int width = Chip.getImageWidth(true) + 3;
+
+        combChipList.setFixedCellHeight(height);
+        combChipList.setFixedCellWidth(width);
         Dimension ccD = combChipListPanel.getSize();
-        ccD.width = combChipList.getFixedCellWidth() + 10 + combChipListScrollPane.getVerticalScrollBar().getPreferredSize().width;
+        ccD.width = width + 10 + combChipListScrollPane.getVerticalScrollBar().getPreferredSize().width;
         combChipListPanel.setPreferredSize(ccD);
+
+        combFreqList.setFixedCellHeight(height);
+        combFreqList.setFixedCellWidth(width);
+        Dimension ccfD = combFreqListPanel.getSize();
+        ccfD.width = width + 10 + combFreqListScrollPane.getVerticalScrollBar().getPreferredSize().width;
+        combFreqListPanel.setPreferredSize(ccfD);
+
         // Model
         combChipList.setModel(combChipLM);
+        combFreqList.setModel(combFreqLM);
         // Renderer
         combChipList.setCellRenderer(new ChipListCellRenderer(app));
+        combFreqList.setCellRenderer(new ChipFreqListCellRenderer(app, blink));
+
     }
 
     private void addListeners() {
@@ -484,14 +513,31 @@ public class MainFrame extends JFrame {
         combSaveButton.addActionListener((e) -> progFile_saveAs());
 
         // Comb Right
+        combTabbedPane.addChangeListener((e) -> {
+            if (combTabbedPane.getSelectedIndex() != 1) {
+                combFreqList.clearSelection();
+            }
+        });
+
         combChipList.getSelectionModel().addListSelectionListener((e) -> {
             if (!e.getValueIsAdjusting()) {
-                comb_ensureInvListIndexIsVisible();
+                comb_ensureInvListIndexIsVisible_combChipList();
                 invList.repaint();
             }
         });
-        combMarkButton.addActionListener((e) -> comb_mark());
-        combTagButton.addActionListener((e) -> comb_openTagDialog());
+        combMarkButton.addActionListener((e) -> comb_result_mark());
+        combTagButton.addActionListener((e) -> comb_result_openTagDialog());
+
+        combFreqList.getSelectionModel().addListSelectionListener((e) -> {
+            if (!e.getValueIsAdjusting()) {
+                comb_ensureInvListIndexIsVisible_combChipFreqList();
+                comb_updateFreqLabel();
+                invList.repaint();
+                combList.repaint();
+            }
+        });
+        combFreqMarkButton.addActionListener((e) -> comb_freq_mark());
+        combFreqTagButton.addActionListener((e) -> comb_freq_openTagDialog());
     }
 
     private ShortcutKeyAdapter initSKA_focusable() {
@@ -575,8 +621,20 @@ public class MainFrame extends JFrame {
         ska.addShortcut_c(KeyEvent.VK_S, () -> progFile_saveAs());
 
         ska.addShortcut(KeyEvent.VK_C, () -> comb_nextBoardName());
-        ska.addShortcut(KeyEvent.VK_M, () -> comb_mark());
-        ska.addShortcut(KeyEvent.VK_T, () -> comb_openTagDialog());
+        ska.addShortcut(KeyEvent.VK_M, () -> {
+            if (combTabbedPane.getSelectedIndex() == 0) {
+                comb_result_mark();
+            } else {
+                comb_freq_mark();
+            }
+        });
+        ska.addShortcut(KeyEvent.VK_T, () -> {
+            if (combTabbedPane.getSelectedIndex() == 0) {
+                comb_result_openTagDialog();
+            } else {
+                comb_freq_openTagDialog();
+            }
+        });
 
         return ska;
     }
@@ -642,10 +700,15 @@ public class MainFrame extends JFrame {
         researchButton.setText(app.getText(Language.RESEARCH_TITLE));
         statButton.setText(app.getText(Language.STAT_TITLE));
 
+        combTabbedPane.setTitleAt(0, app.getText(Language.COMB_TAB_RESULT));
+        combTabbedPane.setTitleAt(1, app.getText(Language.COMB_TAB_FREQ));
+
         ticketTextLabel.setText(app.getText(Language.CHIP_TICKET));
         xpTextLabel.setText(app.getText(Language.CHIP_XP));
         combMarkButton.setText(app.getText(Language.CHIP_MARK));
         combTagButton.setText(app.getText(Language.CHIP_TAG));
+        combFreqMarkButton.setText(app.getText(Language.CHIP_MARK));
+        combFreqTagButton.setText(app.getText(Language.CHIP_TAG));
 
         legendEquippedLabel.setText(app.getText(Language.LEGEND_EQUIPPED));
         legendRotatedLabel.setText(app.getText(Language.LEGEND_ROTATED));
@@ -737,6 +800,7 @@ public class MainFrame extends JFrame {
 
         addTip(combList, app.getText(Language.TIP_COMB_LIST));
         addTip(combChipList, app.getText(Language.TIP_COMB_CHIPLIST));
+        addTip(combFreqList, app.getText(Language.TIP_COMB_FREQLIST));
 
         addTip(combDmgTextLabel, app.getText(Language.CHIP_STAT_DMG_LONG));
         addTip(combBrkTextLabel, app.getText(Language.CHIP_STAT_BRK_LONG));
@@ -751,6 +815,8 @@ public class MainFrame extends JFrame {
         addTip(combSaveButton, app.getText(Language.TIP_COMB_SAVE));
         addTip(combMarkButton, app.getText(Language.TIP_COMB_MARK));
         addTip(combTagButton, app.getText(Language.TIP_COMB_TAG));
+        addTip(combFreqMarkButton, app.getText(Language.TIP_COMB_MARK));
+        addTip(combFreqTagButton, app.getText(Language.TIP_COMB_TAG));
     }
 
     private void addTip(JComponent c, String s) {
@@ -807,7 +873,7 @@ public class MainFrame extends JFrame {
         invColorButton.setPreferredSize(new Dimension(colorWidth + 10, height));
 
         int prefCombWidth = combStatPanel.getPreferredSize().width;
-        combLabelPanel.setPreferredSize(new Dimension(prefCombWidth, prefCombWidth));
+        combImagePanel.setPreferredSize(new Dimension(prefCombWidth, prefCombWidth));
 
         // Save
         packAndSetInitSize();
@@ -1432,8 +1498,8 @@ public class MainFrame extends JFrame {
         );
     }
 
-    private void display_setType(int i) {
-        int iMod = i % Setting.NUM_DISPLAY;
+    private void display_setType(int type) {
+        int iMod = type % Setting.NUM_DISPLAY;
         app.setting.displayType = iMod;
         if (iMod == DISPLAY_STAT) {
             displayTypeButton.setIcon(Resources.DISPLAY_STAT);
@@ -1443,11 +1509,16 @@ public class MainFrame extends JFrame {
         invChips.forEach((t) -> t.setDisplayType(iMod));
         display_applyFilterSort();
         invList.repaint();
-        for (int b = 0; b < combLM.size(); b++) {
-            Board board = (Board) combLM.get(b);
+        for (int i = 0; i < combLM.size(); i++) {
+            Board board = (Board) combLM.get(i);
             board.forEachChip((t) -> t.setDisplayType(iMod));
         }
         combChipList.repaint();
+        Enumeration<ChipFreq> cfEnum = combFreqLM.elements();
+        while (cfEnum.hasMoreElements()) {
+            cfEnum.nextElement().chip.setDisplayType(iMod);
+        }
+        combFreqList.repaint();
         settingFile_save();
     }
 
@@ -1629,13 +1700,40 @@ public class MainFrame extends JFrame {
             }
         }
         combChipList.repaint();
+
+        Enumeration<ChipFreq> combCFs = combFreqLM.elements();
+        while (combCFs.hasMoreElements()) {
+            Chip c = combCFs.nextElement().chip;
+            for (Chip invChip : invChips) {
+                if (invChip.equals(c)) {
+                    c.setMarked(invChip.isMarked());
+                    break;
+                }
+            }
+        }
+        combFreqList.repaint();
     }
 
-    private List<Chip> comb_getChipsFromInv() {
+    private List<Chip> comb_result_getChipsFromInv() {
         Enumeration<Chip> chipEnum = combChipLM.elements();
         List<Chip> chipList = new ArrayList<>();
         while (chipEnum.hasMoreElements()) {
             Chip c = chipEnum.nextElement();
+            for (Chip invChip : invChips) {
+                if (invChip.equals(c)) {
+                    chipList.add(invChip);
+                    break;
+                }
+            }
+        }
+        return chipList;
+    }
+
+    private List<Chip> comb_freq_getChipsFromInv() {
+        Enumeration<ChipFreq> cfEnum = combFreqLM.elements();
+        List<Chip> chipList = new ArrayList<>();
+        while (cfEnum.hasMoreElements()) {
+            Chip c = cfEnum.nextElement().chip;
             for (Chip invChip : invChips) {
                 if (invChip.equals(c)) {
                     chipList.add(invChip);
@@ -1653,21 +1751,22 @@ public class MainFrame extends JFrame {
         }
     }
 
-    private void comb_mark() {
+    private void comb_result_mark() {
         if (!combList.isSelectionEmpty()) {
-            List<Chip> chipList = comb_getChipsFromInv();
+            List<Chip> chipList = comb_result_getChipsFromInv();
+            // Continue
             int retval = JOptionPane.showConfirmDialog(this,
                     app.getText(Language.COMB_MARK_CONTINUE_BODY), app.getText(Language.COMB_MARK_CONTINUE_TITLE),
                     JOptionPane.YES_NO_OPTION);
+            // If some chips are missing in the inventory
             if (retval == JOptionPane.YES_OPTION && combChipLM.size() != chipList.size()) {
                 retval = JOptionPane.showConfirmDialog(this,
                         app.getText(Language.COMB_DNE_BODY), app.getText(Language.COMB_DNE_TITLE),
                         JOptionPane.YES_NO_OPTION);
             }
+            // Mark
             if (retval == JOptionPane.YES_OPTION) {
-                chipList.forEach((c) -> {
-                    c.setMarked(true);
-                });
+                chipList.forEach((c) -> c.setMarked(true));
                 invList.repaint();
                 comb_updateMark();
                 invStat_enableSave();
@@ -1675,9 +1774,32 @@ public class MainFrame extends JFrame {
         }
     }
 
-    private void comb_openTagDialog() {
+    private void comb_freq_mark() {
+        if (!combFreqLM.isEmpty()) {
+            List<Chip> chipList = comb_freq_getChipsFromInv();
+            // Continue
+            int retval = JOptionPane.showConfirmDialog(this,
+                    app.getText(Language.COMB_MARK_CONTINUE_BODY), app.getText(Language.COMB_MARK_CONTINUE_TITLE),
+                    JOptionPane.YES_NO_OPTION);
+            // Some chips are missing in the inventory
+            if (retval == JOptionPane.YES_OPTION && combFreqLM.size() != chipList.size()) {
+                retval = JOptionPane.showConfirmDialog(this,
+                        app.getText(Language.COMB_DNE_BODY), app.getText(Language.COMB_DNE_TITLE),
+                        JOptionPane.YES_NO_OPTION);
+            }
+            // Mark
+            if (retval == JOptionPane.YES_OPTION) {
+                chipList.forEach((c) -> c.setMarked(true));
+                invList.repaint();
+                comb_updateMark();
+                invStat_enableSave();
+            }
+        }
+    }
+
+    private void comb_result_openTagDialog() {
         if (!combList.isSelectionEmpty()) {
-            List<Chip> chipList = comb_getChipsFromInv();
+            List<Chip> chipList = comb_result_getChipsFromInv();
             int retval = JOptionPane.YES_OPTION;
             if (combChipLM.size() != chipList.size()) {
                 retval = JOptionPane.showConfirmDialog(this,
@@ -1690,23 +1812,61 @@ public class MainFrame extends JFrame {
         }
     }
 
-    private void comb_ensureInvListIndexIsVisible() {
+    private void comb_freq_openTagDialog() {
+        if (!combFreqLM.isEmpty()) {
+            List<Chip> chipList = comb_freq_getChipsFromInv();
+            int retval = JOptionPane.YES_OPTION;
+            if (combFreqLM.size() != chipList.size()) {
+                retval = JOptionPane.showConfirmDialog(this,
+                        app.getText(Language.COMB_DNE_BODY), app.getText(Language.COMB_DNE_TITLE),
+                        JOptionPane.YES_NO_OPTION);
+            }
+            if (retval == JOptionPane.YES_OPTION) {
+                openDialog(TagDialog.getInstance(app, chipList));
+            }
+        }
+    }
+
+    private void comb_ensureInvListIndexIsVisible_combChipList() {
         if (!combChipList.isSelectionEmpty()) {
-            Chip combChip = combChipList.getSelectedValue();
+            Chip selected = combChipList.getSelectedValue();
             for (int i = 0; i < invLM.size(); i++) {
                 Chip invChip = (Chip) invLM.get(i);
-                if (combChip.equals(invChip)) {
+                if (selected.equals(invChip)) {
                     invList.ensureIndexIsVisible(i);
                     break;
                 }
             }
         }
     }
+
+    private void comb_ensureInvListIndexIsVisible_combChipFreqList() {
+        if (!combFreqList.isSelectionEmpty()) {
+            ChipFreq selected = combFreqList.getSelectedValue();
+            for (int i = 0; i < invLM.size(); i++) {
+                Chip invChip = (Chip) invLM.get(i);
+                if (selected.chip.equals(invChip)) {
+                    invList.ensureIndexIsVisible(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void comb_updateFreqLabel() {
+        if (!combFreqList.isSelectionEmpty()) {
+            ChipFreq selected = combFreqList.getSelectedValue();
+            combFreqLabel.setText(Fn.fPercStr(selected.freq) + " (" + app.getText(Language.UNIT_COUNT, selected.count) + ")");
+        } else {
+            combFreqLabel.setText(" ");
+        }
+
+    }
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Process Methods">
     private void process_toggleStartPause() {
-        switch (calculator.getStatus()) {
+        switch (assembler.getStatus()) {
             case STOPPED:
                 process_start();
                 break;
@@ -1741,10 +1901,10 @@ public class MainFrame extends JFrame {
         boolean start = true;
         int status = Progress.DICTIONARY;
         boolean alt = false;
-        String minType = calculator.getMinType(name, star, false);
+        String minType = assembler.getMinType(name, star, false);
 
         // Partial option
-        if (calculator.hasPartial(name, star)) {
+        if (assembler.hasPartial(name, star)) {
             // Query
             String[] options = {
                 app.getText(Language.COMB_OPTION_M2_0),
@@ -1795,7 +1955,7 @@ public class MainFrame extends JFrame {
         }
 
         // If preset DNE
-        if (!calculator.presetExists(name, star, alt)) {
+        if (!assembler.presetExists(name, star, alt)) {
             status = Progress.ALGX;
         }
 
@@ -1823,7 +1983,7 @@ public class MainFrame extends JFrame {
     }
 
     private void process_init() {
-        calculator.set(progress);
+        assembler.set(progress);
 
         time = System.currentTimeMillis();
         pauseTime = 0;
@@ -1863,13 +2023,13 @@ public class MainFrame extends JFrame {
         settingButton.setEnabled(status == Assembler.Status.STOPPED);
         researchButton.setEnabled(status == Assembler.Status.STOPPED);
         combOpenButton.setEnabled(status == Assembler.Status.STOPPED);
-        combSaveButton.setEnabled(status != Assembler.Status.RUNNING && progress != null && progress.boards.size() > 0);
+        combSaveButton.setEnabled(status != Assembler.Status.RUNNING && progress != null && progress.getBoardSize() > 0);
 
         process_updateProgress(status != Assembler.Status.RUNNING);
     }
 
     private void calcTimer() {
-        if (calculator.getStatus() == Assembler.Status.RUNNING) {
+        if (assembler.getStatus() == Assembler.Status.RUNNING) {
             process_updateProgress(false);
         }
     }
@@ -1879,7 +2039,7 @@ public class MainFrame extends JFrame {
         calcTimer.stop();
 
         process_setUI(Assembler.Status.PAUSED);
-        calculator.pause();
+        assembler.pause();
     }
 
     private void process_resume() {
@@ -1890,7 +2050,7 @@ public class MainFrame extends JFrame {
         calcTimer.start();
 
         process_setUI(Assembler.Status.RUNNING);
-        calculator.resume();
+        assembler.resume();
     }
 
     public void process_stop() {
@@ -1904,7 +2064,7 @@ public class MainFrame extends JFrame {
             progress.status = Progress.FINISHED;
         }
         process_setUI(Assembler.Status.STOPPED);
-        calculator.stop();
+        assembler.stop();
     }
 
     private void process_updateProgress(boolean forceUpdate) {
@@ -1944,17 +2104,44 @@ public class MainFrame extends JFrame {
     private void process_refreshCombListModel(boolean forceUpdate) {
         SwingUtilities.invokeLater(() -> {
             try {
-                if (forceUpdate || calculator.boardsUpdated()) {
+                if (forceUpdate || assembler.boardsUpdated()) {
                     Board selectedBoard = null;
+                    String selectedChipID = null;
                     if (!combList.isSelectionEmpty()) {
                         selectedBoard = combList.getSelectedValue();
                     }
+                    if (!combFreqList.isSelectionEmpty()) {
+                        selectedChipID = combFreqList.getSelectedValue().chip.getID();
+                    }
+
+                    AssemblyResult ar = assembler.getResult();
+
+                    boolean exist = !ar.freqs.isEmpty();
 
                     combLM.clear();
-                    calculator.getBoards().forEach((b) -> combLM.addElement(b));
+                    ar.boards.forEach((b) -> combLM.addElement(b));
 
-                    if (selectedBoard != null) {
-                        combList.setSelectedValue(selectedBoard, true);
+                    combFreqLM.clear();
+                    ar.freqs.forEach((cf) -> combFreqLM.addElement(cf));
+
+                    combFreqMarkButton.setEnabled(exist);
+                    combFreqTagButton.setEnabled(exist);
+
+                    combList.setSelectedValue(selectedBoard, true);
+
+                    if (selectedChipID != null) {
+                        int i = 0;
+                        int size = combFreqLM.size();
+                        boolean found = false;
+                        while (!found && i < size) {
+                            if (selectedChipID.equals(combFreqLM.get(i).chip.getID())) {
+                                combFreqList.setSelectedIndex(i);
+                                combFreqList.ensureIndexIsVisible(i);
+                                combFreqList.repaint();
+                                found = true;
+                            }
+                            i++;
+                        }
                     }
                 }
             } catch (Exception ex) {
@@ -1970,7 +2157,7 @@ public class MainFrame extends JFrame {
 
     public void process_showImage(PuzzlePreset preset) {
         SwingUtilities.invokeLater(() -> {
-            if (app.setting.showProgImage && calculator.getStatus() == Assembler.Status.RUNNING) {
+            if (app.setting.showProgImage && assembler.getStatus() == Assembler.Status.RUNNING) {
                 boardImageLabel.setIcon(preset.getImage(app, boardImageLabel.getWidth()));
                 boardImageLabel.repaint();
             }
@@ -2180,6 +2367,52 @@ public class MainFrame extends JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        combResultPanel = new javax.swing.JPanel();
+        combChipListPanel = new javax.swing.JPanel();
+        combChipListScrollPane = new javax.swing.JScrollPane();
+        combChipList = new javax.swing.JList<>();
+        combMarkButton = new javax.swing.JButton();
+        combTagButton = new javax.swing.JButton();
+        combImagePanel = new javax.swing.JPanel();
+        combImageLabel = new javax.swing.JLabel();
+        combStatPanel = new javax.swing.JPanel();
+        statButton = new javax.swing.JButton();
+        combDmgPanel = new javax.swing.JPanel();
+        combDmgTextLabel = new javax.swing.JLabel();
+        combDmgPercLabel = new javax.swing.JLabel();
+        combDmgResonanceStatLabel = new javax.swing.JLabel();
+        combDmgPtLabel = new javax.swing.JLabel();
+        combDmgStatLabel = new javax.swing.JLabel();
+        combBrkPanel = new javax.swing.JPanel();
+        combBrkTextLabel = new javax.swing.JLabel();
+        combBrkStatLabel = new javax.swing.JLabel();
+        combBrkPtLabel = new javax.swing.JLabel();
+        combBrkResonanceStatLabel = new javax.swing.JLabel();
+        combBrkPercLabel = new javax.swing.JLabel();
+        combHitPanel = new javax.swing.JPanel();
+        combHitTextLabel = new javax.swing.JLabel();
+        combHitStatLabel = new javax.swing.JLabel();
+        combHitPtLabel = new javax.swing.JLabel();
+        combHitResonanceStatLabel = new javax.swing.JLabel();
+        combHitPercLabel = new javax.swing.JLabel();
+        combRldPanel = new javax.swing.JPanel();
+        combRldTextLabel = new javax.swing.JLabel();
+        combRldStatLabel = new javax.swing.JLabel();
+        combRldPtLabel = new javax.swing.JLabel();
+        combRldResonanceStatLabel = new javax.swing.JLabel();
+        combRldPercLabel = new javax.swing.JLabel();
+        combInfoPanel = new javax.swing.JPanel();
+        ticketLabel = new javax.swing.JLabel();
+        ticketTextLabel = new javax.swing.JLabel();
+        xpTextLabel = new javax.swing.JLabel();
+        xpLabel = new javax.swing.JLabel();
+        combFreqPanel = new javax.swing.JPanel();
+        combFreqLabel = new javax.swing.JLabel();
+        combFreqListPanel = new javax.swing.JPanel();
+        combFreqListScrollPane = new javax.swing.JScrollPane();
+        combFreqList = new javax.swing.JList<>();
+        combFreqMarkButton = new javax.swing.JButton();
+        combFreqTagButton = new javax.swing.JButton();
         poolPanel = new javax.swing.JPanel();
         poolTPanel = new javax.swing.JPanel();
         versionLabel = new javax.swing.JLabel();
@@ -2270,6 +2503,9 @@ public class MainFrame extends JFrame {
         jScrollPane4 = new javax.swing.JScrollPane();
         combList = new javax.swing.JList<>();
         researchButton = new javax.swing.JButton();
+        jPanel18 = new javax.swing.JPanel();
+        legendEquippedLabel = new javax.swing.JLabel();
+        legendRotatedLabel = new javax.swing.JLabel();
         combRightPanel = new javax.swing.JPanel();
         combRTPanel = new javax.swing.JPanel();
         combStopButton = new javax.swing.JButton();
@@ -2278,55 +2514,450 @@ public class MainFrame extends JFrame {
         showProgImageCheckBox = new javax.swing.JCheckBox();
         combStartPauseButton = new javax.swing.JButton();
         combRBPanel = new javax.swing.JPanel();
-        combLabelPanel = new javax.swing.JPanel();
-        combImageLabel = new javax.swing.JLabel();
-        combStatPanel = new javax.swing.JPanel();
-        statButton = new javax.swing.JButton();
-        jPanel10 = new javax.swing.JPanel();
-        combDmgTextLabel = new javax.swing.JLabel();
-        combDmgPercLabel = new javax.swing.JLabel();
-        combDmgResonanceStatLabel = new javax.swing.JLabel();
-        combDmgPtLabel = new javax.swing.JLabel();
-        combDmgStatLabel = new javax.swing.JLabel();
-        jPanel11 = new javax.swing.JPanel();
-        combBrkTextLabel = new javax.swing.JLabel();
-        combBrkStatLabel = new javax.swing.JLabel();
-        combBrkPtLabel = new javax.swing.JLabel();
-        combBrkResonanceStatLabel = new javax.swing.JLabel();
-        combBrkPercLabel = new javax.swing.JLabel();
-        jPanel15 = new javax.swing.JPanel();
-        combHitTextLabel = new javax.swing.JLabel();
-        combHitStatLabel = new javax.swing.JLabel();
-        combHitPtLabel = new javax.swing.JLabel();
-        combHitResonanceStatLabel = new javax.swing.JLabel();
-        combHitPercLabel = new javax.swing.JLabel();
-        jPanel16 = new javax.swing.JPanel();
-        combRldTextLabel = new javax.swing.JLabel();
-        combRldStatLabel = new javax.swing.JLabel();
-        combRldPtLabel = new javax.swing.JLabel();
-        combRldResonanceStatLabel = new javax.swing.JLabel();
-        combRldPercLabel = new javax.swing.JLabel();
-        combChipListPanel = new javax.swing.JPanel();
-        combChipListScrollPane = new javax.swing.JScrollPane();
-        combChipList = new javax.swing.JList<>();
-        jPanel18 = new javax.swing.JPanel();
-        legendEquippedLabel = new javax.swing.JLabel();
-        legendRotatedLabel = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
-        jPanel1 = new javax.swing.JPanel();
         combSaveButton = new javax.swing.JButton();
         combOpenButton = new javax.swing.JButton();
-        ticketLabel = new javax.swing.JLabel();
-        ticketTextLabel = new javax.swing.JLabel();
-        xpTextLabel = new javax.swing.JLabel();
-        xpLabel = new javax.swing.JLabel();
-        combMarkButton = new javax.swing.JButton();
-        combTagButton = new javax.swing.JButton();
         jPanel17 = new javax.swing.JPanel();
         timeLabel = new javax.swing.JLabel();
         timeWarningButton = new javax.swing.JButton();
+        combTabbedPane = new javax.swing.JTabbedPane();
         combProgressBar = new javax.swing.JProgressBar();
         tipLabel = new javax.swing.JLabel();
+
+        combChipListPanel.setFocusable(false);
+
+        combChipListScrollPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        combChipListScrollPane.setFocusable(false);
+        combChipListScrollPane.setPreferredSize(new java.awt.Dimension(100, 100));
+
+        combChipList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        combChipList.setFocusable(false);
+        combChipList.setLayoutOrientation(javax.swing.JList.HORIZONTAL_WRAP);
+        combChipList.setVisibleRowCount(-1);
+        combChipListScrollPane.setViewportView(combChipList);
+
+        combMarkButton.setText("mark");
+        combMarkButton.setEnabled(false);
+        combMarkButton.setFocusable(false);
+        combMarkButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+
+        combTagButton.setText("tag");
+        combTagButton.setEnabled(false);
+        combTagButton.setFocusable(false);
+        combTagButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+
+        javax.swing.GroupLayout combChipListPanelLayout = new javax.swing.GroupLayout(combChipListPanel);
+        combChipListPanel.setLayout(combChipListPanelLayout);
+        combChipListPanelLayout.setHorizontalGroup(
+            combChipListPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(combChipListScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(combTagButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(combMarkButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        combChipListPanelLayout.setVerticalGroup(
+            combChipListPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(combChipListPanelLayout.createSequentialGroup()
+                .addComponent(combChipListScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(combMarkButton)
+                .addGap(0, 0, 0)
+                .addComponent(combTagButton))
+        );
+
+        combImagePanel.setFocusable(false);
+        combImagePanel.setPreferredSize(new java.awt.Dimension(175, 175));
+
+        combImageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combImageLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        combImageLabel.setFocusable(false);
+
+        javax.swing.GroupLayout combImagePanelLayout = new javax.swing.GroupLayout(combImagePanel);
+        combImagePanel.setLayout(combImagePanelLayout);
+        combImagePanelLayout.setHorizontalGroup(
+            combImagePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(combImageLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        combImagePanelLayout.setVerticalGroup(
+            combImagePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(combImageLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        combStatPanel.setFocusable(false);
+
+        statButton.setText("detail");
+        statButton.setEnabled(false);
+        statButton.setFocusable(false);
+
+        combDmgTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combDmgTextLabel.setText("D");
+        combDmgTextLabel.setFocusable(false);
+        combDmgTextLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        combDmgTextLabel.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
+
+        combDmgPercLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combDmgPercLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        combDmgPercLabel.setFocusable(false);
+        combDmgPercLabel.setPreferredSize(new java.awt.Dimension(110, 22));
+
+        combDmgResonanceStatLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combDmgResonanceStatLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        combDmgResonanceStatLabel.setFocusable(false);
+        combDmgResonanceStatLabel.setPreferredSize(new java.awt.Dimension(50, 22));
+
+        combDmgPtLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combDmgPtLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        combDmgPtLabel.setFocusable(false);
+        combDmgPtLabel.setPreferredSize(new java.awt.Dimension(50, 22));
+
+        combDmgStatLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combDmgStatLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        combDmgStatLabel.setFocusable(false);
+        combDmgStatLabel.setPreferredSize(new java.awt.Dimension(110, 22));
+
+        javax.swing.GroupLayout combDmgPanelLayout = new javax.swing.GroupLayout(combDmgPanel);
+        combDmgPanel.setLayout(combDmgPanelLayout);
+        combDmgPanelLayout.setHorizontalGroup(
+            combDmgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, combDmgPanelLayout.createSequentialGroup()
+                .addComponent(combDmgTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(combDmgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(combDmgStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(combDmgPercLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 0, 0)
+                .addGroup(combDmgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(combDmgResonanceStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(combDmgPtLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        );
+        combDmgPanelLayout.setVerticalGroup(
+            combDmgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(combDmgPanelLayout.createSequentialGroup()
+                .addGroup(combDmgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(combDmgPtLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(combDmgStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 0, 0)
+                .addGroup(combDmgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(combDmgPercLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(combDmgResonanceStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+            .addComponent(combDmgTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        combBrkTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combBrkTextLabel.setText("B");
+        combBrkTextLabel.setFocusable(false);
+        combBrkTextLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        combBrkTextLabel.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
+
+        combBrkStatLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combBrkStatLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        combBrkStatLabel.setFocusable(false);
+        combBrkStatLabel.setPreferredSize(new java.awt.Dimension(110, 22));
+
+        combBrkPtLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combBrkPtLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        combBrkPtLabel.setFocusable(false);
+        combBrkPtLabel.setPreferredSize(new java.awt.Dimension(50, 22));
+
+        combBrkResonanceStatLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combBrkResonanceStatLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        combBrkResonanceStatLabel.setFocusable(false);
+        combBrkResonanceStatLabel.setPreferredSize(new java.awt.Dimension(50, 22));
+
+        combBrkPercLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combBrkPercLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        combBrkPercLabel.setFocusable(false);
+        combBrkPercLabel.setPreferredSize(new java.awt.Dimension(110, 22));
+
+        javax.swing.GroupLayout combBrkPanelLayout = new javax.swing.GroupLayout(combBrkPanel);
+        combBrkPanel.setLayout(combBrkPanelLayout);
+        combBrkPanelLayout.setHorizontalGroup(
+            combBrkPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(combBrkPanelLayout.createSequentialGroup()
+                .addComponent(combBrkTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(combBrkPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(combBrkStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(combBrkPercLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 0, 0)
+                .addGroup(combBrkPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(combBrkResonanceStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(combBrkPtLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        );
+        combBrkPanelLayout.setVerticalGroup(
+            combBrkPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(combBrkPanelLayout.createSequentialGroup()
+                .addGroup(combBrkPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(combBrkStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(combBrkPtLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 0, 0)
+                .addGroup(combBrkPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(combBrkPercLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(combBrkResonanceStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+            .addComponent(combBrkTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        combHitTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combHitTextLabel.setText("H");
+        combHitTextLabel.setFocusable(false);
+        combHitTextLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        combHitTextLabel.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
+
+        combHitStatLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combHitStatLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        combHitStatLabel.setFocusable(false);
+        combHitStatLabel.setPreferredSize(new java.awt.Dimension(110, 22));
+
+        combHitPtLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combHitPtLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        combHitPtLabel.setFocusable(false);
+        combHitPtLabel.setPreferredSize(new java.awt.Dimension(50, 22));
+
+        combHitResonanceStatLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combHitResonanceStatLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        combHitResonanceStatLabel.setFocusable(false);
+        combHitResonanceStatLabel.setPreferredSize(new java.awt.Dimension(50, 22));
+
+        combHitPercLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combHitPercLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        combHitPercLabel.setFocusable(false);
+        combHitPercLabel.setPreferredSize(new java.awt.Dimension(110, 22));
+
+        javax.swing.GroupLayout combHitPanelLayout = new javax.swing.GroupLayout(combHitPanel);
+        combHitPanel.setLayout(combHitPanelLayout);
+        combHitPanelLayout.setHorizontalGroup(
+            combHitPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(combHitPanelLayout.createSequentialGroup()
+                .addComponent(combHitTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(combHitPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(combHitStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(combHitPercLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 0, 0)
+                .addGroup(combHitPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(combHitResonanceStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(combHitPtLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        );
+        combHitPanelLayout.setVerticalGroup(
+            combHitPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, combHitPanelLayout.createSequentialGroup()
+                .addGroup(combHitPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(combHitStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(combHitPtLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 0, 0)
+                .addGroup(combHitPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(combHitPercLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(combHitResonanceStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+            .addComponent(combHitTextLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        combRldTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combRldTextLabel.setText("R");
+        combRldTextLabel.setFocusable(false);
+        combRldTextLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        combRldTextLabel.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
+
+        combRldStatLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combRldStatLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        combRldStatLabel.setFocusable(false);
+        combRldStatLabel.setPreferredSize(new java.awt.Dimension(110, 22));
+
+        combRldPtLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combRldPtLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        combRldPtLabel.setFocusable(false);
+        combRldPtLabel.setPreferredSize(new java.awt.Dimension(50, 22));
+
+        combRldResonanceStatLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combRldResonanceStatLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        combRldResonanceStatLabel.setFocusable(false);
+        combRldResonanceStatLabel.setPreferredSize(new java.awt.Dimension(50, 22));
+
+        combRldPercLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combRldPercLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        combRldPercLabel.setFocusable(false);
+        combRldPercLabel.setPreferredSize(new java.awt.Dimension(110, 22));
+
+        javax.swing.GroupLayout combRldPanelLayout = new javax.swing.GroupLayout(combRldPanel);
+        combRldPanel.setLayout(combRldPanelLayout);
+        combRldPanelLayout.setHorizontalGroup(
+            combRldPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(combRldPanelLayout.createSequentialGroup()
+                .addComponent(combRldTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(combRldPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(combRldStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(combRldPercLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 0, 0)
+                .addGroup(combRldPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(combRldResonanceStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(combRldPtLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        );
+        combRldPanelLayout.setVerticalGroup(
+            combRldPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(combRldPanelLayout.createSequentialGroup()
+                .addGroup(combRldPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(combRldPtLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(combRldStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 0, 0)
+                .addGroup(combRldPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(combRldPercLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(combRldResonanceStatLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+            .addComponent(combRldTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout combStatPanelLayout = new javax.swing.GroupLayout(combStatPanel);
+        combStatPanel.setLayout(combStatPanelLayout);
+        combStatPanelLayout.setHorizontalGroup(
+            combStatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(combDmgPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(combBrkPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(combHitPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(combRldPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(statButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        combStatPanelLayout.setVerticalGroup(
+            combStatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(combStatPanelLayout.createSequentialGroup()
+                .addComponent(combDmgPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(combBrkPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(combHitPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(combRldPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(statButton))
+        );
+
+        ticketLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        ticketLabel.setText("-");
+        ticketLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        ticketLabel.setFocusable(false);
+        ticketLabel.setPreferredSize(new java.awt.Dimension(75, 22));
+
+        ticketTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        ticketTextLabel.setText("ticket");
+        ticketTextLabel.setFocusable(false);
+        ticketTextLabel.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+
+        xpTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        xpTextLabel.setText("enh");
+        xpTextLabel.setFocusable(false);
+
+        xpLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        xpLabel.setText("-");
+        xpLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        xpLabel.setFocusable(false);
+        xpLabel.setPreferredSize(new java.awt.Dimension(75, 22));
+
+        javax.swing.GroupLayout combInfoPanelLayout = new javax.swing.GroupLayout(combInfoPanel);
+        combInfoPanel.setLayout(combInfoPanelLayout);
+        combInfoPanelLayout.setHorizontalGroup(
+            combInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(combInfoPanelLayout.createSequentialGroup()
+                .addGroup(combInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(ticketTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(xpTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(combInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(xpLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(ticketLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        );
+        combInfoPanelLayout.setVerticalGroup(
+            combInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(combInfoPanelLayout.createSequentialGroup()
+                .addGroup(combInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(ticketTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(ticketLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(combInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(xpLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(xpTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        );
+
+        combInfoPanelLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {ticketLabel, xpLabel});
+
+        javax.swing.GroupLayout combResultPanelLayout = new javax.swing.GroupLayout(combResultPanel);
+        combResultPanel.setLayout(combResultPanelLayout);
+        combResultPanelLayout.setHorizontalGroup(
+            combResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(combResultPanelLayout.createSequentialGroup()
+                .addGroup(combResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(combStatPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(combImagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(combInfoPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(combChipListPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        combResultPanelLayout.setVerticalGroup(
+            combResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(combResultPanelLayout.createSequentialGroup()
+                .addComponent(combImagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(combStatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(combInfoPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(combChipListPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        combFreqLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        combFreqLabel.setText("-");
+        combFreqLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        combFreqLabel.setFocusable(false);
+        combFreqLabel.setPreferredSize(new java.awt.Dimension(75, 22));
+
+        combFreqListPanel.setFocusable(false);
+
+        combFreqListScrollPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        combFreqListScrollPane.setFocusable(false);
+        combFreqListScrollPane.setPreferredSize(new java.awt.Dimension(100, 100));
+
+        combFreqList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        combFreqList.setFocusable(false);
+        combFreqList.setLayoutOrientation(javax.swing.JList.HORIZONTAL_WRAP);
+        combFreqList.setVisibleRowCount(-1);
+        combFreqListScrollPane.setViewportView(combFreqList);
+
+        javax.swing.GroupLayout combFreqListPanelLayout = new javax.swing.GroupLayout(combFreqListPanel);
+        combFreqListPanel.setLayout(combFreqListPanelLayout);
+        combFreqListPanelLayout.setHorizontalGroup(
+            combFreqListPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(combFreqListScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        combFreqListPanelLayout.setVerticalGroup(
+            combFreqListPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(combFreqListScrollPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 385, Short.MAX_VALUE)
+        );
+
+        combFreqMarkButton.setText("mark");
+        combFreqMarkButton.setEnabled(false);
+        combFreqMarkButton.setFocusable(false);
+        combFreqMarkButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+
+        combFreqTagButton.setText("tag");
+        combFreqTagButton.setEnabled(false);
+        combFreqTagButton.setFocusable(false);
+        combFreqTagButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+
+        javax.swing.GroupLayout combFreqPanelLayout = new javax.swing.GroupLayout(combFreqPanel);
+        combFreqPanel.setLayout(combFreqPanelLayout);
+        combFreqPanelLayout.setHorizontalGroup(
+            combFreqPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(combFreqListPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(combFreqLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(combFreqTagButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(combFreqMarkButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        combFreqPanelLayout.setVerticalGroup(
+            combFreqPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(combFreqPanelLayout.createSequentialGroup()
+                .addComponent(combFreqLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(combFreqListPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(combFreqMarkButton)
+                .addGap(0, 0, 0)
+                .addComponent(combFreqTagButton))
+        );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -3100,6 +3731,16 @@ public class MainFrame extends JFrame {
 
         researchButton.setText("research");
 
+        jPanel18.setLayout(new java.awt.BorderLayout());
+
+        legendEquippedLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        legendEquippedLabel.setText("legend equipped");
+        jPanel18.add(legendEquippedLabel, java.awt.BorderLayout.NORTH);
+
+        legendRotatedLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        legendRotatedLabel.setText("legend rotated");
+        jPanel18.add(legendRotatedLabel, java.awt.BorderLayout.SOUTH);
+
         javax.swing.GroupLayout combLBPanelLayout = new javax.swing.GroupLayout(combLBPanel);
         combLBPanel.setLayout(combLBPanelLayout);
         combLBPanelLayout.setHorizontalGroup(
@@ -3107,6 +3748,7 @@ public class MainFrame extends JFrame {
             .addComponent(combListPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(researchButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel18, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         combLBPanelLayout.setVerticalGroup(
             combLBPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -3114,6 +3756,8 @@ public class MainFrame extends JFrame {
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(combListPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel18, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(researchButton))
         );
@@ -3185,307 +3829,6 @@ public class MainFrame extends JFrame {
 
         combRBPanel.setFocusable(false);
 
-        combLabelPanel.setFocusable(false);
-        combLabelPanel.setPreferredSize(new java.awt.Dimension(100, 100));
-
-        combImageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combImageLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        combImageLabel.setFocusable(false);
-
-        javax.swing.GroupLayout combLabelPanelLayout = new javax.swing.GroupLayout(combLabelPanel);
-        combLabelPanel.setLayout(combLabelPanelLayout);
-        combLabelPanelLayout.setHorizontalGroup(
-            combLabelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(combImageLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        combLabelPanelLayout.setVerticalGroup(
-            combLabelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(combImageLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-
-        combStatPanel.setFocusable(false);
-
-        statButton.setText("detail");
-        statButton.setEnabled(false);
-        statButton.setFocusable(false);
-
-        combDmgTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combDmgTextLabel.setText("D");
-        combDmgTextLabel.setFocusable(false);
-        combDmgTextLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        combDmgTextLabel.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
-
-        combDmgPercLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combDmgPercLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        combDmgPercLabel.setFocusable(false);
-        combDmgPercLabel.setPreferredSize(new java.awt.Dimension(110, 22));
-
-        combDmgResonanceStatLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combDmgResonanceStatLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        combDmgResonanceStatLabel.setFocusable(false);
-        combDmgResonanceStatLabel.setPreferredSize(new java.awt.Dimension(50, 22));
-
-        combDmgPtLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combDmgPtLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        combDmgPtLabel.setFocusable(false);
-        combDmgPtLabel.setPreferredSize(new java.awt.Dimension(50, 22));
-
-        combDmgStatLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combDmgStatLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        combDmgStatLabel.setFocusable(false);
-        combDmgStatLabel.setPreferredSize(new java.awt.Dimension(110, 22));
-
-        javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
-        jPanel10.setLayout(jPanel10Layout);
-        jPanel10Layout.setHorizontalGroup(
-            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel10Layout.createSequentialGroup()
-                .addComponent(combDmgTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(combDmgStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combDmgPercLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(0, 0, 0)
-                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(combDmgResonanceStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combDmgPtLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-        );
-        jPanel10Layout.setVerticalGroup(
-            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel10Layout.createSequentialGroup()
-                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(combDmgPtLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combDmgStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(0, 0, 0)
-                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(combDmgPercLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combDmgResonanceStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-            .addComponent(combDmgTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-
-        combBrkTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combBrkTextLabel.setText("B");
-        combBrkTextLabel.setFocusable(false);
-        combBrkTextLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        combBrkTextLabel.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
-
-        combBrkStatLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combBrkStatLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        combBrkStatLabel.setFocusable(false);
-        combBrkStatLabel.setPreferredSize(new java.awt.Dimension(110, 22));
-
-        combBrkPtLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combBrkPtLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        combBrkPtLabel.setFocusable(false);
-        combBrkPtLabel.setPreferredSize(new java.awt.Dimension(50, 22));
-
-        combBrkResonanceStatLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combBrkResonanceStatLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        combBrkResonanceStatLabel.setFocusable(false);
-        combBrkResonanceStatLabel.setPreferredSize(new java.awt.Dimension(50, 22));
-
-        combBrkPercLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combBrkPercLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        combBrkPercLabel.setFocusable(false);
-        combBrkPercLabel.setPreferredSize(new java.awt.Dimension(110, 22));
-
-        javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
-        jPanel11.setLayout(jPanel11Layout);
-        jPanel11Layout.setHorizontalGroup(
-            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel11Layout.createSequentialGroup()
-                .addComponent(combBrkTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(combBrkStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combBrkPercLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(0, 0, 0)
-                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(combBrkResonanceStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combBrkPtLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-        );
-        jPanel11Layout.setVerticalGroup(
-            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel11Layout.createSequentialGroup()
-                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(combBrkStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combBrkPtLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(0, 0, 0)
-                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(combBrkPercLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combBrkResonanceStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-            .addComponent(combBrkTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-
-        combHitTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combHitTextLabel.setText("H");
-        combHitTextLabel.setFocusable(false);
-        combHitTextLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        combHitTextLabel.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
-
-        combHitStatLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combHitStatLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        combHitStatLabel.setFocusable(false);
-        combHitStatLabel.setPreferredSize(new java.awt.Dimension(110, 22));
-
-        combHitPtLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combHitPtLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        combHitPtLabel.setFocusable(false);
-        combHitPtLabel.setPreferredSize(new java.awt.Dimension(50, 22));
-
-        combHitResonanceStatLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combHitResonanceStatLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        combHitResonanceStatLabel.setFocusable(false);
-        combHitResonanceStatLabel.setPreferredSize(new java.awt.Dimension(50, 22));
-
-        combHitPercLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combHitPercLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        combHitPercLabel.setFocusable(false);
-        combHitPercLabel.setPreferredSize(new java.awt.Dimension(110, 22));
-
-        javax.swing.GroupLayout jPanel15Layout = new javax.swing.GroupLayout(jPanel15);
-        jPanel15.setLayout(jPanel15Layout);
-        jPanel15Layout.setHorizontalGroup(
-            jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel15Layout.createSequentialGroup()
-                .addComponent(combHitTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(combHitStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combHitPercLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(0, 0, 0)
-                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(combHitResonanceStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combHitPtLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-        );
-        jPanel15Layout.setVerticalGroup(
-            jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel15Layout.createSequentialGroup()
-                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(combHitStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combHitPtLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(0, 0, 0)
-                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(combHitPercLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combHitResonanceStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-            .addComponent(combHitTextLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-
-        combRldTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combRldTextLabel.setText("R");
-        combRldTextLabel.setFocusable(false);
-        combRldTextLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        combRldTextLabel.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
-
-        combRldStatLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combRldStatLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        combRldStatLabel.setFocusable(false);
-        combRldStatLabel.setPreferredSize(new java.awt.Dimension(110, 22));
-
-        combRldPtLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combRldPtLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        combRldPtLabel.setFocusable(false);
-        combRldPtLabel.setPreferredSize(new java.awt.Dimension(50, 22));
-
-        combRldResonanceStatLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combRldResonanceStatLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        combRldResonanceStatLabel.setFocusable(false);
-        combRldResonanceStatLabel.setPreferredSize(new java.awt.Dimension(50, 22));
-
-        combRldPercLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        combRldPercLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        combRldPercLabel.setFocusable(false);
-        combRldPercLabel.setPreferredSize(new java.awt.Dimension(110, 22));
-
-        javax.swing.GroupLayout jPanel16Layout = new javax.swing.GroupLayout(jPanel16);
-        jPanel16.setLayout(jPanel16Layout);
-        jPanel16Layout.setHorizontalGroup(
-            jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel16Layout.createSequentialGroup()
-                .addComponent(combRldTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(combRldStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combRldPercLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(0, 0, 0)
-                .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(combRldResonanceStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combRldPtLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-        );
-        jPanel16Layout.setVerticalGroup(
-            jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel16Layout.createSequentialGroup()
-                .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(combRldPtLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combRldStatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(0, 0, 0)
-                .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(combRldPercLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combRldResonanceStatLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-            .addComponent(combRldTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-
-        javax.swing.GroupLayout combStatPanelLayout = new javax.swing.GroupLayout(combStatPanel);
-        combStatPanel.setLayout(combStatPanelLayout);
-        combStatPanelLayout.setHorizontalGroup(
-            combStatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(statButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        combStatPanelLayout.setVerticalGroup(
-            combStatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(combStatPanelLayout.createSequentialGroup()
-                .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(statButton))
-        );
-
-        combChipListPanel.setFocusable(false);
-
-        combChipListScrollPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        combChipListScrollPane.setFocusable(false);
-        combChipListScrollPane.setPreferredSize(new java.awt.Dimension(100, 100));
-
-        combChipList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        combChipList.setFocusable(false);
-        combChipList.setLayoutOrientation(javax.swing.JList.HORIZONTAL_WRAP);
-        combChipList.setVisibleRowCount(-1);
-        combChipListScrollPane.setViewportView(combChipList);
-
-        jPanel18.setLayout(new java.awt.BorderLayout());
-
-        legendEquippedLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        legendEquippedLabel.setText("legend equipped");
-        jPanel18.add(legendEquippedLabel, java.awt.BorderLayout.CENTER);
-
-        legendRotatedLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        legendRotatedLabel.setText("legend rotated");
-        jPanel18.add(legendRotatedLabel, java.awt.BorderLayout.SOUTH);
-
-        javax.swing.GroupLayout combChipListPanelLayout = new javax.swing.GroupLayout(combChipListPanel);
-        combChipListPanel.setLayout(combChipListPanelLayout);
-        combChipListPanelLayout.setHorizontalGroup(
-            combChipListPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(combChipListScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel18, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        combChipListPanelLayout.setVerticalGroup(
-            combChipListPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(combChipListPanelLayout.createSequentialGroup()
-                .addComponent(combChipListScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel18, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
-
         jPanel3.setFocusable(false);
 
         combSaveButton.setEnabled(false);
@@ -3497,81 +3840,20 @@ public class MainFrame extends JFrame {
         combOpenButton.setMinimumSize(new java.awt.Dimension(50, 50));
         combOpenButton.setPreferredSize(new java.awt.Dimension(50, 50));
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(combOpenButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(0, 0, 0)
-                .addComponent(combSaveButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(combOpenButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-            .addComponent(combSaveButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        );
-
-        ticketLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        ticketLabel.setText("-");
-        ticketLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        ticketLabel.setFocusable(false);
-        ticketLabel.setPreferredSize(new java.awt.Dimension(75, 22));
-
-        ticketTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        ticketTextLabel.setText("ticket");
-        ticketTextLabel.setFocusable(false);
-        ticketTextLabel.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
-
-        xpTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        xpTextLabel.setText("enh");
-        xpTextLabel.setFocusable(false);
-
-        xpLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        xpLabel.setText("-");
-        xpLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        xpLabel.setFocusable(false);
-        xpLabel.setPreferredSize(new java.awt.Dimension(75, 22));
-
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(ticketTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(xpTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(xpLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(ticketLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addComponent(combOpenButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
+                .addComponent(combSaveButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(ticketTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(ticketLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(xpLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(xpTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(combOpenButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(combSaveButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
-
-        jPanel3Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {ticketLabel, xpLabel});
-
-        combMarkButton.setText("mark");
-        combMarkButton.setEnabled(false);
-        combMarkButton.setFocusable(false);
-        combMarkButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
-
-        combTagButton.setText("tag");
-        combTagButton.setEnabled(false);
-        combTagButton.setFocusable(false);
-        combTagButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
         jPanel17.setLayout(new java.awt.BorderLayout());
 
@@ -3590,35 +3872,19 @@ public class MainFrame extends JFrame {
         combRBPanelLayout.setHorizontalGroup(
             combRBPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(combRBPanelLayout.createSequentialGroup()
-                .addGroup(combRBPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(combStatPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combLabelPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(combRBPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(combChipListPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combMarkButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(combTagButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-            .addComponent(jPanel17, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(jPanel17, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+            .addComponent(combTabbedPane)
         );
         combRBPanelLayout.setVerticalGroup(
             combRBPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(combRBPanelLayout.createSequentialGroup()
                 .addComponent(jPanel17, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(combRBPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(combRBPanelLayout.createSequentialGroup()
-                        .addComponent(combLabelPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(combStatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(combRBPanelLayout.createSequentialGroup()
-                        .addComponent(combChipListPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(combMarkButton)
-                        .addGap(0, 0, 0)
-                        .addComponent(combTagButton))))
+                .addComponent(combTabbedPane)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         javax.swing.GroupLayout combRightPanelLayout = new javax.swing.GroupLayout(combRightPanel);
@@ -3682,7 +3948,7 @@ public class MainFrame extends JFrame {
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         if (invFile_confirmSave()) {
             process_stop();
-            invLCR.stopTimer();
+            blinkTimer.stop();
             dispose();
             System.exit(0);
         }
@@ -3694,6 +3960,7 @@ public class MainFrame extends JFrame {
     private javax.swing.JLabel boardImageLabel;
     private javax.swing.JComboBox<String> boardNameComboBox;
     private javax.swing.JComboBox<String> boardStarComboBox;
+    private javax.swing.JPanel combBrkPanel;
     private javax.swing.JLabel combBrkPercLabel;
     private javax.swing.JLabel combBrkPtLabel;
     private javax.swing.JLabel combBrkResonanceStatLabel;
@@ -3702,21 +3969,31 @@ public class MainFrame extends JFrame {
     private javax.swing.JList<Chip> combChipList;
     private javax.swing.JPanel combChipListPanel;
     private javax.swing.JScrollPane combChipListScrollPane;
+    private javax.swing.JPanel combDmgPanel;
     private javax.swing.JLabel combDmgPercLabel;
     private javax.swing.JLabel combDmgPtLabel;
     private javax.swing.JLabel combDmgResonanceStatLabel;
     private javax.swing.JLabel combDmgStatLabel;
     private javax.swing.JLabel combDmgTextLabel;
+    private javax.swing.JLabel combFreqLabel;
+    private javax.swing.JList<ChipFreq> combFreqList;
+    private javax.swing.JPanel combFreqListPanel;
+    private javax.swing.JScrollPane combFreqListScrollPane;
+    private javax.swing.JButton combFreqMarkButton;
+    private javax.swing.JPanel combFreqPanel;
+    private javax.swing.JButton combFreqTagButton;
+    private javax.swing.JPanel combHitPanel;
     private javax.swing.JLabel combHitPercLabel;
     private javax.swing.JLabel combHitPtLabel;
     private javax.swing.JLabel combHitResonanceStatLabel;
     private javax.swing.JLabel combHitStatLabel;
     private javax.swing.JLabel combHitTextLabel;
     private javax.swing.JLabel combImageLabel;
+    private javax.swing.JPanel combImagePanel;
+    private javax.swing.JPanel combInfoPanel;
     private javax.swing.JPanel combLBPanel;
     private javax.swing.JPanel combLTPanel;
     private javax.swing.JLabel combLabel;
-    private javax.swing.JPanel combLabelPanel;
     private javax.swing.JPanel combLeftPanel;
     private javax.swing.JList<Board> combList;
     private javax.swing.JPanel combListPanel;
@@ -3725,7 +4002,9 @@ public class MainFrame extends JFrame {
     private javax.swing.JProgressBar combProgressBar;
     private javax.swing.JPanel combRBPanel;
     private javax.swing.JPanel combRTPanel;
+    private javax.swing.JPanel combResultPanel;
     private javax.swing.JPanel combRightPanel;
+    private javax.swing.JPanel combRldPanel;
     private javax.swing.JLabel combRldPercLabel;
     private javax.swing.JLabel combRldPtLabel;
     private javax.swing.JLabel combRldResonanceStatLabel;
@@ -3735,6 +4014,7 @@ public class MainFrame extends JFrame {
     private javax.swing.JButton combStartPauseButton;
     private javax.swing.JPanel combStatPanel;
     private javax.swing.JButton combStopButton;
+    private javax.swing.JTabbedPane combTabbedPane;
     private javax.swing.JButton combTagButton;
     private javax.swing.JButton combWarningButton;
     private javax.swing.JButton displaySettingButton;
@@ -3785,14 +4065,9 @@ public class MainFrame extends JFrame {
     private javax.swing.JPanel invStatPanel;
     private javax.swing.JPanel invTPanel;
     private javax.swing.JButton invTagButton;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel10;
-    private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel12;
     private javax.swing.JPanel jPanel13;
     private javax.swing.JPanel jPanel14;
-    private javax.swing.JPanel jPanel15;
-    private javax.swing.JPanel jPanel16;
     private javax.swing.JPanel jPanel17;
     private javax.swing.JPanel jPanel18;
     private javax.swing.JPanel jPanel2;

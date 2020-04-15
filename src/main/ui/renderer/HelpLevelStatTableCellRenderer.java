@@ -27,13 +27,12 @@ public class HelpLevelStatTableCellRenderer extends DefaultTableCellRenderer {
         this.app = app;
         this.rowHeaderNum = rowHeaderNum;
         this.colHeaderNum = colHeaderNum;
-        this.toggleType = toggleType; 
+        this.toggleType = toggleType;
     }
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        DefaultTableCellRenderer cr;
-        cr = (DefaultTableCellRenderer) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        DefaultTableCellRenderer cr = (DefaultTableCellRenderer) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         cr.setHorizontalAlignment(CENTER);
 
         if (row < colHeaderNum || (column < rowHeaderNum)) {

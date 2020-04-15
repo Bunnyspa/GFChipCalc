@@ -92,6 +92,7 @@ public class Language {
 
     public static final String TIP_COMB_LIST = "TIP_COMB_LIST";
     public static final String TIP_COMB_CHIPLIST = "TIP_COMB_CHIPLIST";
+    public static final String TIP_COMB_FREQLIST = "TIP_COMB_FREQLIST";
 
     public static final String TIP_COMB_SETTING = "TIP_COMB_SETTING";
     public static final String TIP_COMB_SHOWPROGIMAGE = "TIP_COMB_SHOWPROGIMAGE";
@@ -291,6 +292,9 @@ public class Language {
     public static final String COMB_REMAINING = "COMB_REMAINING";
     public static final String COMB_DESC = "COMB_DESC";
     public static final String COMB_NONEFOUND = "COMB_NONEFOUND";
+
+    public static final String COMB_TAB_RESULT = "COMB_TAB_RESULT";
+    public static final String COMB_TAB_FREQ = "COMB_TAB_FREQ";
 
     public static final String COMB_MARK_CONTINUE_TITLE = "COMB_MARK_CONTINUE_TITLE";
     public static final String COMB_MARK_CONTINUE_BODY = "COMB_MARK_CONTINUE_BODY";
