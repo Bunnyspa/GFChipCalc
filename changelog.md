@@ -13,7 +13,7 @@
 - Divided the result table into two (Excluding/Including Resonance) columns
 
 ### Fixed
-- A bug where the result table does not get sorted correctly
+- A bug that caused the result table not getting sorted correctly
 
 ## 1.2.0 (10/26/2018)
 
@@ -76,8 +76,8 @@
 - Stat with resonance
 
 ### Fixed
-- A bug where calculations use incorrect inventories after reordering or deleting their chips
-- A bug were less number of results are shown than intended
+- A bug that caused calculations using incorrect inventories after reordering or deleting their chips
+- A bug that caused less number of results showing than intended
 
 ## 1.8.0 (1/4/2019)
 
@@ -102,7 +102,7 @@
 - Settings - # of cells (Filter feature is used instead)
 
 ### Fixed
-- A bug where chips can be added while filters are on
+- A bug that caused chips being added while filters are on
 
 ## 1.10.0 (1/19/2019)
 
@@ -128,8 +128,8 @@
 - Calculation option - 5-6 Cell option temporarily removed
 
 ### Fixed
-- A bug where files can be saved with incorrect extensions
-- A bug where chip files does not get saved correctly after reordering by dragging and dropping.
+- A bug that caused files saving with incorrect extensions
+- A bug that caused chip files not getting saved correctly after reordering by dragging and dropping.
 
 ## 2.2.0 (2/7/2019)
 
@@ -154,7 +154,7 @@
 
 ### Fixed
 - A bug with tickets shown incorrectly
-- A bug where each calculation process producing less number of results
+- A bug that caused each calculation process producing less number of results
 
 ## 2.4.0 (2/20/2019)
 
@@ -205,7 +205,7 @@
  - Inventory: Several chips selectable for drag and drop, rotation, deletion, and tagging
  
 ### Fixed
-- A bug where adding tags from the result section not applying to the inventory filter
+- A bug that caused adding tags from the result section not applying to the inventory filter
 
 ## 4.2.0 (5/14/2019)
 
@@ -226,13 +226,13 @@
 ## 4.2.1
 
 ### Fixed
-- M2 4-6 Cell Calculation: A bug where 4-cell chips are not placed correctly
+- M2 4-6 Cell Calculation: A bug that caused 4-cell chips not placing correctly
 
 ## 4.2.2
 
 ### Fixed
-- A bug where "5-6 Cell" options for other HOCs do not work after the "Fill 35-36 cells with 5B+6 chips" option for the 5-star M2 is used.
-- A bug where calibration tickets are not counted correctly when loading pre-4.2.0 version calculation files
+- A bug that caused "5-6 Cell" options for other HOCs not working after the "Fill 35-36 cells with 5B+6 chips" option for the 5-star M2 is used.
+- A bug that caused calibration tickets not being counted correctly when loading pre-4.2.0 version calculation files
 
 ### Fix Attempt
 - A bug with the proxy chip extraction from other servers
@@ -247,8 +247,8 @@
 - Tip text shown at the bottom instead
 
 ### Fix Attempt
-- A bug where the app does not start
-- A bug where texts are not displayed properly
+- A bug that caused the app not starting
+- A bug that caused texts not being displayed properly
 - A bug with the proxy chip extraction from other servers
 
 ## 4.4.0 (6/6/2019)
@@ -260,7 +260,7 @@
 - Results that do not get added to the list due to conditions are not counted towards the counter
 
 ### Fixed
-- Calculation setting: A bug where the PT list is shown instead of their sum when the PT option is on
+- Calculation setting: A bug that caused the PT list showing instead of their sum when the PT option is on
 - A bug with the proxy chip extraction from other servers
 
 ### Language File Changed
@@ -297,7 +297,7 @@
 - Calculation: Less strict internal filtering algorithm for presets and PT
 
 ### Fixed
-- A bug where filter presets can be changed
+- A bug that caused filter presets being changed
 
 ## 4.8.0 (7/25/2019)
 
@@ -312,7 +312,7 @@
 - Inventory sort method
 
 ### Fixed
-- A bug where saving, canceling overwrite, and saving again not showing the overwrite warning
+- A bug that caused saving, canceling overwrite, and saving again not showing the overwrite warning
 
 ## 5.0.0 (8/3/2019)
 
@@ -320,7 +320,7 @@
 - Proxy extraction - Can read game client version 2.04
 
 ### Fix Attempt
-- A bug where the app does not start
+- A bug that caused the app not starting
 
 ## 5.1.0 (8/11/2019)
 
@@ -336,7 +336,7 @@
 - Auto-generated presets
 
 ### Fixed
-- Calculation setting - Mark: A bug where the upper bound always set to 100
+- Calculation setting - Mark: A bug that caused the upper bound always setting to 100
 
 ## 5.1.1 (8/12/2019)
 
@@ -354,14 +354,14 @@
 ## 5.2.1 (8/18/2019)
 
 ### Fixed
-- Calculation setting: A bug where stat and PT options cannot be used
+- Calculation setting: A bug that caused stat and PT options being disabled
 
 ## 5.2.2 (8/20/2019)
 
 ### Fixed
 - Result: A bug showing 0% for max of 0
-- Result: A bug where instantly finished calculations do not enable save button
-- Result: A bug where less number of results are shown than intended
+- Result: A bug that caused instantly finished calculations not enabling the save button
+- Result: A bug that caused less number of results showing than intended
 
 ## 5.2.3 (8/27/2019)
 
@@ -386,7 +386,7 @@
 ## 5.3.1 (9/12/2019)
 
 ### Fixed
-- A bug where inventory chip colors are incorrect
+- A bug that caused inventory chip colors being incorrect
 
 ## 5.3.2 (9/26/2019)
 
@@ -418,7 +418,7 @@
 - Mining -> Research
 
 ### Fixed
-- A bug where loading a file and changing a tag not changing the tag from all chips
+- A bug that caused loading a file and changing a tag not changing the tag from all chips
 
 ## 6.1.1 (10/21/2019)
 
@@ -432,8 +432,8 @@
 ## 6.1.2 (10/23/2019)
 
 ### Fixed
-- Research: A bug where the research stops until the restart whenever the server does not respond, even when the server is restarted
-- Language: A bug where language exports are not in the UTF-8 format
+- Research: A bug that caused the research stopping until the restart whenever the server does not respond, even when the server is restarted
+- Language: A bug that caused language exports not in the UTF-8 format
 
 ## 6.2.0 (10/25/2019)
 
@@ -467,7 +467,7 @@
 - 1-6 cell calculation: Improved algorithm
 
 ### Fixed
-- A visual bug where marked chips do not show proper check marks
+- A visual bug that caused marked chips not showing proper check marks
 
 ## 6.5.0 (1/7/2020)
 
@@ -482,7 +482,7 @@
 - Research: Hidden if server is not up
 
 ### Fixed
-- Image scan: A bug where deleting a rectangle leaves the chip image generated by the app
+- Image scan: A bug that caused deleting a rectangle leaving the chip image generated by the app
 
 ## 6.5.1 (1/9/2020)
 
@@ -501,7 +501,7 @@
 - Result files: Initial chip levels are (also) updated to those of inventory chips
 
 ### Fixed
-- A bug where result chips are not max-leveled when loaded (if max level option is checked)
+- A bug that caused result chips not max-leveled when loaded (if max level option is checked)
 
 ## 6.5.4 (1/11/2020)
 
@@ -555,3 +555,14 @@
 
 ### Added
 - Chip Frequency: Shows the list of chips used in the calculation.
+
+## 6.8.1 (4/16/2020)
+
+### Added
+- Missing Japanese language
+
+### Fixed
+- A bug that caused the app not reading external language files
+
+### Fix Attempt
+- Proxy: The application will try to find the real interal IP address

@@ -591,7 +591,7 @@ public class IO {
     }
 
     public static Properties getProp(Locale locale) {
-        String lang = locale.getLanguage() + "_" + locale.getCountry();
+        String lang = locale.getLanguage() + "-" + locale.getCountry();
         if (getExternalLocales().contains(locale)) {
             return getProp(PATH_EX_LANG + "/" + lang + ".properties");
         }

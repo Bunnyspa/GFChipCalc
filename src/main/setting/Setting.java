@@ -196,7 +196,7 @@ public class Setting {
         lines.add("[" + Setting.SECTION_GENERAL + "]");
         lines.add("UPDATE_VERSION=" + updateVersion.toData());
 
-        lines.add("DISPLAY_LANG=" + locale.getLanguage() + "_" + locale.getCountry());
+        lines.add("DISPLAY_LANG=" + locale.getLanguage() + "-" + locale.getCountry());
         lines.add("DISPLAY_FONTSIZE=" + fontSize);
         lines.add("DISPLAY_COLOR=" + colorPreset);
 

@@ -85,7 +85,7 @@ public class AppSettingDialog extends JDialog {
     private int colorPreset;
 
     private static String getLocaleName(Locale locale) {
-        return locale.toLanguageTag().replace("-", "_") + " : " + locale.getDisplayName(locale);
+        return locale.toLanguageTag() + " : " + locale.getDisplayName(locale);
     }
 
     private static String getColorStr(int preset) {

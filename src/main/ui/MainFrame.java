@@ -1514,8 +1514,7 @@ public class MainFrame extends JFrame {
             board.forEachChip((t) -> t.setDisplayType(iMod));
         }
         combChipList.repaint();
-        Enumeration<ChipFreq> cfEnum = combFreqLM.elements();
-        while (cfEnum.hasMoreElements()) {
+        for (Enumeration<ChipFreq> cfEnum = combFreqLM.elements(); cfEnum.hasMoreElements();) {
             cfEnum.nextElement().chip.setDisplayType(iMod);
         }
         combFreqList.repaint();
@@ -1689,8 +1688,7 @@ public class MainFrame extends JFrame {
     }
 
     private void comb_updateMark() {
-        Enumeration<Chip> combChips = combChipLM.elements();
-        while (combChips.hasMoreElements()) {
+        for (Enumeration<Chip> combChips = combChipLM.elements(); combChips.hasMoreElements();) {
             Chip c = combChips.nextElement();
             for (Chip invChip : invChips) {
                 if (invChip.equals(c)) {
@@ -1701,8 +1699,7 @@ public class MainFrame extends JFrame {
         }
         combChipList.repaint();
 
-        Enumeration<ChipFreq> combCFs = combFreqLM.elements();
-        while (combCFs.hasMoreElements()) {
+        for (Enumeration<ChipFreq> combCFs = combFreqLM.elements(); combCFs.hasMoreElements();) {
             Chip c = combCFs.nextElement().chip;
             for (Chip invChip : invChips) {
                 if (invChip.equals(c)) {
@@ -1715,33 +1712,31 @@ public class MainFrame extends JFrame {
     }
 
     private List<Chip> comb_result_getChipsFromInv() {
-        Enumeration<Chip> chipEnum = combChipLM.elements();
-        List<Chip> chipList = new ArrayList<>();
-        while (chipEnum.hasMoreElements()) {
+        List<Chip> out = new ArrayList<>();
+        for (Enumeration<Chip> chipEnum = combChipLM.elements(); chipEnum.hasMoreElements();) {
             Chip c = chipEnum.nextElement();
             for (Chip invChip : invChips) {
                 if (invChip.equals(c)) {
-                    chipList.add(invChip);
+                    out.add(invChip);
                     break;
                 }
             }
         }
-        return chipList;
+        return out;
     }
 
     private List<Chip> comb_freq_getChipsFromInv() {
-        Enumeration<ChipFreq> cfEnum = combFreqLM.elements();
-        List<Chip> chipList = new ArrayList<>();
-        while (cfEnum.hasMoreElements()) {
+        List<Chip> out = new ArrayList<>();
+        for (Enumeration<ChipFreq> cfEnum = combFreqLM.elements(); cfEnum.hasMoreElements();) {
             Chip c = cfEnum.nextElement().chip;
             for (Chip invChip : invChips) {
                 if (invChip.equals(c)) {
-                    chipList.add(invChip);
+                    out.add(invChip);
                     break;
                 }
             }
         }
-        return chipList;
+        return out;
     }
 
     private void comb_openStatDialog() {
@@ -1858,7 +1853,7 @@ public class MainFrame extends JFrame {
             ChipFreq selected = combFreqList.getSelectedValue();
             combFreqLabel.setText(Fn.fPercStr(selected.freq) + " (" + app.getText(Language.UNIT_COUNT, selected.count) + ")");
         } else {
-            combFreqLabel.setText(" ");
+            combFreqLabel.setText("-");
         }
 
     }

@@ -8,11 +8,6 @@ public class Version2 {
 
     public final int v1, v2;
 
-    public Version2() {
-        v1 = 0;
-        v2 = 0;
-    }
-
     public Version2(String version) {
         String[] verStrs = version.split("\\.");
         if (2 == verStrs.length) {
