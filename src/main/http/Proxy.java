@@ -8,9 +8,12 @@ import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import javax.swing.SwingUtilities;
 import main.json.JsonParser;
@@ -29,7 +32,15 @@ public class Proxy {
     public static final int PORT = 8080;
 
     private final ProxyDialog dialog;
-    private final ServerSocket serverSocket = new ServerSocket(PORT);
+    private final ServerSocket serverSocket = initServerSocket();
+
+    private ServerSocket initServerSocket() throws IOException {
+        try {
+            return new ServerSocket(PORT);
+        } catch (IOException ex) {
+            return new ServerSocket(0);
+        }
+    }
 
     private final List<Thread> threads = new ArrayList<>();
     private boolean isRunning = true;
@@ -58,12 +69,13 @@ public class Proxy {
                 NetworkInterface i = interfaces.nextElement();
                 for (Enumeration<InetAddress> addresses = i.getInetAddresses(); addresses.hasMoreElements();) {
                     InetAddress a = addresses.nextElement();
-                    if (!a.isLoopbackAddress() && !a.isLinkLocalAddress() && a.isSiteLocalAddress()) {
+                    if (a.isSiteLocalAddress()) {
                         return a.getHostAddress();
                     }
                 }
             }
-        } catch (SocketException ex) {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (SocketException | UnknownHostException ex) {
         }
         return "";
     }

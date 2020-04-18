@@ -566,3 +566,8 @@
 
 ### Fix Attempt
 - Proxy: The application will try to find the real interal IP address
+
+## 6.8.2 (4/18/2020)
+
+### Fix Attempt
+- Proxy: The application will try to find the real interal IP address
