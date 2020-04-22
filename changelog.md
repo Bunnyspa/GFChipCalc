@@ -571,3 +571,8 @@
 
 ### Fix Attempt
 - Proxy: The application will try to find the real interal IP address
+
+## 6.8.3 (4/22/2020)
+
+### Fix Attempt
+- Chip: A bug that caused unnecessary rotations

@@ -484,8 +484,8 @@ public class Chip implements Serializable {
 
         this.initLevel = level;
         this.level = level;
-        this.initRotation = rotation;
-        this.rotation = rotation;
+        this.rotation = rotation % getMaxRotation();
+        this.initRotation = rotation % getMaxRotation();
 
         this.tags = new HashSet<>();
     }
@@ -502,8 +502,8 @@ public class Chip implements Serializable {
 
         this.initLevel = level;
         this.level = level;
-        this.initRotation = rotation;
-        this.rotation = rotation;
+        this.rotation = rotation % getMaxRotation();
+        this.initRotation = rotation % getMaxRotation();
 
         this.tags = new HashSet<>();
     }
@@ -521,8 +521,8 @@ public class Chip implements Serializable {
 
         this.initLevel = level;
         this.level = level;
-        this.initRotation = rotation;
-        this.rotation = rotation;
+        this.rotation = rotation % getMaxRotation();
+        this.initRotation = rotation % getMaxRotation();
 
         this.marked = marked;
         this.tags = tags;
@@ -620,37 +620,32 @@ public class Chip implements Serializable {
         return rotation;
     }
 
-    public void resetRotation() {
-        this.rotation = this.initRotation;
-    }
-
-    public void setInitRotation(int rotation) {
-        this.initRotation = rotation % getMaxRotation();
-    }
-
-    public void setRotation(int rotation) {
-        int r = rotation % getMaxRotation();
-        if (this.rotation != r) {
-            this.rotation = r;
-            repaint();
-        }
-    }
-
-    public void initRotate(boolean direction) {
-        rotation = (rotation + (direction ? 3 : 1)) % getMaxRotation();
-        initRotation = rotation;
+    public void setInitRotation(int r) {
+        this.initRotation = r % getMaxRotation();
+        this.rotation = initRotation;
         repaint();
+    }
+
+    public void setRotation(int r) {
+        int rot = r % getMaxRotation();
+        this.rotation = rot;
+        repaint();
+    }
+
+    public void resetRotation() {
+        setRotation(initRotation);
     }
 
     public void initRotate(int i) {
-        rotation = (rotation + i) % getMaxRotation();
-        initRotation = rotation;
-        repaint();
+        setInitRotation(rotation + i);
+    }
+
+    public void initRotate(boolean direction) {
+        initRotate(direction ? 3 : 1);
     }
 
     public void rotate(int i) {
-        rotation = (rotation + i) % getMaxRotation();
-        repaint();
+        setRotation(rotation + i);
     }
 
     public int getNumTicket() {
