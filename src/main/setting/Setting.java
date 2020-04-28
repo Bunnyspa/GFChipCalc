@@ -61,6 +61,7 @@ public class Setting {
     public boolean chipLevelMax;
     public boolean chipMatchColor;
     public boolean chipAllowRotation;
+    public boolean chipSymmetry;
 
     // Board
     public int boardMarkMin;
@@ -118,6 +119,8 @@ public class Setting {
                         chipMatchColor = IO.parseBoolean(afterEqual(line));
                     } else if (line.startsWith("CHIP_ROTATABLE=")) {
                         chipAllowRotation = IO.parseBoolean(afterEqual(line));
+                    } else if (line.startsWith("CHIP_SYMMETRY=")) {
+                        chipSymmetry = IO.parseBoolean(afterEqual(line));
                     }//
                     // Board
                     else if (line.startsWith("BOARD_SORT=")) {
@@ -172,6 +175,7 @@ public class Setting {
         chipLevelMax = true;
         chipMatchColor = true;
         chipAllowRotation = true;
+        chipSymmetry = false;
 
         // Board
         boardMarkMin = 0;
@@ -210,6 +214,7 @@ public class Setting {
         lines.add("CHIP_MAXLEVEL=" + IO.data(chipLevelMax));
         lines.add("CHIP_MATCHCOLOR=" + IO.data(chipMatchColor));
         lines.add("CHIP_ROTATABLE=" + IO.data(chipAllowRotation));
+        lines.add("CHIP_SYMMETRY=" + IO.data(chipSymmetry));
 
         lines.add("BOARD_SORT=" + boardSortType);
 

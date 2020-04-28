@@ -140,7 +140,7 @@ public class HelpChipDialog extends JDialog {
         resonanceTable.getTableHeader().setUI(null);
 
         resonanceTM.addRow(resonanceCols);
-        int resonanceRowCount = Board.RESONANCE_MAP.size(Board.NAMES[0]);
+        int resonanceRowCount = Board.MAP_RESONANCE.size(Board.NAMES[0]);
         resonanceTablePanel.setPreferredSize(new Dimension(200, resonanceTable.getRowHeight() * (resonanceRowCount + 1) + GAP));
 
         percTable.setModel(percTM);
@@ -292,7 +292,7 @@ public class HelpChipDialog extends JDialog {
 
         int color = Board.getColor(name);
         boardLabel.setText(app.getText(Language.CHIP_COLOR) + ": " + app.getText(Chip.COLORSTRS.get(color)));
-        Set<Integer> steps = Board.RESONANCE_MAP.keySet(name);
+        Set<Integer> steps = Board.MAP_RESONANCE.keySet(name);
 
         List<Integer> resonanceSteps = new ArrayList<>(steps);
         resonanceSteps.sort(Collections.reverseOrder());
@@ -300,7 +300,7 @@ public class HelpChipDialog extends JDialog {
         resonanceTM.setRowCount(1);
         if (resonanceType == SECTION) {
             resonanceSteps.forEach((step) -> {
-                FStat stat = Board.RESONANCE_MAP.get(name, step);
+                FStat stat = Board.MAP_RESONANCE.get(name, step);
                 resonanceTM.addRow(new Integer[]{step, stat.dmg, stat.brk, stat.hit, stat.rld});
             });
         } else {
@@ -308,7 +308,7 @@ public class HelpChipDialog extends JDialog {
                 Stat s = new Stat();
                 steps.stream()
                         .filter((key) -> (key <= step))
-                        .forEachOrdered((key) -> s.add(Board.RESONANCE_MAP.get(name, key)));
+                        .forEachOrdered((key) -> s.add(Board.MAP_RESONANCE.get(name, key)));
                 resonanceTM.addRow(new Integer[]{step, s.dmg, s.brk, s.hit, s.rld});
             });
         }

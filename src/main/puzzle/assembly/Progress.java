@@ -28,7 +28,7 @@ public class Progress {
 
     // Setting
     public int status;
-    public final boolean maxLevel, matchColor, allowRotation;
+    public final boolean maxLevel, matchColor, allowRotation, symmetry;
     public final int markMin, markMax, markType, sortType;
     public final FStat pt, stat;
     public final int tag;
@@ -50,6 +50,7 @@ public class Progress {
         this.maxLevel = setting.chipLevelMax;
         this.matchColor = setting.chipMatchColor;
         this.allowRotation = setting.chipAllowRotation;
+        this.symmetry = setting.chipSymmetry;
 
         this.markMin = setting.boardMarkMin;
         this.markMax = setting.boardMarkMax;
@@ -70,7 +71,7 @@ public class Progress {
     }
 
     public Progress(int status, String name, int star,
-            boolean maxLevel, boolean matchColor, boolean allowRotation,
+            boolean maxLevel, boolean matchColor, boolean allowRotation, boolean symmetry,
             int markMin, int markMax, int markType, int sortType,
             FStat stat, FStat pt,
             int nComb, int progress, int progMax,
@@ -84,6 +85,7 @@ public class Progress {
         this.maxLevel = maxLevel;
         this.matchColor = matchColor;
         this.allowRotation = allowRotation;
+        this.symmetry = symmetry;
 
         this.markMin = markMin;
         this.markMax = markMax;
@@ -208,6 +210,7 @@ public class Progress {
         lines.add(IO.data(maxLevel));
         lines.add(IO.data(matchColor));
         lines.add(IO.data(allowRotation));
+        lines.add(IO.data(symmetry));
 
         lines.add(String.valueOf(markMin));
         lines.add(String.valueOf(markMax));

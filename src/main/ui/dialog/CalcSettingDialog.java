@@ -22,17 +22,16 @@ import main.util.Fn;
  */
 public class CalcSettingDialog extends JDialog {
 
+    private static final int MARK_MIN = 0;
+    private static final int MARK_MAX = 64;
     private final App app;
+    private final String name;
+    private final int star;
+
     private int mode, presetIndex;
     private Stat stat, pt;
     private boolean radioLoading;
     private int markType;
-
-    private final String name;
-    private final int star;
-
-    private static final int MARK_MIN = 0;
-    private static final int MARK_MAX = 64;
 
     public static CalcSettingDialog getInstance(App app) {
         return new CalcSettingDialog(app);
@@ -87,6 +86,7 @@ public class CalcSettingDialog extends JDialog {
         maxLevelCheckBox.setText(app.getText(Language.CSET_MAXLEVEL_DESC));
         colorCheckBox.setText(app.getText(Language.CSET_COLOR_DESC));
         rotationCheckBox.setText(app.getText(Language.CSET_ROTATION_DESC));
+        symmetryCheckBox.setText(app.getText(Language.CSET_SYMMETRY_DESC));
 
         //// Load settings //// 
         mode = setting.board.getMode(name, star);
@@ -140,6 +140,7 @@ public class CalcSettingDialog extends JDialog {
         maxLevelCheckBox.setSelected(setting.chipLevelMax);
         colorCheckBox.setSelected(setting.chipMatchColor);
         rotationCheckBox.setSelected(setting.chipAllowRotation);
+        symmetryCheckBox.setSelected(setting.chipSymmetry);
     }
 
     private void addListeners() {
@@ -312,6 +313,7 @@ public class CalcSettingDialog extends JDialog {
         maxLevelCheckBox = new javax.swing.JCheckBox();
         colorCheckBox = new javax.swing.JCheckBox();
         rotationCheckBox = new javax.swing.JCheckBox();
+        symmetryCheckBox = new javax.swing.JCheckBox();
         statPanel = new javax.swing.JPanel();
         maxPanel = new javax.swing.JPanel();
         dmgTextLabel = new javax.swing.JLabel();
@@ -359,16 +361,16 @@ public class CalcSettingDialog extends JDialog {
         rotationCheckBox.setSelected(true);
         rotationCheckBox.setText("rotation");
 
+        symmetryCheckBox.setText("symmetry");
+
         javax.swing.GroupLayout miscPanelLayout = new javax.swing.GroupLayout(miscPanel);
         miscPanel.setLayout(miscPanelLayout);
         miscPanelLayout.setHorizontalGroup(
             miscPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(miscPanelLayout.createSequentialGroup()
-                .addGroup(miscPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(maxLevelCheckBox)
-                    .addComponent(colorCheckBox)
-                    .addComponent(rotationCheckBox))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(maxLevelCheckBox)
+            .addComponent(colorCheckBox)
+            .addComponent(rotationCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(symmetryCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         miscPanelLayout.setVerticalGroup(
             miscPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -378,7 +380,8 @@ public class CalcSettingDialog extends JDialog {
                 .addComponent(colorCheckBox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(rotationCheckBox)
-                .addGap(0, 0, 0))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(symmetryCheckBox))
         );
 
         statPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("최대치 설정"));
@@ -670,6 +673,7 @@ public class CalcSettingDialog extends JDialog {
         setting.chipLevelMax = maxLevelCheckBox.isSelected();
         setting.chipMatchColor = colorCheckBox.isSelected();
         setting.chipAllowRotation = rotationCheckBox.isSelected();
+        setting.chipSymmetry = symmetryCheckBox.isSelected();
 
         setting.board.setMode(name, star, mode);
         setting.board.setPt(name, star, pt);
@@ -686,7 +690,7 @@ public class CalcSettingDialog extends JDialog {
             setting.boardSortType = Setting.BOARD_SORTTYPE_TICKET;
         }
 
-        app.mf.setting_resetDisplay(); 
+        app.mf.setting_resetDisplay();
         app.mf.settingFile_save();
 
         // Preset - Apply Filter
@@ -758,5 +762,6 @@ public class CalcSettingDialog extends JDialog {
     private javax.swing.JRadioButton sortTicketRadioButton;
     private javax.swing.JRadioButton sortXPRadioButton;
     private javax.swing.JPanel statPanel;
+    private javax.swing.JCheckBox symmetryCheckBox;
     // End of variables declaration//GEN-END:variables
 }

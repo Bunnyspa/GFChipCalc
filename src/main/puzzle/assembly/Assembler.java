@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.BooleanSupplier;
+import java.util.stream.Stream;
 import main.App;
 import main.puzzle.Board;
 import main.puzzle.Chip;
@@ -339,10 +340,17 @@ public class Assembler {
         if (progress.status == Progress.DICTIONARY) {
             List<PuzzlePreset> presets = getPresets(progress.name, progress.star, progress.tag == 1);
 
-            progress.nTotal = (int) presets.stream().filter((p) -> cIt.hasEnoughChips(p)).count();
+            progress.nTotal = (int) presets.stream()
+                    .filter((p) -> cIt.hasEnoughChips(p))
+                    .filter((p) -> !progress.symmetry || p.isSymmetric())
+                    .count();
+
             setProgBar();
 
-            Iterator<PuzzlePreset> pIt = presets.stream().skip(progress.nDone).filter((p) -> cIt.hasEnoughChips(p)).iterator();
+            Iterator<PuzzlePreset> pIt = presets.stream().skip(progress.nDone)
+                    .filter((p) -> cIt.hasEnoughChips(p))
+                    .filter((p) -> !progress.symmetry || p.isSymmetric())
+                    .iterator();
             while (checkPause() && pIt.hasNext()) {
                 PuzzlePreset preset = pIt.next();
                 offer(q, preset);

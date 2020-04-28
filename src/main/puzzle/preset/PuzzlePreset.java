@@ -163,6 +163,10 @@ public class PuzzlePreset implements Comparable<PuzzlePreset> {
         return state == EMPTY;
     }
 
+    public boolean isSymmetric() {
+        return placement.isSymmetric(Board.UNUSED);
+    }
+
     public Map<String, Integer> getNameCountMap() {
         return nameCountMap;
     }

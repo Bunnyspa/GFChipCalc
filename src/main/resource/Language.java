@@ -270,6 +270,7 @@ public class Language {
     public static final String CSET_MAXLEVEL_DESC = "CSET_MAXLEVEL_DESC";
     public static final String CSET_COLOR_DESC = "CSET_COLOR_DESC";
     public static final String CSET_ROTATION_DESC = "CSET_ROTATION_DESC";
+    public static final String CSET_SYMMETRY_DESC = "CSET_SYMMETRY_DESC";
 
     public static final String CSET_CONFIRM_FILTER_TITLE = "CSET_CONFIRM_FILTER_TITLE";
     public static final String CSET_CONFIRM_FILTER_BODY = "CSET_CONFIRM_FILTER_BODY";

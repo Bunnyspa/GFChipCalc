@@ -576,3 +576,8 @@
 
 ### Fix Attempt
 - Chip: A bug that caused unnecessary rotations
+
+## 6.9.0 (4/28/2020)
+
+### Added
+- Setting: Find only symmetric boards (off by default)

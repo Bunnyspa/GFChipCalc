@@ -3,8 +3,10 @@ package main.puzzle;
 import java.awt.Point;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -141,30 +143,30 @@ public class PuzzleMatrix<E> implements Serializable {
         }
     }
 
-    public void rotateInside(int num, E e) {
+    public void rotateContent(int num, E e) {
         if (num == 2) {
-            int xMin = nCol;
-            int xMax = 0;
-            int yMin = nRow;
-            int yMax = 0;
+            int rMin = nRow;
+            int rMax = 0;
+            int cMin = nCol;
+            int cMax = 0;
             for (Point p : getCoordsExcept(e)) {
-                if (xMin > p.x) {
-                    xMin = p.x;
+                if (rMin > p.x) {
+                    rMin = p.x;
                 }
-                if (xMax < p.x) {
-                    xMax = p.x;
+                if (rMax < p.x) {
+                    rMax = p.x;
                 }
-                if (yMin > p.y) {
-                    yMin = p.y;
+                if (cMin > p.y) {
+                    cMin = p.y;
                 }
-                if (yMax < p.y) {
-                    yMax = p.y;
+                if (cMax < p.y) {
+                    cMax = p.y;
                 }
             }
             List<Point> pts = new ArrayList<>(getCoordsExcept(e));
             while (!pts.isEmpty()) {
                 Point p1 = pts.get(0);
-                Point p2 = new Point(xMin + xMax - p1.x, yMin + yMax - p1.y);
+                Point p2 = new Point(rMin + rMax - p1.x, cMin + cMax - p1.y);
                 if (p1.equals(p2)) {
                     pts.remove(p1);
                 } else {
@@ -181,6 +183,90 @@ public class PuzzleMatrix<E> implements Serializable {
         } else {
             rotate(num);
         }
+    }
+
+    public boolean isSymmetric(E e) {
+        // Bound
+        int rMin = nRow;
+        int rMax = 0;
+        int cMin = nCol;
+        int cMax = 0;
+        for (Point p : getCoordsExcept(e)) {
+            if (rMin > p.x) {
+                rMin = p.x;
+            }
+            if (rMax < p.x) {
+                rMax = p.x;
+            }
+            if (cMin > p.y) {
+                cMin = p.y;
+            }
+            if (cMax < p.y) {
+                cMax = p.y;
+            }
+        }
+
+        // Line
+        boolean sym = true;
+        Map<E, E> comp = new HashMap<>();
+        for (int x = rMin; x <= (rMax + rMin) / 2; x++) {
+            for (int y = cMin; y <= cMax; y++) {
+                E p1 = get(x, y);
+                E p2 = get(rMax - x + rMin, y);
+                if ((comp.containsKey(p1) && !comp.get(p1).equals(p2))
+                        || (comp.containsKey(p2) && !comp.get(p2).equals(p1))) {
+                    sym = false;
+                    break;
+                }
+                comp.put(p1, p2);
+                comp.put(p2, p1);
+            }
+            if (!sym) {
+                break;
+            }
+        }
+        if (sym) {
+            return true;
+        }
+
+        sym = true;
+        comp.clear();
+        for (int x = rMin; x <= rMax; x++) {
+            for (int y = cMin; y <= (cMax + cMin) / 2; y++) {
+                E p1 = get(x, y);
+                E p2 = get(x, cMax - y + cMin);
+                if (comp.containsKey(p1) && !comp.get(p1).equals(p2)) {
+                    sym = false;
+                    break;
+                }
+                comp.put(p1, p2);
+            }
+            if (!sym) {
+                break;
+            }
+        }
+        if (sym) {
+            return true;
+        }
+
+        // Dot
+        sym = true;
+        comp.clear();
+        for (int x = rMin; x <= rMax; x++) {
+            for (int y = cMin; y <= cMax; y++) {
+                E p1 = get(x, y);
+                E p2 = get(rMax - x + rMin, cMax - y + cMin);
+                if (comp.containsKey(p1) && !comp.get(p1).equals(p2)) {
+                    sym = false;
+                    break;
+                }
+                comp.put(p1, p2);
+            }
+            if (!sym) {
+                break;
+            }
+        }
+        return sym;
     }
 
     @Override

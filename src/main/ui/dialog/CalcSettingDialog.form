@@ -93,14 +93,10 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" attributes="0">
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="maxLevelCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="colorCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="rotationCheckBox" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace max="32767" attributes="0"/>
-              </Group>
+              <Component id="maxLevelCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
+              <Component id="colorCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
+              <Component id="rotationCheckBox" max="32767" attributes="0"/>
+              <Component id="symmetryCheckBox" alignment="0" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
@@ -111,7 +107,8 @@
                   <Component id="colorCheckBox" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="rotationCheckBox" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="symmetryCheckBox" min="-2" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -133,6 +130,11 @@
           <Properties>
             <Property name="selected" type="boolean" value="true"/>
             <Property name="text" type="java.lang.String" value="rotation"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="symmetryCheckBox">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="symmetry"/>
           </Properties>
         </Component>
       </SubComponents>

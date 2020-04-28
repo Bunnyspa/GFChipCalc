@@ -267,7 +267,7 @@ public class IO {
                     boards.forEach((b) -> b.forEachChip((c) -> chipSet.add(c)));
                     loadProgress_adjustInits(chipSet, invChips);
                     return new Progress(Progress.FINISHED, name, star,
-                            false, false, false,
+                            false, false, false, false,
                             0, 0, 0, 0,
                             new FStat(stat), null,
                             -1, 1, 1,
@@ -857,7 +857,7 @@ public class IO {
             List<Board> boards = parseProgress_boards(name, star, stat, chips, it);
 
             return new Progress(status, name, star,
-                    true, true, true,
+                    true, true, true, false,
                     0, 0, 0, 0,
                     stat, new FStat(0),
                     nComb, 1, 1,
@@ -867,6 +867,11 @@ public class IO {
         boolean maxLevel = parseBoolean(it.next());
         boolean matchColor = parseBoolean(it.next());
         boolean allowRotation = parseBoolean(it.next());
+
+        boolean symmetry = false;
+        if (v.isCurrent(6, 9, 0)) {
+            symmetry = parseBoolean(it.next());
+        }
 
         int markMin = Integer.valueOf(it.next());
         int markMax = Integer.valueOf(it.next());
@@ -889,7 +894,7 @@ public class IO {
         List<Board> boards = parseProgress_boards(name, star, stat, chips, it);
 
         return new Progress(status, name, star,
-                maxLevel, matchColor, allowRotation,
+                maxLevel, matchColor, allowRotation, symmetry,
                 markMin, markMax, markType, sortType,
                 stat, pt,
                 nComb, progress, progMax, chips, boards, tag

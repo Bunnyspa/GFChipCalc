@@ -45,7 +45,7 @@ public class Board {
     public static final Color COLOR_STAR_YELLOW = Chip.COLOR_STAR;
     public static final Color COLOR_STAR_RED = Color.RED;
 
-    private static final Map<String, Integer[][]> MATRIX_MAP = new HashMap<String, Integer[][]>() // <editor-fold defaultstate="collapsed">
+    private static final Map<String, Integer[][]> MAP_MATRIX = new HashMap<String, Integer[][]>() // <editor-fold defaultstate="collapsed">
     {
         {
             put(NAME_BGM71, new Integer[][]{
@@ -110,7 +110,7 @@ public class Board {
             });
         }
     }; // </editor-fold>
-    private static final Map<String, Integer> COLOR_MAP = new HashMap<String, Integer>() // <editor-fold defaultstate="collapsed">
+    private static final Map<String, Integer> MAP_COLOR = new HashMap<String, Integer>() // <editor-fold defaultstate="collapsed">
     {
         {
             put(NAME_BGM71, Chip.COLOR_BLUE);
@@ -121,7 +121,7 @@ public class Board {
             put(NAME_QLZ04, Chip.COLOR_ORANGE);
         }
     }; // </editor-fold>
-    private static final Map<String, FStat> INNATE_MAX_MAP = new HashMap<String, FStat>() // <editor-fold defaultstate="collapsed"> 
+    private static final Map<String, FStat> MAP_INNATEMAX = new HashMap<String, FStat>() // <editor-fold defaultstate="collapsed"> 
     {
         {
             put(NAME_BGM71, new FStat(155, 402, 349, 83));
@@ -132,7 +132,7 @@ public class Board {
             put(NAME_QLZ04, new FStat(77, 136, 188, 331));
         }
     }; // </editor-fold>
-    private static final Map<String, FStat[]> MAX_MAP = new HashMap<String, FStat[]>() // <editor-fold defaultstate="collapsed"> 
+    private static final Map<String, FStat[]> MAP_MAX = new HashMap<String, FStat[]>() // <editor-fold defaultstate="collapsed"> 
     {
         {
             put(NAME_BGM71, new FStat[]{
@@ -179,7 +179,7 @@ public class Board {
             });
         }
     }; // </editor-fold>
-    public static final StrIntMap<FStat> RESONANCE_MAP = new StrIntMap<FStat>() // <editor-fold defaultstate="collapsed">
+    public static final StrIntMap<FStat> MAP_RESONANCE = new StrIntMap<FStat>() // <editor-fold defaultstate="collapsed">
     {
         {
             put(NAME_BGM71, new HashMap<Integer, FStat>() {
@@ -250,7 +250,7 @@ public class Board {
             });
         }
     }; // </editor-fold>
-    private static final Map<String, FStat[]> VERSION_MAP = new HashMap<String, FStat[]>() // <editor-fold defaultstate="collapsed">
+    private static final Map<String, FStat[]> MAP_ITERATION = new HashMap<String, FStat[]>() // <editor-fold defaultstate="collapsed">
     {
         {
             put(NAME_BGM71, new FStat[]{
@@ -327,7 +327,7 @@ public class Board {
             });
         }
     }; // </editor-fold>
-    private static final StrIntMap<Integer> ROTATION_MAP = new StrIntMap<Integer>() // <editor-fold defaultstate="collapsed">
+    private static final StrIntMap<Integer> MAP_ROTATIONSTEP = new StrIntMap<Integer>() // <editor-fold defaultstate="collapsed">
     {
         {
             for (String name : NAMES) {
@@ -335,7 +335,7 @@ public class Board {
                     PuzzleMatrix<Integer> unrotated = initMatrix(name, star);
                     for (int i = 1; i <= 4; i++) {
                         PuzzleMatrix<Integer> b = initMatrix(name, star);
-                        b.rotateInside(i, UNUSED);
+                        b.rotateContent(i, UNUSED);
                         if (unrotated.equals(b)) {
                             put(name, star, i);
                             break;
@@ -444,12 +444,12 @@ public class Board {
 
     // <editor-fold defaultstate="collapsed" desc="Color">
     public final int getColor() {
-        return COLOR_MAP.get(name);
+        return MAP_COLOR.get(name);
     }
 
     public static int getColor(String name) {
-        if (COLOR_MAP.containsKey(name)) {
-            return COLOR_MAP.get(name);
+        if (MAP_COLOR.containsKey(name)) {
+            return MAP_COLOR.get(name);
         }
         return -1;
     }
@@ -457,7 +457,7 @@ public class Board {
 
     // <editor-fold defaultstate="collapsed" desc="Rotation and Ticket">
     private void rotate(int i) {
-        matrix.rotate(i);
+        matrix.rotateContent(i, UNUSED);
         chips.forEach((c) -> c.rotate(i));
     }
 
@@ -466,7 +466,7 @@ public class Board {
     }
 
     public void minimizeTicket() {
-        for (int rotation = 0; rotation < 4; rotation += ROTATION_MAP.get(name, star)) {
+        for (int rotation = 0; rotation < 4; rotation += MAP_ROTATIONSTEP.get(name, star)) {
             // Start a new board
             Board b = new Board(this);
             Set<String> cNames = new HashSet<>();
@@ -584,7 +584,7 @@ public class Board {
     }
 
     public static Stat getMaxStat(String name, int star) {
-        return new Stat(MAX_MAP.get(name)[Fn.limit(star - 1, 0, MAX_MAP.get(name).length)]);
+        return new Stat(MAP_MAX.get(name)[Fn.limit(star - 1, 0, MAP_MAX.get(name).length)]);
     }
     // </editor-fold>
 
@@ -634,7 +634,7 @@ public class Board {
 
     // <editor-fold defaultstate="collapsed" desc="HOC, Resonance, and Version">
     public static Stat getHOCStat(String name) {
-        return new Stat(INNATE_MAX_MAP.get(name));
+        return new Stat(MAP_INNATEMAX.get(name));
     }
 
     public Stat getResonance() {
@@ -645,16 +645,16 @@ public class Board {
 
         Stat s = new Stat();
 
-        RESONANCE_MAP.keySet(name).stream()
+        MAP_RESONANCE.keySet(name).stream()
                 .filter((i) -> (i <= numCell))
-                .forEach((i) -> s.add(RESONANCE_MAP.get(name, i)));
+                .forEach((i) -> s.add(MAP_RESONANCE.get(name, i)));
 
         return s;
     }
 
     public static Stat getVersionStat(String name, int v) {
         Stat s = new Stat();
-        FStat[] vus = VERSION_MAP.get(name);
+        FStat[] vus = MAP_ITERATION.get(name);
         for (int i = 0; i < Math.min(v, 10); i++) {
             s.add(vus[i]);
         }
@@ -761,7 +761,7 @@ public class Board {
 
     // <editor-fold defaultstate="collapsed" desc="Matrix and Cells">
     public static PuzzleMatrix<Integer> initMatrix(String name, int star) {
-        PuzzleMatrix<Integer> matrix = new PuzzleMatrix<>(MATRIX_MAP.get(name));
+        PuzzleMatrix<Integer> matrix = new PuzzleMatrix<>(MAP_MATRIX.get(name));
         for (int r = 0; r < matrix.getNumRow(); r++) {
             for (int c = 0; c < matrix.getNumCol(); c++) {
                 matrix.set(r, c, matrix.get(r, c) <= star ? EMPTY : UNUSED);
