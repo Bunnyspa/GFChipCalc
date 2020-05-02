@@ -586,3 +586,8 @@
 
 ### Added
 - Setting: Advanced mode (if the mode is off, user can only use presets, and filters will be automatically applied.)
+
+## 6.10.1 (5/2/2020)
+
+### Changed
+- Setting - Preset: Presets with the most expected number of results are the first on the lists.
