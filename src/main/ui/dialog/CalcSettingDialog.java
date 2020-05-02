@@ -12,9 +12,7 @@ import main.puzzle.Stat;
 import main.resource.Language;
 import main.resource.Resources;
 import main.setting.BoardSetting;
-import main.setting.Filter;
 import main.setting.Setting;
-import main.setting.StatPresetMap;
 import main.util.Fn;
 
 /**
@@ -51,11 +49,9 @@ public class CalcSettingDialog extends JDialog {
 
     private void loadResources() {
         setTitle(app.getText(Language.CSET_TITLE));
-        
+
         okButton.setText(app.getText(Language.ACTION_OK));
         cancelButton.setText(app.getText(Language.ACTION_CANCEL));
-        
-        advancedButton.setText(app.getText(Language.CSET_ADVANCED_MODE));
 
         dmgTextLabel.setIcon(Resources.DMG);
         brkTextLabel.setIcon(Resources.BRK);
@@ -281,7 +277,7 @@ public class CalcSettingDialog extends JDialog {
     private void setAdvandedSetting(boolean b) {
         advancedSetting = b;
 
-        advancedButton.setText("Advanced Mode: " + (advancedSetting ? "ON" : "OFF"));
+        advancedButton.setText(app.getText(Language.CSET_ADVANCED_MODE) + ": " + (advancedSetting ? "ON" : "OFF"));
         advancedButton.setFont(getFont().deriveFont(advancedSetting ? Font.BOLD : Font.PLAIN));
 
         maxNormalRadioButton.setVisible(advancedSetting);
