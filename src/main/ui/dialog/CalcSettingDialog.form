@@ -38,19 +38,24 @@
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
-              <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Component id="statPanel" max="32767" attributes="0"/>
-              <EmptySpace min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                      <Component id="okButton" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="cancelButton" min="-2" max="-2" attributes="0"/>
+                  <Component id="advancedButton" max="32767" attributes="0"/>
+                  <Group type="102" attributes="0">
+                      <Component id="statPanel" max="32767" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="1" attributes="0">
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                              <Component id="okButton" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="cancelButton" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Component id="miscPanel" alignment="1" max="32767" attributes="0"/>
+                          <Component id="markPanel" alignment="1" max="32767" attributes="0"/>
+                          <Component id="sortPanel" alignment="0" max="32767" attributes="0"/>
+                      </Group>
                   </Group>
-                  <Component id="miscPanel" alignment="1" max="32767" attributes="0"/>
-                  <Component id="markPanel" alignment="1" max="32767" attributes="0"/>
-                  <Component id="sortPanel" alignment="0" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -60,8 +65,9 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace min="-2" max="-2" attributes="0"/>
+              <Component id="advancedButton" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="statPanel" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Component id="markPanel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -74,6 +80,7 @@
                           <Component id="okButton" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
+                  <Component id="statPanel" pref="294" max="32767" attributes="0"/>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
           </Group>
@@ -85,7 +92,7 @@
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="&#xae30;&#xbcf8;"/>
+            <TitledBorder title="misc"/>
           </Border>
         </Property>
       </Properties>
@@ -93,18 +100,18 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="maxLevelCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
-              <Component id="colorCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
-              <Component id="rotationCheckBox" max="32767" attributes="0"/>
               <Component id="symmetryCheckBox" alignment="0" max="32767" attributes="0"/>
+              <Component id="colorCheckBox" alignment="0" max="32767" attributes="0"/>
+              <Component id="maxLevelCheckBox" alignment="0" max="32767" attributes="0"/>
+              <Component id="rotationCheckBox" alignment="0" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <Component id="maxLevelCheckBox" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
                   <Component id="colorCheckBox" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="maxLevelCheckBox" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="rotationCheckBox" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
@@ -122,6 +129,11 @@
         </Component>
         <Component class="javax.swing.JCheckBox" name="colorCheckBox">
           <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
+              <FontInfo relative="true">
+                <Font bold="true" component="colorCheckBox" property="font" relativeSize="true" size="0"/>
+              </FontInfo>
+            </Property>
             <Property name="selected" type="boolean" value="true"/>
             <Property name="text" type="java.lang.String" value="color"/>
           </Properties>
@@ -146,6 +158,9 @@
             <TitledBorder title="&#xcd5c;&#xb300;&#xce58; &#xc124;&#xc815;"/>
           </Border>
         </Property>
+        <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[250, 242]"/>
+        </Property>
       </Properties>
 
       <Layout>
@@ -163,10 +178,11 @@
                   <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="maxPresetComboBox" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
                   <Component id="maxPanel" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="ptSumLabel" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -373,6 +389,11 @@
                 <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                   <ComponentRef name="maxButtonGroup"/>
                 </Property>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
+                  <FontInfo relative="true">
+                    <Font bold="true" component="maxNormalRadioButton" property="font" relativeSize="true" size="0"/>
+                  </FontInfo>
+                </Property>
                 <Property name="selected" type="boolean" value="true"/>
                 <Property name="text" type="java.lang.String" value="default"/>
               </Properties>
@@ -382,6 +403,11 @@
                 <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                   <ComponentRef name="maxButtonGroup"/>
                 </Property>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
+                  <FontInfo relative="true">
+                    <Font bold="true" component="maxPresetRadioButton" property="font" relativeSize="true" size="0"/>
+                  </FontInfo>
+                </Property>
                 <Property name="text" type="java.lang.String" value="preset"/>
               </Properties>
             </Component>
@@ -390,6 +416,11 @@
                 <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                   <ComponentRef name="maxButtonGroup"/>
                 </Property>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
+                  <FontInfo relative="true">
+                    <Font bold="true" component="maxPtRadioButton" property="font" relativeSize="true" size="0"/>
+                  </FontInfo>
+                </Property>
                 <Property name="text" type="java.lang.String" value="pt"/>
               </Properties>
             </Component>
@@ -397,6 +428,11 @@
               <Properties>
                 <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                   <ComponentRef name="maxButtonGroup"/>
+                </Property>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
+                  <FontInfo relative="true">
+                    <Font bold="true" component="maxStatRadioButton" property="font" relativeSize="true" size="0"/>
+                  </FontInfo>
                 </Property>
                 <Property name="text" type="java.lang.String" value="stat"/>
               </Properties>
@@ -555,5 +591,13 @@
         </Component>
       </SubComponents>
     </Container>
+    <Component class="javax.swing.JButton" name="advancedButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="advanced"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="advancedButtonActionPerformed"/>
+      </Events>
+    </Component>
   </SubComponents>
 </Form>

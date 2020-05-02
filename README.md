@@ -1,4 +1,16 @@
-# Girls' Frontline HOC Chip Calculator  
+# Girls' Frontline HOC Chip Calculator
+
+![GitHub](https://img.shields.io/github/license/Bunnyspa/GFChipCalc)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/Bunnyspa/GFChipCalc)
+![GitHub All Releases](https://img.shields.io/github/downloads/Bunnyspa/GFChipCalc/total)
+![GitHub Releases](https://img.shields.io/github/downloads/Bunnyspa/GFChipCalc/latest/total)
+
+![GitHub watchers](https://img.shields.io/github/watchers/Bunnyspa/GFChipCalc?style=social)
+![GitHub stars](https://img.shields.io/github/stars/Bunnyspa/GFChipCalc?style=social)
+![GitHub forks](https://img.shields.io/github/forks/Bunnyspa/GFChipCalc?style=social)
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=bunnyspa242%40gmail.com&currency_code=USD&source=url)
+
 This application is a free fan-made application.  
 Girls' Frontline and its related images are registered trademarks of Shanghai Sunborn Network Technology Co., Ltd.  
 This application is not affiliated with Shanghai Sunborn Network Technology Co., Ltd. in any way.

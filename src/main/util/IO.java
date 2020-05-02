@@ -780,16 +780,18 @@ public class IO {
     }
 
     //========== Board Setting ==========//
-    public static BoardSetting parseBS(List<String> data) {
+    public static BoardSetting parseBS(List<String> data, boolean advancedSetting) {
         BoardSetting out = new BoardSetting();
         data.stream().map((line) -> line.split(";")).forEachOrdered((parts) -> {
             String name = parts[0];
             if (Arrays.asList(Board.NAMES).contains(name)) {
                 int star = Integer.valueOf(parts[1]);
-                int mode = Integer.valueOf(parts[2]);
+                if (advancedSetting) {
+                    int mode = Integer.valueOf(parts[2]);
+                    out.setMode(name, star, mode);
+                }
                 Stat stat = parseStat(parts[3]);
                 Stat pt = parseStat(parts[4]);
-                out.setMode(name, star, mode);
                 out.setStat(name, star, stat);
                 out.setPt(name, star, pt);
                 if (parts.length > 5) {

@@ -36,6 +36,10 @@ public class Resources {
     public static final Image FAVICON = getImage("favicon.png");
     public static final ImageIcon BANNER = getIcon("banner.png");
 
+    public static final ImageIcon DONATION = getIcon("donation.png");
+    public static final ImageIcon PAYPALQR = getIcon("paypalqr.png");
+    public static final ImageIcon PAYPAL = getIcon("paypal.png");
+
     public static final Image CHIP_MARKED = getImage("chip_marked.png");
     public static final Image CHIP_ROTATED = getImage("chip_rotated.png");
     public static final Image CHIP_EQUIPPED = getImage("chip_equipped.png");

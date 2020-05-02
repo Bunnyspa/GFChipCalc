@@ -78,7 +78,7 @@ public class BoardSetting {
             for (int star = 1; star <= 5; star++) {
                 statMap.put(name, star, Board.getMaxStat(name, star));
                 ptMap.put(name, star, Board.getMaxPt(name, star));
-                modeMap.put(name, star, MAX_DEFAULT);
+                modeMap.put(name, star, star == 5 ? MAX_PRESET : MAX_DEFAULT);
                 presetIndexMap.put(name, star, 0);
             }
         }

@@ -31,15 +31,17 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" attributes="0">
+          <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="chipButton" max="32767" attributes="0"/>
-                  <Component id="appButton" max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="authorLabel" max="32767" attributes="0"/>
+                  <Component id="chipButton" alignment="0" max="32767" attributes="0"/>
+                  <Component id="appButton" alignment="0" max="32767" attributes="0"/>
                   <Component id="closeButton" alignment="0" max="32767" attributes="0"/>
                   <Component id="proxyButton" alignment="0" max="32767" attributes="0"/>
                   <Component id="aboutButton" alignment="0" max="32767" attributes="0"/>
                   <Component id="changelogButton" alignment="0" max="32767" attributes="0"/>
+                  <Component id="versionLabel" alignment="0" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -48,6 +50,10 @@
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="versionLabel" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="authorLabel" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="chipButton" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
@@ -113,6 +119,17 @@
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="changelogButtonActionPerformed"/>
       </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="versionLabel">
+      <Properties>
+        <Property name="horizontalAlignment" type="int" value="0"/>
+        <Property name="text" type="java.lang.String" value="version"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="authorLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="author"/>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

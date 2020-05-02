@@ -1,5 +1,6 @@
 package main.ui.dialog;
 
+import java.awt.Font;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.SpinnerNumberModel;
@@ -28,6 +29,7 @@ public class CalcSettingDialog extends JDialog {
     private final String name;
     private final int star;
 
+    private boolean advancedSetting;
     private int mode, presetIndex;
     private Stat stat, pt;
     private boolean radioLoading;
@@ -42,21 +44,23 @@ public class CalcSettingDialog extends JDialog {
         this.app = app;
         name = app.mf.getBoardName();
         star = app.mf.getBoardStar();
-        init();
+        loadResources();
+        loadSettings();
         addListeners();
     }
 
-    private void init() {
-        Setting setting = app.setting;
+    private void loadResources() {
+        setTitle(app.getText(Language.CSET_TITLE));
+        
+        okButton.setText(app.getText(Language.ACTION_OK));
+        cancelButton.setText(app.getText(Language.ACTION_CANCEL));
+        
+        advancedButton.setText(app.getText(Language.CSET_ADVANCED_MODE));
 
         dmgTextLabel.setIcon(Resources.DMG);
         brkTextLabel.setIcon(Resources.BRK);
         hitTextLabel.setIcon(Resources.HIT);
         rldTextLabel.setIcon(Resources.RLD);
-
-        setTitle(app.getText(Language.CSET_TITLE));
-        okButton.setText(app.getText(Language.ACTION_OK));
-        cancelButton.setText(app.getText(Language.ACTION_CANCEL));
 
         // Group
         statPanel.setBorder(new TitledBorder(app.getText(Language.CSET_GROUP_STAT)));
@@ -87,8 +91,13 @@ public class CalcSettingDialog extends JDialog {
         colorCheckBox.setText(app.getText(Language.CSET_COLOR_DESC));
         rotationCheckBox.setText(app.getText(Language.CSET_ROTATION_DESC));
         symmetryCheckBox.setText(app.getText(Language.CSET_SYMMETRY_DESC));
+    }
 
-        //// Load settings //// 
+    private void loadSettings() {
+        Setting setting = app.setting;
+
+        setAdvandedSetting(setting.advancedSetting);
+
         mode = setting.board.getMode(name, star);
         stat = setting.board.getStat(name, star);
         pt = setting.board.getPt(name, star);
@@ -137,10 +146,10 @@ public class CalcSettingDialog extends JDialog {
         }
 
         // Misc.
-        maxLevelCheckBox.setSelected(setting.chipLevelMax);
-        colorCheckBox.setSelected(setting.chipMatchColor);
-        rotationCheckBox.setSelected(setting.chipAllowRotation);
-        symmetryCheckBox.setSelected(setting.chipSymmetry);
+        maxLevelCheckBox.setSelected(setting.levelMax);
+        colorCheckBox.setSelected(setting.colorMatch);
+        rotationCheckBox.setSelected(setting.rotation);
+        symmetryCheckBox.setSelected(setting.symmetry);
     }
 
     private void addListeners() {
@@ -269,6 +278,20 @@ public class CalcSettingDialog extends JDialog {
         }
     }
 
+    private void setAdvandedSetting(boolean b) {
+        advancedSetting = b;
+
+        advancedButton.setText("Advanced Mode: " + (advancedSetting ? "ON" : "OFF"));
+        advancedButton.setFont(getFont().deriveFont(advancedSetting ? Font.BOLD : Font.PLAIN));
+
+        maxNormalRadioButton.setVisible(advancedSetting);
+        maxPresetRadioButton.setVisible(advancedSetting);
+        maxStatRadioButton.setVisible(advancedSetting);
+        maxPtRadioButton.setVisible(advancedSetting);
+
+        colorCheckBox.setVisible(advancedSetting);
+    }
+
     private void setMarkType(int t) {
         this.markType = t % Setting.NUM_BOARD_MARKTYPE;
         switch (markType) {
@@ -286,16 +309,6 @@ public class CalcSettingDialog extends JDialog {
 
     private int getBoardStar() {
         return app.mf.getBoardStar();
-    }
-
-    private void setFilter(boolean[] stars, boolean[] colors, boolean[] types, Stat ptMin, Stat ptMax) {
-        app.filter.setColors(colors);
-        app.filter.setStars(stars);
-        app.filter.setTypes(types);
-        app.filter.ptMin = ptMin;
-        app.filter.ptMax = ptMax;
-
-        app.mf.display_applyFilterSort();
     }
 
     /**
@@ -343,6 +356,7 @@ public class CalcSettingDialog extends JDialog {
         sortPanel = new javax.swing.JPanel();
         sortTicketRadioButton = new javax.swing.JRadioButton();
         sortXPRadioButton = new javax.swing.JRadioButton();
+        advancedButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("조합 설정");
@@ -350,11 +364,12 @@ public class CalcSettingDialog extends JDialog {
         setResizable(false);
         setType(java.awt.Window.Type.UTILITY);
 
-        miscPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("기본"));
+        miscPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("misc"));
 
         maxLevelCheckBox.setSelected(true);
         maxLevelCheckBox.setText("level");
 
+        colorCheckBox.setFont(colorCheckBox.getFont().deriveFont(colorCheckBox.getFont().getStyle() | java.awt.Font.BOLD));
         colorCheckBox.setSelected(true);
         colorCheckBox.setText("color");
 
@@ -367,17 +382,17 @@ public class CalcSettingDialog extends JDialog {
         miscPanel.setLayout(miscPanelLayout);
         miscPanelLayout.setHorizontalGroup(
             miscPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(maxLevelCheckBox)
-            .addComponent(colorCheckBox)
-            .addComponent(rotationCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(symmetryCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(colorCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(maxLevelCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(rotationCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         miscPanelLayout.setVerticalGroup(
             miscPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(miscPanelLayout.createSequentialGroup()
-                .addComponent(maxLevelCheckBox)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(colorCheckBox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(maxLevelCheckBox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(rotationCheckBox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -385,6 +400,7 @@ public class CalcSettingDialog extends JDialog {
         );
 
         statPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("최대치 설정"));
+        statPanel.setPreferredSize(new java.awt.Dimension(250, 242));
 
         dmgTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         dmgTextLabel.setText("D");
@@ -469,16 +485,20 @@ public class CalcSettingDialog extends JDialog {
         maxPresetComboBox.setPreferredSize(new java.awt.Dimension(100, 21));
 
         maxButtonGroup.add(maxNormalRadioButton);
+        maxNormalRadioButton.setFont(maxNormalRadioButton.getFont().deriveFont(maxNormalRadioButton.getFont().getStyle() | java.awt.Font.BOLD));
         maxNormalRadioButton.setSelected(true);
         maxNormalRadioButton.setText("default");
 
         maxButtonGroup.add(maxPresetRadioButton);
+        maxPresetRadioButton.setFont(maxPresetRadioButton.getFont().deriveFont(maxPresetRadioButton.getFont().getStyle() | java.awt.Font.BOLD));
         maxPresetRadioButton.setText("preset");
 
         maxButtonGroup.add(maxPtRadioButton);
+        maxPtRadioButton.setFont(maxPtRadioButton.getFont().deriveFont(maxPtRadioButton.getFont().getStyle() | java.awt.Font.BOLD));
         maxPtRadioButton.setText("pt");
 
         maxButtonGroup.add(maxStatRadioButton);
+        maxStatRadioButton.setFont(maxStatRadioButton.getFont().deriveFont(maxStatRadioButton.getFont().getStyle() | java.awt.Font.BOLD));
         maxStatRadioButton.setText("stat");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -524,10 +544,11 @@ public class CalcSettingDialog extends JDialog {
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(maxPresetComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(maxPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(ptSumLabel))
+                .addComponent(ptSumLabel)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         cancelButton.setText("cancel");
@@ -622,31 +643,42 @@ public class CalcSettingDialog extends JDialog {
                 .addComponent(sortXPRadioButton))
         );
 
+        advancedButton.setText("advanced");
+        advancedButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                advancedButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(statPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(okButton)
+                    .addComponent(advancedButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(statPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cancelButton))
-                    .addComponent(miscPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(markPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(sortPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(okButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cancelButton))
+                            .addComponent(miscPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(markPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(sortPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(advancedButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(statPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(markPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -656,7 +688,8 @@ public class CalcSettingDialog extends JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(cancelButton)
-                            .addComponent(okButton))))
+                            .addComponent(okButton)))
+                    .addComponent(statPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 294, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -670,10 +703,12 @@ public class CalcSettingDialog extends JDialog {
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
         Setting setting = app.setting;
 
-        setting.chipLevelMax = maxLevelCheckBox.isSelected();
-        setting.chipMatchColor = colorCheckBox.isSelected();
-        setting.chipAllowRotation = rotationCheckBox.isSelected();
-        setting.chipSymmetry = symmetryCheckBox.isSelected();
+        setting.advancedSetting = advancedSetting;
+
+        setting.levelMax = maxLevelCheckBox.isSelected();
+        setting.colorMatch = colorCheckBox.isSelected();
+        setting.rotation = rotationCheckBox.isSelected();
+        setting.symmetry = symmetryCheckBox.isSelected();
 
         setting.board.setMode(name, star, mode);
         setting.board.setPt(name, star, pt);
@@ -694,28 +729,12 @@ public class CalcSettingDialog extends JDialog {
         app.mf.settingFile_save();
 
         // Preset - Apply Filter
-        if (mode == BoardSetting.MAX_PRESET) {
-            boolean[] stars = new boolean[]{true, false, false, false};
-
-            boolean[] colors = new boolean[Filter.NUM_COLOR];
-            int c = Board.getColor(name);
-            if (c < colors.length) {
-                colors[c] = true;
-            }
-
-            StatPresetMap presetMap = BoardSetting.PRESET;
-            boolean[] types = presetMap.getTypeFilter(name, star, presetIndex);
-
-            Stat ptMin = presetMap.get(name, star, presetIndex).ptMin.toStat();
-            Stat ptMax = presetMap.get(name, star, presetIndex).ptMax.toStat();
-
-            if (!app.filter.equals(stars, types, ptMin, ptMax)) {
-                int retval = JOptionPane.showConfirmDialog(this,
-                        app.getText(Language.CSET_CONFIRM_FILTER_BODY), app.getText(Language.CSET_CONFIRM_FILTER_TITLE),
-                        JOptionPane.YES_NO_OPTION);
-                if (retval == JOptionPane.YES_OPTION) {
-                    setFilter(stars, colors, types, ptMin, ptMax);
-                }
+        if (advancedSetting && mode == BoardSetting.MAX_PRESET && !app.mf.setting_isPresetFilter()) {
+            int retval = JOptionPane.showConfirmDialog(this,
+                    app.getText(Language.CSET_CONFIRM_FILTER_BODY), app.getText(Language.CSET_CONFIRM_FILTER_TITLE),
+                    JOptionPane.YES_NO_OPTION);
+            if (retval == JOptionPane.YES_OPTION) {
+                app.mf.setting_applyPresetFilter();
             }
         }
 
@@ -726,7 +745,12 @@ public class CalcSettingDialog extends JDialog {
         setMarkType(markType + 1);
     }//GEN-LAST:event_markTypeButtonActionPerformed
 
+    private void advancedButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_advancedButtonActionPerformed
+        setAdvandedSetting(!advancedSetting);
+    }//GEN-LAST:event_advancedButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton advancedButton;
     private javax.swing.JLabel brkTextLabel;
     private javax.swing.JButton cancelButton;
     private javax.swing.JCheckBox colorCheckBox;

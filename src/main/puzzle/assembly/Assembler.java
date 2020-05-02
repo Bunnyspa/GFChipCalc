@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.BooleanSupplier;
-import java.util.stream.Stream;
 import main.App;
 import main.puzzle.Board;
 import main.puzzle.Chip;
@@ -153,7 +152,7 @@ public class Assembler {
         board.minimizeTicket();
         board.colorChips();
 
-        if (progress.allowRotation || board.getTicketCount() == 0) {
+        if (progress.settingRotation || board.getTicketCount() == 0) {
             if (progress.isBoardEmpty()) {
                 progress.addBoard(board);
             } else {
@@ -342,14 +341,14 @@ public class Assembler {
 
             progress.nTotal = (int) presets.stream()
                     .filter((p) -> cIt.hasEnoughChips(p))
-                    .filter((p) -> !progress.symmetry || p.isSymmetric())
+                    .filter((p) -> !progress.settingSymmetry || p.isSymmetric())
                     .count();
 
             setProgBar();
 
             Iterator<PuzzlePreset> pIt = presets.stream().skip(progress.nDone)
                     .filter((p) -> cIt.hasEnoughChips(p))
-                    .filter((p) -> !progress.symmetry || p.isSymmetric())
+                    .filter((p) -> !progress.settingSymmetry || p.isSymmetric())
                     .iterator();
             while (checkPause() && pIt.hasNext()) {
                 PuzzlePreset preset = pIt.next();

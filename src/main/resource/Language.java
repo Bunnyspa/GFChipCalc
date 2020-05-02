@@ -249,6 +249,8 @@ public class Language {
     // CSET
     public static final String CSET_TITLE = "CSET_TITLE";
 
+    public static final String CSET_ADVANCED_MODE = "CSET_ADVANCED_MODE";
+
     public static final String CSET_GROUP_STAT = "CSET_GROUP_STAT";
     public static final String CSET_GROUP_MARK = "CSET_GROUP_MARK";
     public static final String CSET_GROUP_SORT = "CSET_GROUP_SORT";

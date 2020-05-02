@@ -7,6 +7,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -49,10 +50,13 @@ import main.puzzle.preset.PuzzlePreset;
 import main.resource.Language;
 import main.resource.Resources;
 import main.setting.BoardSetting;
+import main.setting.Filter;
 import main.setting.Setting;
+import main.setting.StatPresetMap;
 import main.ui.dialog.AppSettingDialog;
 import main.ui.dialog.ApplyDialog;
 import main.ui.dialog.CalcSettingDialog;
+import main.ui.dialog.DonationDialog;
 import main.ui.dialog.FilterDialog;
 import main.ui.dialog.ImageDialog;
 import main.ui.dialog.JsonFilterDialog;
@@ -114,8 +118,6 @@ public class MainFrame extends JFrame {
     private Dimension initSize;
     private Border onBorder;
     private final Border offBorder = new LineBorder(this.getBackground(), BORDERSIZE);
-    private final List<JComboBox<String>> invComboBoxes = new ArrayList<>(4);
-    private final List<JPanel> invStatPanels = new ArrayList<>(4);
     private final TipMouseListener tml;
 
     // Chip
@@ -158,6 +160,10 @@ public class MainFrame extends JFrame {
     // Setting
     private boolean settingFile_loading = false;
 
+    // Array
+    private final List<JComboBox<String>> invComboBoxes = new ArrayList<>(4);
+    private final List<JPanel> invStatPanels = new ArrayList<>(4);
+
     // <editor-fold defaultstate="collapsed" desc="Constructor Methods">
     public MainFrame(App app) {
         this.app = app;
@@ -173,22 +179,21 @@ public class MainFrame extends JFrame {
     }
 
     private void init() {
-        versionLabel.setText("<html><center>Version<br>" + App.VERSION.toData() + "</center></html>");
-
         initImages();
         initTables();
-
-        combTabbedPane.add(app.getText(Language.COMB_TAB_RESULT), combResultPanel);
-        combTabbedPane.add(app.getText(Language.COMB_TAB_FREQ), combFreqPanel);
 
         invComboBoxes.add(invDmgComboBox);
         invComboBoxes.add(invBrkComboBox);
         invComboBoxes.add(invHitComboBox);
         invComboBoxes.add(invRldComboBox);
+
         invStatPanels.add(invDmgPanel);
         invStatPanels.add(invBrkPanel);
         invStatPanels.add(invHitPanel);
         invStatPanels.add(invRldPanel);
+
+        combTabbedPane.add(app.getText(Language.COMB_TAB_RESULT), combResultPanel);
+        combTabbedPane.add(app.getText(Language.COMB_TAB_FREQ), combFreqPanel);
 
         settingFile_load();
 
@@ -234,7 +239,8 @@ public class MainFrame extends JFrame {
 
     private void initImages() {
         this.setIconImage(Resources.FAVICON);
-        authorButton.setIcon(Resources.getScaledIcon(Resources.UI_INFO, 16, 16));
+
+        donationButton.setIcon(Resources.DONATION);
 
         helpButton.setIcon(Resources.QUESTION);
         displaySettingButton.setIcon(Resources.FONT);
@@ -346,9 +352,11 @@ public class MainFrame extends JFrame {
         combFreqList.setCellRenderer(new ChipFreqListCellRenderer(app, blink));
 
     }
+    // </editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Listener Methods">
     private void addListeners() {
-        // Tip 
+        // Tip
         Fn.getAllComponents(this).forEach((t) -> t.addMouseListener(tml));
 
         // Shortcuts
@@ -369,13 +377,9 @@ public class MainFrame extends JFrame {
         combList.addKeyListener(initSKA_comb());
 
         // Pool Top
-        authorButton.addActionListener((e) -> Fn.popup(authorButton, "Author", Fn.toHTML(
-                "바니스파 (Bunnyspa)" + System.lineSeparator()
-                + "bunnyspa@naver.com"
-        )));
-
         displaySettingButton.addActionListener((e) -> openDialog(AppSettingDialog.getInstance(app)));
         helpButton.addActionListener((e) -> openDialog(HelpDialog.getInstance(app)));
+        donationButton.addActionListener((e) -> openDialog(DonationDialog.getInstance(app)));
         poolWindowButton.addActionListener((e) -> setPoolPanelVisible(!poolPanel.isVisible()));
 
         imageButton.addActionListener((e) -> invFile_openImageDialog());
@@ -638,7 +642,9 @@ public class MainFrame extends JFrame {
 
         return ska;
     }
+    //</editor-fold>
 
+    // <editor-fold defaultstate="collapsed" desc="Util Methods">
     private void openDialog(JDialog dialog) {
         Fn.open(this, dialog);
     }
@@ -647,9 +653,7 @@ public class MainFrame extends JFrame {
         Fn.open(this, frame);
         this.setVisible(false);
     }
-    // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Util Methods">
     public Dimension getPreferredDialogSize() {
         Dimension dim = new Dimension();
         dim.width = piButtonPanel.getWidth() + invPanel.getWidth() + combLeftPanel.getWidth() + combRightPanel.getWidth();
@@ -742,8 +746,6 @@ public class MainFrame extends JFrame {
 
     private void refreshTips() {
         tml.clearTips();
-
-        addTip(authorButton, "Author");
 
         addTip(displaySettingButton, app.getText(Language.TIP_DISPLAY));
         addTip(helpButton, app.getText(Language.TIP_HELP));
@@ -1563,6 +1565,48 @@ public class MainFrame extends JFrame {
         boardImageLabel.setIcon(Board.getImage(app, boardImageLabel.getWidth(), getBoardName(), getBoardStar()));
         boardImageLabel.repaint();
     }
+
+    public boolean setting_isPresetFilter() {
+        String name = getBoardName();
+        int star = getBoardStar();
+        int presetIndex = app.setting.board.getPresetIndex(name, star);
+        boolean[] stars = new boolean[]{true, false, false, false};
+
+        StatPresetMap presetMap = BoardSetting.PRESET;
+        boolean[] types = presetMap.getTypeFilter(name, star, presetIndex);
+
+        Stat ptMin = presetMap.get(name, star, presetIndex).ptMin.toStat();
+        Stat ptMax = presetMap.get(name, star, presetIndex).ptMax.toStat();
+
+        return app.filter.equals(stars, types, ptMin, ptMax);
+    }
+
+    public void setting_applyPresetFilter() {
+        String name = getBoardName();
+        int star = getBoardStar();
+        int presetIndex = app.setting.board.getPresetIndex(name, star);
+        boolean[] stars = new boolean[]{true, false, false, false};
+
+        boolean[] colors = new boolean[Filter.NUM_COLOR];
+        int c = Board.getColor(name);
+        if (c < colors.length) {
+            colors[c] = true;
+        }
+
+        StatPresetMap presetMap = BoardSetting.PRESET;
+        boolean[] types = presetMap.getTypeFilter(name, star, presetIndex);
+
+        Stat ptMin = presetMap.get(name, star, presetIndex).ptMin.toStat();
+        Stat ptMax = presetMap.get(name, star, presetIndex).ptMax.toStat();
+
+        app.filter.setColors(colors);
+        app.filter.setStars(stars);
+        app.filter.setTypes(types);
+        app.filter.ptMin = ptMin;
+        app.filter.ptMax = ptMax;
+
+        app.mf.display_applyFilterSort();
+    }
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Combination Methods">
@@ -1898,55 +1942,58 @@ public class MainFrame extends JFrame {
         boolean alt = false;
         String minType = assembler.getMinType(name, star, false);
 
-        // Partial option
-        if (assembler.hasPartial(name, star)) {
-            // Query
-            String[] options = {
-                app.getText(Language.COMB_OPTION_M2_0),
-                app.getText(Language.COMB_OPTION_M2_1),
-                app.getText(Language.COMB_OPTION_M2_2),
-                app.getText(Language.ACTION_CANCEL)
-            };
-            int response = JOptionPane.showOptionDialog(this,
-                    app.getText(Language.COMB_OPTION_M2_DESC, options[0], options[1]), app.getText(Language.COMB_OPTION_TITLE),
-                    JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]
-            );
-            // Response
-            start = response != JOptionPane.CLOSED_OPTION && response <= 2;
-            status = response <= 1 ? Progress.DICTIONARY : Progress.ALGX;
-            alt = response == 0;
-        } //
-        // Full option
-        else {
-            // Check if any chip size is smaller than dictionary chip size
-            Enumeration<Chip> elements = invLM.elements();
-            while (elements.hasMoreElements() && status == Progress.DICTIONARY) {
-                Chip c = elements.nextElement();
-                if (!c.typeGeq(minType)) {
-                    status = Progress.ALGX;
-                    break;
-                }
-            }
-            // Query
-            if (status == Progress.ALGX) {
-                String combOption0Text = minType.length() > 1
-                        ? app.getText(Language.UNIT_CELLTYPE, minType.substring(0, 1), minType.substring(1, 2))
-                        : app.getText(Language.UNIT_CELL, minType);
+        if (app.setting.advancedSetting) {
+            // Partial option
+            if (assembler.hasPartial(name, star)) {
+                // Query
                 String[] options = {
-                    app.getText(Language.COMB_OPTION_DEFAULT_0, combOption0Text),
-                    app.getText(Language.COMB_OPTION_DEFAULT_1),
+                    app.getText(Language.COMB_OPTION_M2_0),
+                    app.getText(Language.COMB_OPTION_M2_1),
+                    app.getText(Language.COMB_OPTION_M2_2),
                     app.getText(Language.ACTION_CANCEL)
                 };
                 int response = JOptionPane.showOptionDialog(this,
-                        app.getText(Language.COMB_OPTION_DEFAULT_DESC, options[0], combOption0Text),
-                        app.getText(Language.COMB_OPTION_TITLE),
+                        app.getText(Language.COMB_OPTION_M2_DESC, options[0], options[1]), app.getText(Language.COMB_OPTION_TITLE),
                         JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]
                 );
                 // Response
-                start = response != JOptionPane.CLOSED_OPTION && response <= 1;
-                status = response == 0 ? Progress.DICTIONARY : Progress.ALGX;
+                start = response != JOptionPane.CLOSED_OPTION && response <= 2;
+                status = response <= 1 ? Progress.DICTIONARY : Progress.ALGX;
+                alt = response == 0;
+            } //
+            // Full option
+            else {
+                // Check if any chip size is smaller than dictionary chip size
+                Enumeration<Chip> elements = invLM.elements();
+                while (elements.hasMoreElements() && status == Progress.DICTIONARY) {
+                    Chip c = elements.nextElement();
+                    if (!c.typeGeq(minType)) {
+                        status = Progress.ALGX;
+                        break;
+                    }
+                }
+                // Query
+                if (status == Progress.ALGX) {
+                    String combOption0Text = minType.length() > 1
+                            ? app.getText(Language.UNIT_CELLTYPE, minType.substring(0, 1), minType.substring(1, 2))
+                            : app.getText(Language.UNIT_CELL, minType);
+                    String[] options = {
+                        app.getText(Language.COMB_OPTION_DEFAULT_0, combOption0Text),
+                        app.getText(Language.COMB_OPTION_DEFAULT_1),
+                        app.getText(Language.ACTION_CANCEL)
+                    };
+                    int response = JOptionPane.showOptionDialog(this,
+                            app.getText(Language.COMB_OPTION_DEFAULT_DESC, options[0], combOption0Text),
+                            app.getText(Language.COMB_OPTION_TITLE),
+                            JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]
+                    );
+                    // Response
+                    start = response != JOptionPane.CLOSED_OPTION && response <= 1;
+                    status = response == 0 ? Progress.DICTIONARY : Progress.ALGX;
+                }
             }
-
+        } else if (getBoardStar() == 5) {
+            setting_applyPresetFilter();
         }
 
         // If preset DNE
@@ -1959,7 +2006,7 @@ public class MainFrame extends JFrame {
             List<Chip> candidates = new ArrayList<>();
             for (Enumeration<Chip> elements = invLM.elements(); elements.hasMoreElements();) {
                 Chip chip = elements.nextElement();
-                boolean colorMatch = !app.setting.chipMatchColor || Board.getColor(name) == chip.getColor();
+                boolean colorMatch = !app.setting.colorMatch || Board.getColor(name) == chip.getColor();
                 boolean sizeMatch = status == Progress.ALGX || chip.typeGeq(minType);
                 boolean markMatchNeg = 0 < app.setting.boardMarkMax || !chip.isMarked();
                 boolean markMatchPos = app.setting.boardMarkMin < Board.getCellCount(name, star) || chip.isMarked();
@@ -1967,7 +2014,7 @@ public class MainFrame extends JFrame {
                     candidates.add(new Chip(chip));
                 }
             }
-            if (app.setting.chipLevelMax) {
+            if (app.setting.levelMax) {
                 candidates.forEach((c) -> c.setMaxLevel());
             }
 
@@ -2085,7 +2132,7 @@ public class MainFrame extends JFrame {
         sb.append(Fn.getTime(sec));
 
         boolean warn = false;
-        if (!doneTimes.isEmpty()) {
+        if (app.setting.advancedSetting && !doneTimes.isEmpty()) {
             long avg = doneTimes.stream().mapToLong((v) -> v).sum() / doneTimes.size();
             long remaining = avg * (progress.nTotal - progress.nDone) / 1000;
             warn = 60 * 60 < remaining;
@@ -2318,9 +2365,9 @@ public class MainFrame extends JFrame {
             if (progress.status != Progress.FINISHED) {
                 Setting setting = app.setting;
 
-                setting.chipLevelMax = progress.maxLevel;
-                setting.chipMatchColor = progress.matchColor;
-                setting.chipAllowRotation = progress.allowRotation;
+                setting.levelMax = progress.settingLevelMax;
+                setting.colorMatch = progress.settingColorMatch;
+                setting.rotation = progress.settingRotation;
 
                 setting.boardMarkMin = progress.markMin;
                 setting.boardMarkMax = progress.markMax;
@@ -2410,10 +2457,9 @@ public class MainFrame extends JFrame {
         combFreqTagButton = new javax.swing.JButton();
         poolPanel = new javax.swing.JPanel();
         poolTPanel = new javax.swing.JPanel();
-        versionLabel = new javax.swing.JLabel();
         helpButton = new javax.swing.JButton();
         displaySettingButton = new javax.swing.JButton();
-        authorButton = new javax.swing.JButton();
+        donationButton = new javax.swing.JButton();
         poolBPanel = new javax.swing.JPanel();
         poolControlPanel = new javax.swing.JPanel();
         poolRotRButton = new javax.swing.JButton();
@@ -2965,11 +3011,6 @@ public class MainFrame extends JFrame {
 
         poolTPanel.setFocusable(false);
 
-        versionLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        versionLabel.setText("#.#.#");
-        versionLabel.setFocusable(false);
-        versionLabel.setPreferredSize(new java.awt.Dimension(50, 50));
-
         helpButton.setFocusable(false);
         helpButton.setMinimumSize(new java.awt.Dimension(50, 50));
         helpButton.setPreferredSize(new java.awt.Dimension(50, 50));
@@ -2978,29 +3019,25 @@ public class MainFrame extends JFrame {
         displaySettingButton.setMinimumSize(new java.awt.Dimension(50, 50));
         displaySettingButton.setPreferredSize(new java.awt.Dimension(50, 50));
 
-        authorButton.setFocusable(false);
-        authorButton.setMinimumSize(new java.awt.Dimension(50, 50));
-        authorButton.setPreferredSize(new java.awt.Dimension(25, 25));
+        donationButton.setText("<html>Your donation will<br>help me run this app!</html>");
+        donationButton.setPreferredSize(new java.awt.Dimension(200, 41));
 
         javax.swing.GroupLayout poolTPanelLayout = new javax.swing.GroupLayout(poolTPanel);
         poolTPanel.setLayout(poolTPanelLayout);
         poolTPanelLayout.setHorizontalGroup(
             poolTPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(poolTPanelLayout.createSequentialGroup()
-                .addComponent(versionLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(authorButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(displaySettingButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(helpButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(helpButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(displaySettingButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(donationButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         poolTPanelLayout.setVerticalGroup(
             poolTPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(versionLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-            .addComponent(helpButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-            .addComponent(displaySettingButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-            .addComponent(authorButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(donationButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(helpButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(displaySettingButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         poolBPanel.setFocusable(false);
@@ -3031,7 +3068,7 @@ public class MainFrame extends JFrame {
         jPanel13.setLayout(jPanel13Layout);
         jPanel13Layout.setHorizontalGroup(
             jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(poolStarComboBox, 0, 124, Short.MAX_VALUE)
+            .addComponent(poolStarComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(poolColorButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanel13Layout.setVerticalGroup(
@@ -3118,7 +3155,7 @@ public class MainFrame extends JFrame {
         poolBPanelLayout.setHorizontalGroup(
             poolBPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(poolListPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(poolControlPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(poolControlPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 307, Short.MAX_VALUE)
             .addComponent(poolReadPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         poolBPanelLayout.setVerticalGroup(
@@ -3869,7 +3906,7 @@ public class MainFrame extends JFrame {
             .addGroup(combRBPanelLayout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addComponent(jPanel17, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+            .addComponent(jPanel17, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(combTabbedPane)
         );
         combRBPanelLayout.setVerticalGroup(
@@ -3951,7 +3988,6 @@ public class MainFrame extends JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addButton;
-    private javax.swing.JButton authorButton;
     private javax.swing.JLabel boardImageLabel;
     private javax.swing.JComboBox<String> boardNameComboBox;
     private javax.swing.JComboBox<String> boardStarComboBox;
@@ -4014,6 +4050,7 @@ public class MainFrame extends JFrame {
     private javax.swing.JButton combWarningButton;
     private javax.swing.JButton displaySettingButton;
     private javax.swing.JButton displayTypeButton;
+    private javax.swing.JButton donationButton;
     private javax.swing.JLabel enhancementTextLabel;
     private javax.swing.JPanel fileTAPanel;
     private javax.swing.JTextArea fileTextArea;
@@ -4103,7 +4140,6 @@ public class MainFrame extends JFrame {
     private javax.swing.JLabel timeLabel;
     private javax.swing.JButton timeWarningButton;
     private javax.swing.JLabel tipLabel;
-    private javax.swing.JLabel versionLabel;
     private javax.swing.JLabel xpLabel;
     private javax.swing.JLabel xpTextLabel;
     // End of variables declaration//GEN-END:variables

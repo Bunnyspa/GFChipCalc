@@ -37,50 +37,48 @@ public class Setting {
     public static final int BOARD_SORTTYPE_XP = 1;
     public static final int NUM_BOARD_SORTTYPE = 2;
 
-    //// Default ////
     public static final int DEFAULT_FONTSIZE = 12;
 
     //// Variables ////
-    public Version2 updateVersion;
+    public Version2 updateVersion = new Version2(1, 0);
 
     // Display
-    public Locale locale;
-    public int fontSize;
-    public int colorPreset;
+    public Locale locale = Locale.getDefault();
+    public int fontSize = DEFAULT_FONTSIZE;
+    public int colorPreset = COLOR_NORMAL;
 
     // Pool
-    public boolean poolOrder;
-    public int poolColor;
-    public int poolStar;
-    public boolean poolPanelVisible;
+    public boolean poolOrder = DESCENDING;
+    public int poolColor = Chip.COLOR_ORANGE;
+    public int poolStar = 5;
+    public boolean poolPanelVisible = true;
 
     // Inventory Display
-    public int displayType;
+    public int displayType = DISPLAY_STAT;
 
     // Chip
-    public boolean chipLevelMax;
-    public boolean chipMatchColor;
-    public boolean chipAllowRotation;
-    public boolean chipSymmetry;
+    public boolean levelMax = true;
+    public boolean colorMatch = true;
+    public boolean rotation = true;
+    public boolean symmetry = false;
 
     // Board
-    public int boardMarkMin;
-    public int boardMarkMax;
-    public int boardMarkType;
-    public int boardSortType;
+    public int boardMarkMin = 0;
+    public int boardMarkMax = 64;
+    public int boardMarkType = BOARD_MARKTYPE_CELL;
+    public int boardSortType = BOARD_SORTTYPE_TICKET;
 
     // Combinator
-    public boolean showProgImage;
+    public boolean advancedSetting = false;
+    public boolean showProgImage = true;
 
     // Board
-    public BoardSetting board;
+    public BoardSetting board = new BoardSetting();
 
     public Setting() {
-        init();
     }
 
     public Setting(List<String> generalLines, List<String> boardStatLines) {
-        init();
         try {
             Version3 v = new Version3(generalLines.get(0));
             if (v.isCurrent(4, 2, 0)) {
@@ -114,29 +112,31 @@ public class Setting {
                     }//
                     // Chip
                     else if (line.startsWith("CHIP_MAXLEVEL=")) {
-                        chipLevelMax = IO.parseBoolean(afterEqual(line));
+                        levelMax = IO.parseBoolean(afterEqual(line));
                     } else if (line.startsWith("CHIP_MATCHCOLOR=")) {
-                        chipMatchColor = IO.parseBoolean(afterEqual(line));
+                        colorMatch = IO.parseBoolean(afterEqual(line));
                     } else if (line.startsWith("CHIP_ROTATABLE=")) {
-                        chipAllowRotation = IO.parseBoolean(afterEqual(line));
+                        rotation = IO.parseBoolean(afterEqual(line));
                     } else if (line.startsWith("CHIP_SYMMETRY=")) {
-                        chipSymmetry = IO.parseBoolean(afterEqual(line));
+                        symmetry = IO.parseBoolean(afterEqual(line));
                     }//
                     // Board
                     else if (line.startsWith("BOARD_SORT=")) {
                         boardSortType = Integer.valueOf(afterEqual(line));
                     }//
                     // Combinator
-                    else if (line.startsWith("COMB_HIDEPROG=") || line.startsWith("COMB_SHOWPROG=")) {
+                    else if (line.startsWith("ADVANCED_SETTING=")) {
+                        advancedSetting = IO.parseBoolean(afterEqual(line));
+                    } else if (line.startsWith("COMB_HIDEPROG=") || line.startsWith("COMB_SHOWPROG=")) {
                         showProgImage = IO.parseBoolean(afterEqual(line));
                     }
                 });
+                if (advancedSetting) {
+                    colorMatch = true;
+                }
                 // Board
-                board = IO.parseBS(boardStatLines);
+                board = IO.parseBS(boardStatLines, advancedSetting);
             } else {
-                updateVersion = new Version2(1, 0);
-
-                locale = Locale.getDefault();
                 fontSize = Integer.valueOf(generalLines.get(1));
 
                 poolOrder = IO.parseBoolean(generalLines.get(2));
@@ -146,48 +146,13 @@ public class Setting {
                 poolPanelVisible = IO.parseBoolean(generalLines.get(5));
                 displayType = Integer.valueOf(generalLines.get(6));
 
-                chipLevelMax = IO.parseBoolean(generalLines.get(7));
-                chipMatchColor = IO.parseBoolean(generalLines.get(8));
-                chipAllowRotation = IO.parseBoolean(generalLines.get(9));
+                levelMax = IO.parseBoolean(generalLines.get(7));
+                colorMatch = IO.parseBoolean(generalLines.get(8));
+                rotation = IO.parseBoolean(generalLines.get(9));
                 colorPreset = Integer.valueOf(generalLines.get(11));
             }
         } catch (Exception ex) {
         }
-    }
-
-    public final void init() {
-        updateVersion = new Version2(1, 0);
-        // Display
-        locale = Locale.getDefault();
-        fontSize = DEFAULT_FONTSIZE;
-        colorPreset = COLOR_NORMAL;
-
-        // Pool
-        poolOrder = DESCENDING;
-        poolColor = Chip.COLOR_ORANGE;
-        poolStar = 5;
-        poolPanelVisible = true;
-
-        // Inventory Display
-        displayType = DISPLAY_STAT;
-
-        // Chip
-        chipLevelMax = true;
-        chipMatchColor = true;
-        chipAllowRotation = true;
-        chipSymmetry = false;
-
-        // Board
-        boardMarkMin = 0;
-        boardMarkMax = 64;
-        boardMarkType = BOARD_MARKTYPE_CELL;
-        boardSortType = BOARD_SORTTYPE_TICKET;
-
-        // Combinator
-        showProgImage = true;
-
-        // Board
-        board = new BoardSetting();
     }
 
     private static String afterEqual(String line) {
@@ -211,13 +176,14 @@ public class Setting {
 
         lines.add("DISPLAY_TYPE=" + displayType);
 
-        lines.add("CHIP_MAXLEVEL=" + IO.data(chipLevelMax));
-        lines.add("CHIP_MATCHCOLOR=" + IO.data(chipMatchColor));
-        lines.add("CHIP_ROTATABLE=" + IO.data(chipAllowRotation));
-        lines.add("CHIP_SYMMETRY=" + IO.data(chipSymmetry));
+        lines.add("CHIP_MAXLEVEL=" + IO.data(levelMax));
+        lines.add("CHIP_MATCHCOLOR=" + IO.data(colorMatch));
+        lines.add("CHIP_ROTATABLE=" + IO.data(rotation));
+        lines.add("CHIP_SYMMETRY=" + IO.data(symmetry));
 
         lines.add("BOARD_SORT=" + boardSortType);
 
+        lines.add("ADVANCED_SETTING=" + IO.data(advancedSetting));
         lines.add("COMB_SHOWPROG=" + IO.data(showProgImage));
 
         lines.add("[" + Setting.SECTION_BOARD + "]");

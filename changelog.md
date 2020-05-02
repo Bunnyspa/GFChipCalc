@@ -581,3 +581,8 @@
 
 ### Added
 - Setting: Find only symmetric boards (off by default)
+
+## 6.10.0 (5/2/2020)
+
+### Added
+- Setting: Advanced mode (if the mode is off, user can only use presets, and filters will be automatically applied.)
