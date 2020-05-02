@@ -3,7 +3,7 @@
 ![GitHub](https://img.shields.io/github/license/Bunnyspa/GFChipCalc)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Bunnyspa/GFChipCalc)
 ![GitHub All Releases](https://img.shields.io/github/downloads/Bunnyspa/GFChipCalc/total)
-![GitHub Releases](https://img.shields.io/github/downloads/Bunnyspa/GFChipCalc/latest/total)
+[![GitHub Releases](https://img.shields.io/github/downloads/Bunnyspa/GFChipCalc/latest/total)](https://github.com/Bunnyspa/GFChipCalc/releases/latest)
 
 ![GitHub watchers](https://img.shields.io/github/watchers/Bunnyspa/GFChipCalc?style=social)
 ![GitHub stars](https://img.shields.io/github/stars/Bunnyspa/GFChipCalc?style=social)
@@ -20,10 +20,10 @@ Java is required to run JAR files.
 
 ## Download
 
-### Latest version: https://github.com/Bunnyspa/GFChipCalc/releases/latest
+### [Latest version](https://github.com/Bunnyspa/GFChipCalc/releases/latest)
 - **GFChipCalc.jar**: Main application
 
-### (Optional) Utility file: https://github.com/Bunnyspa/GFChipCalc/releases/tag/util
+### [(Optional) Utility file](https://github.com/Bunnyspa/GFChipCalc/releases/tag/util)
 The utility file must be in the same folder as GFChipCalc.jar.
 
 - **GFChipCalc.exe**: (Windows user only) Runs GFChipCalc.jar  
