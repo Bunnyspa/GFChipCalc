@@ -2131,14 +2131,14 @@ public class MainFrame extends JFrame {
         sb.append(Fn.getTime(sec));
 
         boolean warn = false;
-        if (app.setting.advancedSetting && !doneTimes.isEmpty()) {
+        if (!doneTimes.isEmpty()) {
             long avg = doneTimes.stream().mapToLong((v) -> v).sum() / doneTimes.size();
             long remaining = avg * (progress.nTotal - progress.nDone) / 1000;
             warn = 60 * 60 < remaining;
             sb.append(" (").append(app.getText(Language.COMB_REMAINING, Fn.getTime(remaining))).append(")");
         }
 
-        timeWarningButton.setVisible(warn);
+        timeWarningButton.setVisible(app.setting.advancedSetting && warn);
         timeLabel.setText(sb.toString());
     }
 
