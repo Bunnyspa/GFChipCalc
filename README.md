@@ -1,8 +1,10 @@
 # Girls' Frontline HOC Chip Calculator
 
-![GitHub](https://img.shields.io/github/license/Bunnyspa/GFChipCalc)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/Bunnyspa/GFChipCalc)
-![GitHub All Releases](https://img.shields.io/github/downloads/Bunnyspa/GFChipCalc/total)
+[![GitHub](https://img.shields.io/github/license/Bunnyspa/GFChipCalc)](https://github.com/Bunnyspa/GFChipCalc/blob/master/LICENSE)
+[![GitHub All Releases](https://img.shields.io/github/downloads/Bunnyspa/GFChipCalc/total)](https://github.com/Bunnyspa/GFChipCalc/releases)
+
+
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/Bunnyspa/GFChipCalc)](https://github.com/Bunnyspa/GFChipCalc/releases/latest)
 [![GitHub Releases](https://img.shields.io/github/downloads/Bunnyspa/GFChipCalc/latest/total)](https://github.com/Bunnyspa/GFChipCalc/releases/latest)
 
 ![GitHub watchers](https://img.shields.io/github/watchers/Bunnyspa/GFChipCalc?style=social)
