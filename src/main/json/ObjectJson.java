@@ -42,17 +42,15 @@ public class ObjectJson implements Json {
         }
     }
 
-    
-    
     public List<String> getKeys() {
         return new ArrayList<>(keys);
     }
-    
-    public boolean isEmpty(){
+
+    public boolean isEmpty() {
         return getKeys().isEmpty();
     }
-    
-    public boolean containsKey(String key){
+
+    public boolean containsKey(String key) {
         return keys.contains(key);
     }
 

@@ -56,6 +56,11 @@ public class Tag implements Serializable, Comparable {
     }
 
     @Override
+    public String toString() {
+        return toData();
+    }
+
+    @Override
     public int compareTo(Object o) {
         Tag t = (Tag) o;
         int i = this.name.compareTo(t.name);

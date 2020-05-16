@@ -37,6 +37,7 @@ public class Board {
     public static final String NAME_M2 = "M2";
     public static final String NAME_AT4 = "AT4";
     public static final String NAME_QLZ04 = "QLZ-04";
+    // Index from game data
     public static String[] NAMES = {NAME_BGM71, NAME_AGS30, NAME_2B14, NAME_M2, NAME_AT4, NAME_QLZ04};
 
     public static final String STR_STAR_FULL = "★";

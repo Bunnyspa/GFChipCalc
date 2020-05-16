@@ -20,17 +20,23 @@ public interface Json {
     public static Json parse(String data) {
         String dataTrim = data.trim();
         switch (dataTrim.charAt(0)) {
+            // Object
             case '{':
                 return new ObjectJson(data);
+            // Array
             case '[':
                 return new ArrayJson(data);
+            // Text
             case '"':
                 return new TextJson(data);
+            // Boolean
             case 't':
             case 'f':
                 return new BooleanJson(data);
+            // Null
             case 'n':
                 return new NullJson();
+            // Number
             default:
                 return new NumberJson(data);
         }
@@ -41,10 +47,13 @@ public interface Json {
             char next = data.charAt(i);
             if (!Character.isWhitespace(next)) {
                 switch (next) {
+                    // Object
                     case '{':
                         return getBracketEndIndex(data, i, OBJECT);
+                    // Array
                     case '[':
                         return getBracketEndIndex(data, i, ARRAY);
+                    // Text
                     case '"':
                         i++;
                         while (i < data.length()) {
@@ -54,25 +63,30 @@ public interface Json {
                             i++;
                         }
                         return -1;
+                    // Boolean - True
                     case 't':
                         if (data.startsWith("true", i)) {
                             return i + 4;
                         }
                         return -1;
+                    // Boolean - False
                     case 'f':
                         if (data.startsWith("false", i)) {
                             return i + 5;
                         }
                         return -1;
+                    // Null
                     case 'n':
                         if (data.startsWith("null", i)) {
                             return i + 4;
                         }
                         return -1;
+                    // Number
                     default:
                         i++;
                         while (i < data.length()) {
-                            if (data.charAt(i) < '0' || '9' < data.charAt(i)) {
+                            char c = data.charAt(i);
+                            if (c != '.' && (c < '0' || '9' < c)) {
                                 return i - 1;
                             }
                             i++;

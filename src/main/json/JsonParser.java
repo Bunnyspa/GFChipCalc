@@ -93,7 +93,7 @@ public class JsonParser {
         stream.forEach((squadJ) -> {
             int squadID = Integer.valueOf(Json.getText(squadJ.getValue("id")));
             int squadIndex = Integer.valueOf(Json.getText(squadJ.getValue("squad_id")));
-            squadMap.put(squadID, new Tag(Color.GRAY, Board.NAMES[squadIndex - 1]));
+            squadMap.put(squadID, boardTag(squadIndex - 1));
         });
     }
 
@@ -112,14 +112,21 @@ public class JsonParser {
             int color = Integer.valueOf(Json.getText(chipJ.getValue("color_id"))) - 1;
             int rotation = Integer.valueOf(Json.getText(chipJ.getValue("shape_info")).substring(0, 1));
             int squadID = Integer.valueOf(Json.getText(chipJ.getValue("squad_with_user_id")));
-            //
+
             Stat pt = new Stat(dmg, brk, hit, rld);
             Chip chip = new Chip(id, name, star, color, pt, level, rotation);
-            if (squadID > 0) {
+            if (squadMap.containsKey(squadID)) {
                 Tag tag = squadMap.get(squadID);
+                chip.setTag(tag, true);
+            } else if (squadID != 0) {
+                Tag tag = boardTag(squadID - 10001);
                 chip.setTag(tag, true);
             }
             chips.add(chip);
         });
+    }
+
+    private static Tag boardTag(int index) {
+        return new Tag(Color.GRAY, Board.NAMES[index]);
     }
 }

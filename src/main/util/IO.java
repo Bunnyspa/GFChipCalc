@@ -627,13 +627,13 @@ public class IO {
     }
     // </editor-fold>
 
-    private static void write(String filePath, String fileContent) throws IOException {
+    public static void write(String filePath, String fileContent) throws IOException {
         try (BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), UTF8))) {
             w.write(fileContent);
         }
     }
 
-    private static List<String> read(String filePath) throws IOException {
+    public static List<String> read(String filePath) throws IOException {
         List<String> l = new ArrayList<>();
         try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), UTF8))) {
             Stream<String> s = r.lines();

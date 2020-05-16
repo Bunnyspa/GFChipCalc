@@ -1170,6 +1170,6 @@ public class Chip implements Serializable {
 
     @Override
     public String toString() {
-        return id == null ? "null" : id.substring(0, 4);
+        return id == null ? "null" : id;
     }
 }

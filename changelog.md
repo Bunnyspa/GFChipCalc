@@ -591,3 +591,11 @@
 
 ### Changed
 - Setting - Preset: Presets with the most expected number of results are the first on the lists.
+
+## 6.10.2 (5/16/2020)
+
+### Fixed
+- A bug that caused the app not reading JSON files from certain game servers
+
+### Fix Attempt
+- A bug that caused the interface not working in certain operating systems
