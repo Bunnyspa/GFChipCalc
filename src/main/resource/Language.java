@@ -311,6 +311,7 @@ public class Language {
     public static final String COMB_OPTION_DEFAULT_0 = "COMB_OPTION_DEFAULT_0";
     public static final String COMB_OPTION_DEFAULT_1 = "COMB_OPTION_DEFAULT_1";
     public static final String COMB_OPTION_DEFAULT_DESC = "COMB_OPTION_DEFAULT_DESC";
+    public static final String COMB_OPTION_FILTER_DESC = "COMB_OPTION_FILTER_DESC";
     public static final String COMB_OPTION_TITLE = "COMB_OPTION_TITLE";
     public static final String COMB_ERROR_STAT_TITLE = "COMB_ERROR_STAT_TITLE";
     public static final String COMB_ERROR_STAT_BODY = "COMB_ERROR_STAT_BODY";
@@ -341,7 +342,7 @@ public class Language {
             PROXY_WARNING, PROXY_STAGE1_INFO, PROXY_STAGE2_INFO,
             APPLY_TAG_DESC,
             WARNING_HOCMAX_DESC, WARNING_TIME_DESC,
-            COMB_OPTION_M2_DESC, COMB_OPTION_DEFAULT_DESC,
+            COMB_OPTION_M2_DESC, COMB_OPTION_DEFAULT_DESC, COMB_OPTION_FILTER_DESC,
             RESEARCH_WTF
     );
     private static final List<String> KEYS_HTML_CENTER = Arrays.asList(

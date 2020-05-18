@@ -599,3 +599,8 @@
 
 ### Fix Attempt
 - A bug that caused the interface not working in certain operating systems
+
+## 6.11.0 (5/18/2020)
+
+### Changed
+- Normal (non-advanced) mode: the application will ask if you want to apply a filter.

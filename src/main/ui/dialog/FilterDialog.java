@@ -67,7 +67,7 @@ public class FilterDialog extends JDialog {
         brkTextLabel.setIcon(Resources.BRK);
         hitTextLabel.setIcon(Resources.HIT);
         rldTextLabel.setIcon(Resources.RLD);
-        
+
         starPanel.setBorder(new TitledBorder(app.getText(Language.FILTER_GROUP_STAR)));
         for (int i = 0; i < Filter.NUM_STAR; i++) {
             String starStr = String.valueOf(5 - i);

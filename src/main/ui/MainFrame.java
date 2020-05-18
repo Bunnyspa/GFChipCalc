@@ -1604,7 +1604,7 @@ public class MainFrame extends JFrame {
         app.filter.ptMin = ptMin;
         app.filter.ptMax = ptMax;
 
-        app.mf.display_applyFilterSort();
+        display_applyFilterSort();
     }
     // </editor-fold>
 
@@ -1952,7 +1952,8 @@ public class MainFrame extends JFrame {
                     app.getText(Language.ACTION_CANCEL)
                 };
                 int response = JOptionPane.showOptionDialog(this,
-                        app.getText(Language.COMB_OPTION_M2_DESC, options[0], options[1]), app.getText(Language.COMB_OPTION_TITLE),
+                        app.getText(Language.COMB_OPTION_M2_DESC, options[0], options[1]),
+                        app.getText(Language.COMB_OPTION_TITLE),
                         JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]
                 );
                 // Response
@@ -1991,8 +1992,15 @@ public class MainFrame extends JFrame {
                     status = response == 0 ? Progress.DICTIONARY : Progress.ALGX;
                 }
             }
-        } else if (getBoardStar() == 5) {
-            setting_applyPresetFilter();
+        } else if (getBoardStar() == 5 && !setting_isPresetFilter()) {
+            int retval = JOptionPane.showOptionDialog(this,
+                    app.getText(Language.COMB_OPTION_FILTER_DESC),
+                    app.getText(Language.COMB_OPTION_TITLE),
+                    JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
+            start = retval != JOptionPane.CLOSED_OPTION && retval != JOptionPane.CANCEL_OPTION;
+            if (retval == JOptionPane.YES_OPTION) {
+                setting_applyPresetFilter();
+            }
         }
 
         // If preset DNE
