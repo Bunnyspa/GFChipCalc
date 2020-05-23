@@ -36,7 +36,10 @@ public class HelpAboutDialog extends JDialog {
         imageLabel.setIcon(Resources.BANNER);
         label.setText(Fn.toHTML("<center>" + App.NAME_EN + "</center>" + System.lineSeparator()
                 + "Developer: Bunnyspa" + System.lineSeparator()
-                + "Contact email: bunnyspa@naver.com (Korean and English)" + System.lineSeparator()
+                + "Email:" + System.lineSeparator()
+                + "bunnyspa@naver.com" + System.lineSeparator()
+                + "bunnyspa242@gmail.com" + System.lineSeparator()
+                + "(Korean and English)" + System.lineSeparator()
                 + System.lineSeparator()
                 + "This application is a free fan-made application." + System.lineSeparator()
                 + "Girls' Frontline and its related images are registered trademarks of Shanghai Sunborn Network Technology Co., Ltd." + System.lineSeparator()
@@ -51,6 +54,7 @@ public class HelpAboutDialog extends JDialog {
                 + "xpfjqja" + System.lineSeparator()
                 + "apple" + System.lineSeparator()
                 + "naganeko" + System.lineSeparator()
+                + "ひかげ" + System.lineSeparator()
         ));
 
         closeButton.setText(app.getText(Language.ACTION_CLOSE));
@@ -107,7 +111,7 @@ public class HelpAboutDialog extends JDialog {
         });
 
         label.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        label.setText("jLabel3");
+        label.setText("text");
         label.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         label.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 2, 2, 2));
 

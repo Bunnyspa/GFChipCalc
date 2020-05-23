@@ -604,3 +604,9 @@
 
 ### Changed
 - Normal (non-advanced) mode: the application will ask if you want to apply a filter.
+
+## 6.11.1 (5/23/2020)
+
+### Changed
+- Adjusted the window sizes for Filter dialog and Calculation Settings dialog
+- A bit of Japanese translation

@@ -43,6 +43,7 @@ public class CalcSettingDialog extends JDialog {
         name = app.mf.getBoardName();
         star = app.mf.getBoardStar();
         loadResources();
+        pack();
         loadSettings();
         addListeners();
     }
@@ -102,8 +103,6 @@ public class CalcSettingDialog extends JDialog {
             maxPresetRadioButton.setEnabled(false);
             maxPresetComboBox.setVisible(false);
         }
-
-        pack();
 
         // Stat
         switch (mode) {

@@ -146,10 +146,6 @@ public class FilterDialog extends JDialog {
         }
 
         addListeners();
-
-        Dimension d = getPreferredSize();
-        d.height = app.mf.getPreferredDialogSize().height;
-        setPreferredSize(d);
         pack();
     }
 
@@ -648,11 +644,11 @@ public class FilterDialog extends JDialog {
         );
 
         tagIncludedPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("tag included"));
-        tagIncludedPanel.setPreferredSize(new java.awt.Dimension(200, 200));
+        tagIncludedPanel.setPreferredSize(new java.awt.Dimension(150, 150));
         tagIncludedPanel.setLayout(new java.awt.BorderLayout());
 
         tagExcludedPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("tag excluded"));
-        tagExcludedPanel.setPreferredSize(new java.awt.Dimension(200, 200));
+        tagExcludedPanel.setPreferredSize(new java.awt.Dimension(150, 150));
         tagExcludedPanel.setLayout(new java.awt.BorderLayout());
 
         tagResetButton.setText("tag reset");
@@ -707,8 +703,7 @@ public class FilterDialog extends JDialog {
                             .addComponent(colorPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(markPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(presetButton)
