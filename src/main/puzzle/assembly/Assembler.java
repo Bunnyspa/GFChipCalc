@@ -52,10 +52,13 @@ public class Assembler {
         for (String name : Board.NAMES) {
             for (int star = 1; star <= 5; star++) {
                 List<BoardTemplate> templates = IO.loadBoardTemplates(name, star, false);
-                Shape.Type minType
-                        = (Board.NAME_MK153.equals(name) && star <= 2) || Board.NAME_M2.equals(name)
-                        ? Shape.Type._4
-                        : Shape.Type._5A;
+                Shape.Type minType = Shape.Type._5A;
+                if (Board.NAME_M2.equals(name)
+                        || (Board.NAME_MK153.equals(name) && star <= 2)) {
+                    minType = Shape.Type._4;
+                } else if (Board.NAME_MK153.equals(name) && star == 5) {
+                    minType = Shape.Type._5B;
+                }
                 fullBTM.put(name, star, templates, minType);
             }
         }
