@@ -1,21 +1,42 @@
 package main.puzzle;
 
-import java.io.Serializable;
-import main.util.Rational;
+import java.util.stream.Stream;
 
 /**
  *
  * @author Bunnyspa
  */
-public class Stat implements Serializable, Comparable<Stat> {
+public class Stat implements Comparable<Stat> {
 
     public static final int DMG = 0;
     public static final int BRK = 1;
     public static final int HIT = 2;
     public static final int RLD = 3;
+    public final int dmg, brk, hit, rld;
 
-    public int dmg, brk, hit, rld;
-
+//    public static Stat getStat(Collection<Chip> chips) {
+//        int dmg = chips.stream().mapToInt(c -> c.getDmg()).sum();
+//        int brk = chips.stream().mapToInt(c -> c.getBrk()).sum();
+//        int hit = chips.stream().mapToInt(c -> c.getHit()).sum();
+//        int rld = chips.stream().mapToInt(c -> c.getRld()).sum();
+//        return new Stat(dmg, brk, hit, rld);
+//    }
+//
+//    public static Stat getPt(Collection<Chip> chips) {
+//        int dmg = chips.stream().mapToInt(c -> c.getPt().dmg).sum();
+//        int brk = chips.stream().mapToInt(c -> c.getPt().brk).sum();
+//        int hit = chips.stream().mapToInt(c -> c.getPt().hit).sum();
+//        int rld = chips.stream().mapToInt(c -> c.getPt().rld).sum();
+//        return new Stat(dmg, brk, hit, rld);
+//    }
+//
+//    public static Stat getOldStat(Collection<Chip> chips) {
+//        int dmg = chips.stream().mapToInt(c -> c.getOldStat().dmg).sum();
+//        int brk = chips.stream().mapToInt(c -> c.getOldStat().brk).sum();
+//        int hit = chips.stream().mapToInt(c -> c.getOldStat().hit).sum();
+//        int rld = chips.stream().mapToInt(c -> c.getOldStat().rld).sum();
+//        return new Stat(dmg, brk, hit, rld);
+//    }
     public Stat() {
         this.dmg = 0;
         this.brk = 0;
@@ -23,11 +44,11 @@ public class Stat implements Serializable, Comparable<Stat> {
         this.rld = 0;
     }
 
-    public Stat(int value) {
-        this.dmg = value;
-        this.brk = value;
-        this.hit = value;
-        this.rld = value;
+    public Stat(int val) {
+        this.dmg = val;
+        this.brk = val;
+        this.hit = val;
+        this.rld = val;
     }
 
     public Stat(int dmg, int brk, int hit, int rld) {
@@ -37,95 +58,45 @@ public class Stat implements Serializable, Comparable<Stat> {
         this.rld = rld;
     }
 
-    public Stat(int[] stat) {
-        this.dmg = stat[0];
-        this.brk = stat[1];
-        this.hit = stat[2];
-        this.rld = stat[3];
+    public Stat(int[] v) {
+        this.dmg = v[0];
+        this.brk = v[1];
+        this.hit = v[2];
+        this.rld = v[3];
     }
 
-    public Stat(Stat s) {
-        this.dmg = s.dmg;
-        this.brk = s.brk;
-        this.hit = s.hit;
-        this.rld = s.rld;
+    public Stat(Stream<Stat> stream) {
+        int[] s = new int[4];
+        stream.forEach(stat -> {
+            int[] array = stat.toArray();
+            for (int i = 0; i < 4; i++) {
+                s[i] += array[i];
+            }
+        });
+
+        this.dmg = s[0];
+        this.brk = s[1];
+        this.hit = s[2];
+        this.rld = s[3];
     }
 
-    public Stat(FStat s) {
-        this.dmg = s.dmg;
-        this.brk = s.brk;
-        this.hit = s.hit;
-        this.rld = s.rld;
-    }
-
-    public int sum() {
-        return dmg + brk + hit + rld;
-    }
-
-    public int[] toArray() {
-        int[] out = {dmg, brk, hit, rld};
-        return out;
-    }
-
-    public String toData() {
-        return String.join(",", String.valueOf(dmg), String.valueOf(brk), String.valueOf(hit), String.valueOf(rld));
-    }
-
-    @Override
-    public String toString() {
-        return "[" + toData() + "]";
-    }
-
-    public Stat add(int[] stat) {
-        this.dmg += stat[0];
-        this.brk += stat[1];
-        this.hit += stat[2];
-        this.rld += stat[3];
-        return this;
-    }
-
-    public Stat add(Stat stat) {
-        this.dmg += stat.dmg;
-        this.brk += stat.brk;
-        this.hit += stat.hit;
-        this.rld += stat.rld;
-        return this;
-    }
-
-    public Stat add(FStat stat) {
-        return add(stat.toStat());
-    }
-
-    public Stat subtract(Stat stat) {
-        this.dmg -= stat.dmg;
-        this.brk -= stat.brk;
-        this.hit -= stat.hit;
-        this.rld -= stat.rld;
-        return this;
-    }
-
-    public Stat subtract(int[] stat) {
-        if (stat.length == 4) {
-            this.dmg -= stat[0];
-            this.brk -= stat[1];
-            this.hit -= stat[2];
-            this.rld -= stat[3];
-        }
-        return this;
-    }
-
-    public Stat limit(Stat max) {
-        this.dmg = Math.min(this.dmg, max.dmg);
-        this.brk = Math.min(this.brk, max.brk);
-        this.hit = Math.min(this.hit, max.hit);
-        this.rld = Math.min(this.rld, max.rld);
-        return this;
-    }
-
-    public boolean anyNeg() {
-        return dmg < 0 || brk < 0 || hit < 0 || rld < 0;
-    }
-
+//    public Stat add(Stat stat) {
+//        return new Stat(
+//                dmg + stat.dmg,
+//                brk + stat.brk,
+//                hit + stat.hit,
+//                rld + stat.rld
+//        );
+//    }
+//
+//    public Stat add(int i) {
+//        return new Stat(
+//                dmg + i,
+//                brk + i,
+//                hit + i,
+//                rld + i
+//        );
+//    }
     public boolean allGeq(Stat s) {
         return s.dmg <= dmg
                 && s.brk <= brk
@@ -140,12 +111,38 @@ public class Stat implements Serializable, Comparable<Stat> {
                 && rld <= s.rld;
     }
 
-    public Stat applyMultCeil(Rational rational) {
-        dmg = new Rational(dmg).mult(rational).getIntCeil();
-        brk = new Rational(brk).mult(rational).getIntCeil();
-        hit = new Rational(hit).mult(rational).getIntCeil();
-        rld = new Rational(rld).mult(rational).getIntCeil();
-        return this;
+    public Stat limit(Stat max) {
+        int newDmg = Math.min(this.dmg, max.dmg);
+        int newBrk = Math.min(this.brk, max.brk);
+        int newHit = Math.min(this.hit, max.hit);
+        int newRld = Math.min(this.rld, max.rld);
+        return new Stat(newDmg, newBrk, newHit, newRld);
+    }
+
+    public String toStringSlash() {
+        return String.join("/",
+                String.valueOf(dmg),
+                String.valueOf(brk),
+                String.valueOf(hit),
+                String.valueOf(rld)
+        );
+    }
+
+    public boolean allZero() {
+        return dmg == 0 && brk == 0 && hit == 0 && rld == 0;
+    }
+
+    public int[] toArray() {
+        int[] out = {dmg, brk, hit, rld};
+        return out;
+    }
+
+    public int sum() {
+        return dmg + brk + hit + rld;
+    }
+
+    public String toData() {
+        return String.join(",", String.valueOf(dmg), String.valueOf(brk), String.valueOf(hit), String.valueOf(rld));
     }
 
     @Override
@@ -167,11 +164,7 @@ public class Stat implements Serializable, Comparable<Stat> {
             return false;
         }
         if (obj.getClass() == Stat.class) {
-            Stat stat = (Stat) obj;
-            return this.dmg == stat.dmg && this.brk == stat.brk && this.hit == stat.hit && this.rld == stat.rld;
-        }
-        if (obj.getClass() == FStat.class) {
-            FStat fstat = (FStat) obj;
+            Stat fstat = (Stat) obj;
             return this.dmg == fstat.dmg && this.brk == fstat.brk && this.hit == fstat.hit && this.rld == fstat.rld;
         }
         return false;
@@ -194,4 +187,8 @@ public class Stat implements Serializable, Comparable<Stat> {
         return 0;
     }
 
+    @Override
+    public String toString() {
+        return "[" + toData() + "]";
+    }
 }

@@ -34,6 +34,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import main.App;
 import main.image.ImageProcessor;
 import main.puzzle.Chip;
+import main.puzzle.Shape;
 import main.resource.Language;
 import main.util.Fn;
 
@@ -340,7 +341,7 @@ public class ImageDialog extends JDialog {
     }
 
     public static boolean isValid(Chip chip) {
-        if (chip == null || chip.getName() == null || chip.getName().isEmpty()) {
+        if (chip == null || chip.getShape() == null || chip.getShape() == Shape.NONE) {
             return false;
         }
         return chip.getPt().sum() == chip.getSize();

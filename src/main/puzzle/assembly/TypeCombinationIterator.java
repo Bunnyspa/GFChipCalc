@@ -10,22 +10,23 @@ import java.util.Set;
 import java.util.Stack;
 import main.puzzle.Board;
 import main.puzzle.Chip;
+import main.puzzle.Shape;
 
 /**
  *
  * @author Bunnyspa
  */
-public class TypeCombinationIterator implements Iterator<List<String>> {
+public class TypeCombinationIterator implements Iterator<List<Shape>> {
 
-    private List<List<String>> next;
+    private List<List<Shape>> next;
     private final int total;
 
-    public TypeCombinationIterator(Map<String, Integer> typeCountMap) {
+    public TypeCombinationIterator(Map<Shape.Type, Integer> typeCountMap) {
         next = initComb(typeCountMap);
         total = total(typeCountMap);
     }
 
-    public TypeCombinationIterator(List<String> progress) {
+    public TypeCombinationIterator(List<Shape> progress) {
         next = toComb(progress);
         total = total(getTypeCount(progress));
     }
@@ -36,15 +37,15 @@ public class TypeCombinationIterator implements Iterator<List<String>> {
     }
 
     @Override
-    public List<String> next() {
-        List<String> out = peek();
+    public List<Shape> next() {
+        List<Shape> out = peek();
         next = nextComb(next);
         return out;
     }
 
-    public List<String> peek() {
-        List<String> out = new ArrayList<>();
-        next.forEach((next_type) -> next_type.forEach((name) -> out.add(name)));
+    public List<Shape> peek() {
+        List<Shape> out = new ArrayList<>();
+        next.forEach((nextType) -> nextType.forEach((shape) -> out.add(shape)));
         return out;
     }
 
@@ -52,23 +53,22 @@ public class TypeCombinationIterator implements Iterator<List<String>> {
         return total;
     }
 
-    private static List<List<String>> nextComb(List<List<String>> comb) {
+    private static List<List<Shape>> nextComb(List<List<Shape>> comb) {
         int n = comb.size() - 1;
         while (0 <= n) {
-            List<String> chips = nextComb_type(comb.get(n));
+            List<Shape> chips = nextComb_type(comb.get(n));
             if (chips.isEmpty()) {
                 n--;
             } else {
-                List<List<String>> out = new ArrayList<>(comb.size());
+                List<List<Shape>> out = new ArrayList<>(comb.size());
                 for (int i = 0; i < n; i++) {
                     out.add(comb.get(i));
                 }
                 out.add(chips);
                 for (int i = n + 1; i < comb.size(); i++) {
-                    String chip = comb.get(i).get(0);
-                    String type = Chip.getType(chip);
+                    Shape chip = comb.get(i).get(0);
                     int length = comb.get(i).size();
-                    out.add(initComb_type(type, length));
+                    out.add(initComb_type(chip.getType(), length));
                 }
                 return out;
             }
@@ -76,19 +76,19 @@ public class TypeCombinationIterator implements Iterator<List<String>> {
         return new ArrayList<>();
     }
 
-    private static List<String> nextComb_type(List<String> chips) {
+    private static List<Shape> nextComb_type(List<Shape> chips) {
         int n = chips.size() - 1;
         while (0 <= n) {
-            String chip = nextChip(chips.get(n));
-            if (chip.isEmpty()) {
+            Shape shape = nextShape(chips.get(n));
+            if (shape == Shape.NONE) {
                 n--;
             } else {
-                List<String> out = new ArrayList<>(chips.size());
+                List<Shape> out = new ArrayList<>(chips.size());
                 for (int i = 0; i < n; i++) {
                     out.add(chips.get(i));
                 }
                 for (int i = n; i < chips.size(); i++) {
-                    out.add(chip);
+                    out.add(shape);
                 }
                 return out;
             }
@@ -96,35 +96,34 @@ public class TypeCombinationIterator implements Iterator<List<String>> {
         return new ArrayList<>();
     }
 
-    private static String nextChip(String chip) {
-        List<String> chips = Arrays.asList(Chip.getNames(Chip.getType(chip)));
-        int i = chips.indexOf(chip) + 1;
+    private static Shape nextShape(Shape shape) {
+        List<Shape> chips = Arrays.asList(Shape.getShapes(shape.getType()));
+        int i = chips.indexOf(shape) + 1;
         if (chips.size() <= i) {
-            return "";
+            return Shape.NONE;
         }
         return chips.get(i);
     }
 
-    private static List<List<String>> initComb(Map<String, Integer> combType) {
-        List<List<String>> out = new ArrayList<>(combType.keySet().size());
-        combType.keySet().stream().sorted((o1, o2) -> Chip.compareType(o1, o2)).forEach((type) -> out.add(initComb_type(type, combType.get(type))));
+    private static List<List<Shape>> initComb(Map<Shape.Type, Integer> combType) {
+        List<List<Shape>> out = new ArrayList<>(combType.keySet().size());
+        combType.keySet().stream().sorted((o1, o2) -> Shape.Type.compare(o1, o2)).forEach((type) -> out.add(initComb_type(type, combType.get(type))));
         return out;
     }
 
-    private static List<String> initComb_type(String type, int length) {
-        String[] chips = Chip.getNames(type);
-        String chip = chips[0];
-        List<String> out = new ArrayList<>(length);
+    private static List<Shape> initComb_type(Shape.Type type, int length) {
+        Shape shape = Shape.getShapes(type)[0];
+        List<Shape> out = new ArrayList<>(length);
         for (int i = 0; i < length; i++) {
-            out.add(chip);
+            out.add(shape);
         }
         return out;
     }
 
-    public static Map<String, Integer> getTypeCount(List<String> comb) {
-        Map<String, Integer> combType = new HashMap<>();
-        comb.forEach((chip) -> {
-            String type = Chip.getType(chip);
+    public static Map<Shape.Type, Integer> getTypeCount(List<Shape> comb) {
+        Map<Shape.Type, Integer> combType = new HashMap<>();
+        comb.forEach((shape) -> {
+            Shape.Type type = shape.getType();
             if (!combType.containsKey(type)) {
                 combType.put(type, 0);
             }
@@ -135,9 +134,9 @@ public class TypeCombinationIterator implements Iterator<List<String>> {
         return combType;
     }
 
-    public static int total(Map<String, Integer> typeCountMap) {
+    public static int total(Map<Shape.Type, Integer> typeCountMap) {
         return typeCountMap.keySet().stream().map((type)
-                -> nHr(Chip.getNames(type).length, typeCountMap.get(type))
+                -> nHr(Shape.getShapes(type).length, typeCountMap.get(type))
         ).reduce(1, (a, b) -> a * b);
     }
 
@@ -157,54 +156,54 @@ public class TypeCombinationIterator implements Iterator<List<String>> {
         return num;
     }
 
-    public static List<Map<String, Integer>> getTypeCountMaps(String name, int star, Set<String> types) {
+    public static List<Map<Shape.Type, Integer>> getTypeCountMaps(String name, int star, Set<Shape.Type> types) {
         int nCell = Board.getCellCount(name, star);
         return getTypeCountMaps(nCell, types);
     }
 
-    private static List<Map<String, Integer>> getTypeCountMaps(int nCell, Set<String> types) {
-        List<Map<String, Integer>> out = new ArrayList<>();
-        List<String> typesAvail = new ArrayList<>(types);
-        typesAvail.sort((o1, o2) -> Chip.compareType(o1, o2));
+    private static List<Map<Shape.Type, Integer>> getTypeCountMaps(int nCell, Set<Shape.Type> types) {
+        List<Map<Shape.Type, Integer>> out = new ArrayList<>();
+        List<Shape.Type> typesAvail = new ArrayList<>(types);
+        typesAvail.sort((o1, o2) -> Shape.Type.compare(o1, o2));
         getTypeCountMaps_rec(out, typesAvail, nCell, new Stack<>());
         return out;
     }
 
-    private static void getTypeCountMaps_rec(List<Map<String, Integer>> out, List<String> typesAvail, int nCell, Stack<String> typeBuffer) {
+    private static void getTypeCountMaps_rec(List<Map<Shape.Type, Integer>> out, List<Shape.Type> typesAvail, int nCell, Stack<Shape.Type> typeBuffer) {
         if (nCell == 0) {
-            Map<String, Integer> e = new HashMap<>();
-            typeBuffer.forEach((s) -> {
-                if (!e.containsKey(s)) {
-                    e.put(s, 0);
+            Map<Shape.Type, Integer> e = new HashMap<>();
+            typeBuffer.forEach((type) -> {
+                if (!e.containsKey(type)) {
+                    e.put(type, 0);
                 }
-                e.put(s, e.get(s) + 1);
+                e.put(type, e.get(type) + 1);
             });
             out.add(e);
             return;
         }
         int range = Math.min(Chip.SIZE_MAX, nCell);
-        typesAvail.stream().filter((t) -> Chip.getSize(t) <= range).forEach((t) -> {
+        typesAvail.stream().filter((t) -> t.getSize() <= range).forEach((t) -> {
             typeBuffer.push(t);
-            List<String> typeAvail_new = new ArrayList<>();
-            typesAvail.stream().filter((ta) -> Chip.compareType(t, ta) <= 0).forEach((ta) -> typeAvail_new.add(ta));
-            int nCell_new = nCell - Chip.getSize(t);
+            List<Shape.Type> typeAvail_new = new ArrayList<>();
+            typesAvail.stream().filter((ta) -> Shape.Type.compare(t, ta) <= 0).forEach((ta) -> typeAvail_new.add(ta));
+            int nCell_new = nCell - t.getSize();
             getTypeCountMaps_rec(out, typeAvail_new, nCell_new, typeBuffer);
             typeBuffer.pop();
         });
     }
 
-    private static List<List<String>> toComb(List<String> strs) {
-        Map<String, List<String>> map = new HashMap<>();
-        strs.stream().forEach((chip) -> {
-            String type = Chip.getType(chip);
+    private static List<List<Shape>> toComb(List<Shape> shapes) {
+        Map<Shape.Type, List<Shape>> map = new HashMap<>();
+        shapes.stream().forEach((shape) -> {
+            Shape.Type type = shape.getType();
             if (!map.containsKey(type)) {
                 map.put(type, new ArrayList<>());
             }
-            map.get(type).add(chip);
+            map.get(type).add(shape);
         });
 
-        List<List<String>> out = new ArrayList<>();
-        for (String type : Chip.TYPES) {
+        List<List<Shape>> out = new ArrayList<>();
+        for (Shape.Type type : Shape.Type.values()) {
             if (map.containsKey(type)) {
                 out.add(map.get(type));
             }

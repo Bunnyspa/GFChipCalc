@@ -1,12 +1,13 @@
 package main.puzzle.assembly;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import main.puzzle.Board;
 import main.puzzle.Chip;
-import main.puzzle.FStat;
 import main.puzzle.Stat;
 import main.setting.BoardSetting;
 import main.setting.Setting;
@@ -30,14 +31,14 @@ public class Progress {
     public int status;
     public final boolean settingLevelMax, settingColorMatch, settingRotation, settingSymmetry;
     public final int markMin, markMax, markType, sortType;
-    public final FStat pt, stat;
+    public final Stat pt, stat;
     public final int tag;
 
     // Progress
     public int nComb;
     public int nDone;
     public int nTotal;
-    private final List<Board> boards;
+    private TreeSet<Board> boards;
 
     public Progress(int status, String name, int star,
             List<Chip> chips, Setting setting, int tag) {
@@ -66,14 +67,13 @@ public class Progress {
         this.pt = getPT(name, star, mode, presetIndex, bsPt, bsStat);
 
         this.nDone = 0;
-        this.boards = new ArrayList<>();
         this.tag = tag;
     }
 
     public Progress(int status, String name, int star,
             boolean maxLevel, boolean matchColor, boolean allowRotation, boolean symmetry,
             int markMin, int markMax, int markType, int sortType,
-            FStat stat, FStat pt,
+            Stat stat, Stat pt,
             int nComb, int progress, int progMax,
             List<Chip> chips, List<Board> boards,
             int tag) {
@@ -100,41 +100,38 @@ public class Progress {
         this.nTotal = progMax;
 
         this.chips = chips;
-        this.boards = boards;
+        this.boards = new TreeSet<>(getComparator(sortType));
+        this.boards.addAll(boards);
 
         this.tag = tag;
     }
 
-    private static FStat getStat(String name, int star, int mode, int presetIndex, Stat stat) {
+    private static Stat getStat(String name, int star, int mode, int presetIndex, Stat stat) {
         switch (mode) {
             case BoardSetting.MAX_PRESET:
                 return BoardSetting.getPreset(name, star, presetIndex).stat;
             case BoardSetting.MAX_STAT:
-                return new FStat(stat);
+                return stat;
             default:
-                return new FStat(Board.getMaxStat(name, star));
+                return Board.getMaxStat(name, star);
         }
     }
 
-    private static FStat getPT(String name, int star, int mode, int presetIndex, Stat pt, Stat stat) {
+    private static Stat getPT(String name, int star, int mode, int presetIndex, Stat pt, Stat stat) {
         switch (mode) {
             case BoardSetting.MAX_PRESET:
                 return BoardSetting.getPreset(name, star, presetIndex).pt;
             case BoardSetting.MAX_STAT:
-                return new FStat(Board.getMaxPt(name, star, stat));
+                return Board.getMaxPt(name, star, stat);
             case BoardSetting.MAX_PT:
-                return new FStat(pt);
+                return pt;
             default:
-                return new FStat(Board.getMaxPt(name, star));
+                return Board.getMaxPt(name, star);
         }
     }
 
     public List<Board> getBoards() {
         return new ArrayList<>(boards);
-    }
-
-    public boolean isBoardEmpty() {
-        return boards.isEmpty();
     }
 
     public int getBoardSize() {
@@ -145,16 +142,56 @@ public class Progress {
         boards.add(board);
     }
 
-    public void addBoard(int index, Board board) {
-        boards.add(index, board);
-    }
-
     public void removeLastBoard() {
-        boards.remove(boards.size() - 1);
+        boards.pollLast();
     }
 
-    public Board getBoard(int index) {
-        return boards.get(index);
+    private static Comparator<Board> getComparator(int sortType) {
+        return sortType == Setting.BOARD_SORTTYPE_XP
+                ? new Comparator<Board>() {
+            @Override
+            public int compare(Board o1, Board o2) {
+                int percent = Double.compare(o2.getStatPerc(), o1.getStatPerc());
+                if (percent != 0) {
+                    return percent;
+                }
+                int xp = Integer.compare(o1.getXP(), o2.getXP());
+                if (xp != 0) {
+                    return xp;
+                }
+                int ticket = Integer.compare(o1.getTicketCount(), o2.getTicketCount());
+                if (ticket != 0) {
+                    return ticket;
+                }
+                return o1.compareTo(o2);
+            }
+        }
+                : new Comparator<Board>() {
+            @Override
+            public int compare(Board o1, Board o2) {
+                int percent = Double.compare(o2.getStatPerc(), o1.getStatPerc());
+                if (percent != 0) {
+                    return percent;
+                }
+                int ticket = Integer.compare(o1.getTicketCount(), o2.getTicketCount());
+                if (ticket != 0) {
+                    return ticket;
+                }
+                int xp = Integer.compare(o1.getXP(), o2.getXP());
+                if (xp != 0) {
+                    return xp;
+                }
+                return o1.compareTo(o2);
+            }
+        };
+    }
+
+    public void setComparator() {
+        TreeSet<Board> newBoards = new TreeSet<>(getComparator(sortType));
+        if (boards != null && !boards.isEmpty()) {
+            newBoards.addAll(boards);
+        }
+        boards = newBoards;
     }
 
     public List<ChipFreq> getChipFreqs() {
@@ -194,7 +231,7 @@ public class Progress {
             out.add(new ChipFreq(c, count, freq));
         });
 
-        out.sort((o1, o2) -> o1.freq == o2.freq ? 0 : (o1.freq < o2.freq) ? 1 : -1);
+        out.sort((o1, o2) -> Double.compare(o2.freq, o1.freq));
 
         return out;
     }

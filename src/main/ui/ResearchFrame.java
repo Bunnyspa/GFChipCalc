@@ -2,14 +2,16 @@ package main.ui;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.Timer;
 import main.App;
 import main.http.ResearchConnection;
+import main.puzzle.Board;
+import main.puzzle.BoardTemplate;
+import main.puzzle.Shape;
 import main.puzzle.assembly.Assembler;
-import main.puzzle.preset.PuzzlePreset;
 import main.resource.Language;
 import main.resource.Resources;
 import main.util.Fn;
@@ -38,27 +40,31 @@ public class ResearchFrame extends javax.swing.JFrame {
         aRunnable = () -> {
             while (running) {
                 String task = ResearchConnection.getTask();
+//                System.out.println(task);
                 if (task == null || task.isEmpty()) {
                     currentLabel.setText(app.getText(Language.RESEARCH_EMPTY));
                     wait_(10000);
                 } else {
                     String[] split = task.split(";");
-                    String name = split[0];
-                    int star = Integer.valueOf(split[1]);
+                    String boardName = Board.getTrueName(split[0]);
+                    int boardStar = Integer.valueOf(split[1]);
                     if (split.length == 2) {
-                        currentLabel.setText(app.getText(Language.RESEARCH_WAITING, name, String.valueOf(star)));
-                        wait_(1000);
+                        currentLabel.setText(app.getText(Language.RESEARCH_WAITING, boardName, String.valueOf(boardStar)));
+                        wait_(5000);
                     } else {
-                        String chipStrs = split[2];
+                        String shapeStrs = split[2];
 
-                        currentLabel.setText(app.getText(Language.RESEARCH_WORKING, name, String.valueOf(star)));
+                        currentLabel.setText(app.getText(Language.RESEARCH_WORKING, boardName, String.valueOf(boardStar)));
 
                         // Run task
-                        List<String> chips = Arrays.asList(chipStrs.split(","));
-                        PuzzlePreset result = Assembler.genPreset(name, star, chips, () -> running);
+                        List<Shape> shapes = new ArrayList<>();
+                        for (String s : shapeStrs.split(",")) {
+                            shapes.add(Shape.byId(Integer.valueOf(s)));
+                        }
+                        BoardTemplate result = Assembler.generateBT(boardName, boardStar, shapes, () -> running);
                         if (running) {
                             if (result.isEmpty()) {
-                                ResearchConnection.sendResult(chipStrs + ";-");
+                                ResearchConnection.sendResult(shapes.stream().map(s -> String.valueOf(s.id)).collect(Collectors.joining(",")) + ";-");
                             } else {
                                 ResearchConnection.sendResult(result.toData());
                             }
@@ -74,7 +80,7 @@ public class ResearchFrame extends javax.swing.JFrame {
 
     private synchronized void wait_(int mili) {
         try {
-            wait(10);
+            wait(mili);
         } catch (InterruptedException ex) {
         }
     }

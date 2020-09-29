@@ -187,32 +187,32 @@ public class PuzzleMatrix<E> implements Serializable {
 
     public boolean isSymmetric(E e) {
         // Bound
-        int rMin = nRow;
-        int rMax = 0;
-        int cMin = nCol;
-        int cMax = 0;
+        int xMin = nRow;
+        int xMax = 0;
+        int yMin = nCol;
+        int yMax = 0;
         for (Point p : getCoordsExcept(e)) {
-            if (rMin > p.x) {
-                rMin = p.x;
+            if (xMin > p.x) {
+                xMin = p.x;
             }
-            if (rMax < p.x) {
-                rMax = p.x;
+            if (xMax < p.x) {
+                xMax = p.x;
             }
-            if (cMin > p.y) {
-                cMin = p.y;
+            if (yMin > p.y) {
+                yMin = p.y;
             }
-            if (cMax < p.y) {
-                cMax = p.y;
+            if (yMax < p.y) {
+                yMax = p.y;
             }
         }
 
-        // Line
+        // Line -
         boolean sym = true;
         Map<E, E> comp = new HashMap<>();
-        for (int x = rMin; x <= (rMax + rMin) / 2; x++) {
-            for (int y = cMin; y <= cMax; y++) {
+        for (int x = xMin; x <= xMax; x++) {
+            for (int y = yMin; y <= yMax; y++) {
                 E p1 = get(x, y);
-                E p2 = get(rMax - x + rMin, y);
+                E p2 = get(xMax - x + xMin, y);
                 if ((comp.containsKey(p1) && !comp.get(p1).equals(p2))
                         || (comp.containsKey(p2) && !comp.get(p2).equals(p1))) {
                     sym = false;
@@ -226,15 +226,17 @@ public class PuzzleMatrix<E> implements Serializable {
             }
         }
         if (sym) {
+            // System.out.println("Line -");
             return true;
         }
 
+        // Line |
         sym = true;
         comp.clear();
-        for (int x = rMin; x <= rMax; x++) {
-            for (int y = cMin; y <= (cMax + cMin) / 2; y++) {
+        for (int x = xMin; x <= xMax; x++) {
+            for (int y = yMin; y <= yMax; y++) {
                 E p1 = get(x, y);
-                E p2 = get(x, cMax - y + cMin);
+                E p2 = get(x, yMax - y + yMin);
                 if (comp.containsKey(p1) && !comp.get(p1).equals(p2)) {
                     sym = false;
                     break;
@@ -246,16 +248,65 @@ public class PuzzleMatrix<E> implements Serializable {
             }
         }
         if (sym) {
+            // System.out.println("Line |");
+            return true;
+        }
+
+        // Line \
+        sym = true;
+        comp.clear();
+        for (int x = xMin; x <= xMax; x++) {
+            for (int y = yMin; y <= yMax; y++) {
+                E p1 = get(x, y);
+                E p2 = get(y, x);
+                if ((comp.containsKey(p1) && !comp.get(p1).equals(p2))
+                        || (comp.containsKey(p2) && !comp.get(p2).equals(p1))) {
+                    sym = false;
+                    break;
+                }
+                comp.put(p1, p2);
+                comp.put(p2, p1);
+            }
+            if (!sym) {
+                break;
+            }
+        }
+        if (sym) {
+            // System.out.println("Line \\");
+            return true;
+        }
+
+        // Line /
+        sym = true;
+        comp.clear();
+        for (int x = xMin; x <= xMax; x++) {
+            for (int y = yMin; y <= yMax; y++) {
+                E p1 = get(x, y);
+                E p2 = get(yMax - y + yMin, xMax - x + xMin);
+                if ((comp.containsKey(p1) && !comp.get(p1).equals(p2))
+                        || (comp.containsKey(p2) && !comp.get(p2).equals(p1))) {
+                    sym = false;
+                    break;
+                }
+                comp.put(p1, p2);
+                comp.put(p2, p1);
+            }
+            if (!sym) {
+                break;
+            }
+        }
+        if (sym) {
+            // System.out.println("Line /");
             return true;
         }
 
         // Dot
         sym = true;
         comp.clear();
-        for (int x = rMin; x <= rMax; x++) {
-            for (int y = cMin; y <= cMax; y++) {
+        for (int x = xMin; x <= xMax; x++) {
+            for (int y = yMin; y <= yMax; y++) {
                 E p1 = get(x, y);
-                E p2 = get(rMax - x + rMin, cMax - y + cMin);
+                E p2 = get(xMax - x + xMin, yMax - y + yMin);
                 if (comp.containsKey(p1) && !comp.get(p1).equals(p2)) {
                     sym = false;
                     break;
@@ -266,6 +317,7 @@ public class PuzzleMatrix<E> implements Serializable {
                 break;
             }
         }
+        // System.out.println("Dot"); 
         return sym;
     }
 

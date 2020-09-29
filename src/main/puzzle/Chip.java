@@ -6,11 +6,8 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -19,7 +16,6 @@ import javax.swing.ImageIcon;
 import main.App;
 import main.resource.Language;
 import main.resource.Resources;
-import main.util.FRational;
 import main.util.Fn;
 import main.util.IO;
 import main.util.Rational;
@@ -34,180 +30,161 @@ public class Chip implements Serializable {
     private static final boolean O = true;
     private static final boolean X = false;
 
-    public static final FRational RATE_DMG = new FRational(44, 10);
-    public static final FRational RATE_BRK = new FRational(127, 10);
-    public static final FRational RATE_HIT = new FRational(71, 10);
-    public static final FRational RATE_RLD = new FRational(57, 10);
-    public static final FRational[] RATES = {Chip.RATE_DMG, Chip.RATE_BRK, Chip.RATE_HIT, Chip.RATE_RLD};
-
-    public static final String TYPE_6 = "6";
-    public static final String TYPE_5B = "5B";
-    public static final String TYPE_5A = "5A";
-    public static final String TYPE_4 = "4";
-    public static final String TYPE_3 = "3";
-    public static final String TYPE_2 = "2";
-    public static final String TYPE_1 = "1";
-    public static final String[] TYPES = {TYPE_6, TYPE_5B, TYPE_5A, TYPE_4, TYPE_3, TYPE_2, TYPE_1};
+    public static final Rational RATE_DMG = new Rational(44, 10);
+    public static final Rational RATE_BRK = new Rational(127, 10);
+    public static final Rational RATE_HIT = new Rational(71, 10);
+    public static final Rational RATE_RLD = new Rational(57, 10);
+    public static final Rational[] RATES = {Chip.RATE_DMG, Chip.RATE_BRK, Chip.RATE_HIT, Chip.RATE_RLD};
 
     public static final String STR_STAR = Board.STR_STAR_FULL;
+    public static final Shape SHAPE_DEFAULT = Shape._1;
 
-    private static final String[] NAMES_6 = {"6R", "6C", "6I", "6T", "6Y", "6Zm", "6Z", "6D", "6A", "6O"};
-    private static final String[] NAMES_5B = {"5Fm", "5F", "5T", "5X", "5Y", "5Ym", "5N", "5Nm", "5W"};
-    private static final String[] NAMES_5A = {"5Lm", "5L", "5V", "5Zm", "5Z", "5C", "5I", "5P", "5Pm"};
-    // public static final String[] NAMES_5 = Fn.concatAll(NAMES_5B, NAMES_5A);
-    private static final String[] NAMES_4 = {"4T", "4Z", "4Zm", "4L", "4Lm", "4O", "4I"};
-    private static final String[] NAMES_3 = {"3L", "3I"};
-    private static final String[] NAMES_2 = {"2"};
-    private static final String[] NAMES_1 = {"1"};
-    private static final String[][] NAMES_N = {NAMES_6, NAMES_5B, NAMES_5A, NAMES_4, NAMES_3, NAMES_2, NAMES_1};
-    public static final String NAME_DEFAULT = NAMES_1[0];
-
-    private static final Map<String, Boolean[][]> CHIP_MATRIX_MAP = new HashMap<String, Boolean[][]>() // <editor-fold defaultstate="collapsed">
+    private static final Map<Shape, Boolean[][]> CHIP_MATRIX_MAP = new HashMap<Shape, Boolean[][]>() // <editor-fold defaultstate="collapsed">
     {
         {
             // 1
-            put("1", new Boolean[][]{
+            put(Shape._1, new Boolean[][]{
                 {O}
             });
 
             // 2
-            put("2", new Boolean[][]{
+            put(Shape._2, new Boolean[][]{
                 {O},
                 {O}
             });
 
             // 3
-            put("3I", new Boolean[][]{
+            put(Shape._3_I, new Boolean[][]{
                 {O},
                 {O},
                 {O}
             });
-            put("3L", new Boolean[][]{
+            put(Shape._3_L, new Boolean[][]{
                 {O, X},
                 {O, O}
             });
 
             // 4
-            put("4I", new Boolean[][]{
+            put(Shape._4_I, new Boolean[][]{
                 {O, O, O, O}
             });
-            put("4L", new Boolean[][]{
+            put(Shape._4_L, new Boolean[][]{
                 {O, X},
                 {O, X},
                 {O, O}
             });
-            put("4Lm", new Boolean[][]{
+            put(Shape._4_Lm, new Boolean[][]{
                 {O, X, X},
                 {O, O, O}
             });
-            put("4O", new Boolean[][]{
+            put(Shape._4_O, new Boolean[][]{
                 {O, O},
                 {O, O}
             });
-            put("4T", new Boolean[][]{
+            put(Shape._4_T, new Boolean[][]{
                 {X, O, X},
                 {O, O, O}
             });
-            put("4Z", new Boolean[][]{
+            put(Shape._4_Z, new Boolean[][]{
                 {O, O, X},
                 {X, O, O}
             });
-            put("4Zm", new Boolean[][]{
+            put(Shape._4_Zm, new Boolean[][]{
                 {X, O, O},
                 {O, O, X}
             });
 
             // 5A
-            put("5C", new Boolean[][]{
+            put(Shape._5A_C, new Boolean[][]{
                 {O, O, O},
                 {O, X, O}
             });
-            put("5I", new Boolean[][]{
+            put(Shape._5A_I, new Boolean[][]{
                 {O, O, O, O, O}
             });
-            put("5L", new Boolean[][]{
+            put(Shape._5A_L, new Boolean[][]{
                 {O, X},
                 {O, X},
                 {O, X},
                 {O, O}
             });
-            put("5Lm", new Boolean[][]{
+            put(Shape._5A_Lm, new Boolean[][]{
                 {X, O},
                 {X, O},
                 {X, O},
                 {O, O}
             });
-            put("5P", new Boolean[][]{
+            put(Shape._5A_P, new Boolean[][]{
                 {X, O},
                 {O, O},
                 {O, O}
             });
-            put("5Pm", new Boolean[][]{
+            put(Shape._5A_Pm, new Boolean[][]{
                 {O, X},
                 {O, O},
                 {O, O}
             });
-            put("5V", new Boolean[][]{
+            put(Shape._5A_V, new Boolean[][]{
                 {O, X, X},
                 {O, X, X},
                 {O, O, O}
             });
-            put("5Z", new Boolean[][]{
+            put(Shape._5A_Z, new Boolean[][]{
                 {X, X, O},
                 {O, O, O},
                 {O, X, X}
             });
-            put("5Zm", new Boolean[][]{
+            put(Shape._5A_Zm, new Boolean[][]{
                 {O, X, X},
                 {O, O, O},
                 {X, X, O}
             });
 
             // 5B
-            put("5F", new Boolean[][]{
+            put(Shape._5B_F, new Boolean[][]{
                 {O, X, X},
                 {O, O, O},
                 {X, O, X}
             });
-            put("5Fm", new Boolean[][]{
+            put(Shape._5B_Fm, new Boolean[][]{
                 {X, X, O},
                 {O, O, O},
                 {X, O, X}
             });
-            put("5N", new Boolean[][]{
+            put(Shape._5B_N, new Boolean[][]{
                 {X, O},
                 {O, O},
                 {O, X},
                 {O, X}
             });
-            put("5Nm", new Boolean[][]{
+            put(Shape._5B_Nm, new Boolean[][]{
                 {O, X},
                 {O, O},
                 {X, O},
                 {X, O}
             });
-            put("5T", new Boolean[][]{
+            put(Shape._5B_T, new Boolean[][]{
                 {X, O, X},
                 {X, O, X},
                 {O, O, O}
             });
-            put("5W", new Boolean[][]{
+            put(Shape._5B_W, new Boolean[][]{
                 {X, O, O},
                 {O, O, X},
                 {O, X, X}
             });
-            put("5X", new Boolean[][]{
+            put(Shape._5B_X, new Boolean[][]{
                 {X, O, X},
                 {O, O, O},
                 {X, O, X}
             });
-            put("5Y", new Boolean[][]{
+            put(Shape._5B_Y, new Boolean[][]{
                 {X, O},
                 {O, O},
                 {X, O},
                 {X, O}
             });
-            put("5Ym", new Boolean[][]{
+            put(Shape._5B_Ym, new Boolean[][]{
                 {O, X},
                 {O, O},
                 {O, X},
@@ -215,65 +192,66 @@ public class Chip implements Serializable {
             });
 
             // 6
-            put("6A", new Boolean[][]{
+            put(Shape._6_A, new Boolean[][]{
                 {O, X, X},
                 {O, O, X},
                 {O, O, O}
             });
-            put("6C", new Boolean[][]{
+            put(Shape._6_C, new Boolean[][]{
                 {O, X, X, O},
                 {O, O, O, O}
             });
-            put("6D", new Boolean[][]{
+            put(Shape._6_D, new Boolean[][]{
                 {X, O, O, X},
                 {O, O, O, O}
             });
-            put("6I", new Boolean[][]{
+            put(Shape._6_I, new Boolean[][]{
                 {O, O, O, O, O, O}
             });
-            put("6O", new Boolean[][]{
+            put(Shape._6_O, new Boolean[][]{
                 {O, O},
                 {O, O},
                 {O, O}
             });
-            put("6R", new Boolean[][]{
+            put(Shape._6_R, new Boolean[][]{
                 {X, O, X},
                 {O, O, O},
                 {O, O, X}
             });
-            put("6T", new Boolean[][]{
+            put(Shape._6_T, new Boolean[][]{
                 {X, X, O, X},
                 {O, O, O, O},
                 {X, X, O, X}
             });
-            put("6Y", new Boolean[][]{
+            put(Shape._6_Y, new Boolean[][]{
                 {X, O, X},
                 {O, O, O},
                 {O, X, O}
             });
-            put("6Z", new Boolean[][]{
+            put(Shape._6_Z, new Boolean[][]{
                 {O, O, O, X},
                 {X, O, O, O}
             });
-            put("6Zm", new Boolean[][]{
+            put(Shape._6_Zm, new Boolean[][]{
                 {X, O, O, O},
                 {O, O, O, X}
             });
         }
     }; // </editor-fold>
-    private static final Map<String, Integer> CHIP_ROTATION_MAP = new HashMap<String, Integer>() // <editor-fold defaultstate="collapsed">
+    private static final Map<Shape, Integer> CHIP_ROTATION_MAP = new HashMap<Shape, Integer>() // <editor-fold defaultstate="collapsed">
     {
         {
-            for (String[] names : NAMES_N) {
-                for (String name : names) {
-                    PuzzleMatrix<Boolean> a = new PuzzleMatrix<>(CHIP_MATRIX_MAP.get(name));
-                    for (int i = 1; i <= 4; i++) {
-                        PuzzleMatrix<Boolean> b = new PuzzleMatrix<>(CHIP_MATRIX_MAP.get(name));
-                        b.rotate(i);
-                        if (a.equals(b)) {
-                            put(name, i);
-                            break;
-                        }
+            for (Shape shape : Shape.values()) {
+                if (shape == Shape.NONE) {
+                    continue;
+                }
+                PuzzleMatrix<Boolean> a = new PuzzleMatrix<>(CHIP_MATRIX_MAP.get(shape));
+                for (int i = 1; i <= 4; i++) {
+                    PuzzleMatrix<Boolean> b = new PuzzleMatrix<>(CHIP_MATRIX_MAP.get(shape));
+                    b.rotate(i);
+                    if (a.equals(b)) {
+                        put(shape, i);
+                        break;
                     }
                 }
             }
@@ -316,9 +294,9 @@ public class Chip implements Serializable {
     private static final int PT = 1;
 
     private final String id;
-    private final String name;
+    private final Shape shape;
 
-    private final Stat pt;
+    private Stat pt;
     private int initRotation, rotation, initLevel, level, star, color, displayType;
     private int combinationIndex = -1;
     private boolean marked;
@@ -329,9 +307,9 @@ public class Chip implements Serializable {
     private final Set<Tag> tags;
 
     // Pool init
-    public Chip(String name) {
+    public Chip(Shape shape) {
         this.id = null;
-        this.name = name;
+        this.shape = shape;
         pt = null;
         tags = new HashSet<>();
     }
@@ -339,7 +317,7 @@ public class Chip implements Serializable {
     // Pool to inventory init
     public Chip(Chip c, int star, int color) {
         this.id = UUID.randomUUID().toString();
-        name = c.name;
+        shape = c.shape;
         rotation = c.rotation;
         initRotation = c.initRotation;
 
@@ -353,11 +331,11 @@ public class Chip implements Serializable {
     // Chip deep copy
     public Chip(Chip c) {
         id = c.getID();
-        name = c.name;
+        shape = c.shape;
         star = c.star;
         color = c.color;
 
-        pt = new Stat(c.pt);
+        pt = c.pt;
 
         initLevel = c.initLevel;
         level = c.level;
@@ -383,7 +361,7 @@ public class Chip implements Serializable {
             int i = 0;
             id = data.length > i ? data[i] : UUID.randomUUID().toString();
             i++;
-            name = data.length > i ? data[i] : "";
+            shape = data.length > i ? Shape.byName(data[i]) : Shape.NONE;
             i++;
 
             int dmgPt = data.length > i ? Fn.limit(Integer.parseInt(data[i]), 0, getMaxPt()) : 0;
@@ -431,9 +409,9 @@ public class Chip implements Serializable {
             }
         } else {
             // 1.0.0 - 3.0.0
+            shape = data.length > 0 ? Shape.byName(data[0]) : Shape.NONE;
+            rotation = data.length > 1 ? Integer.parseInt(data[1]) % getMaxRotation() : 0;
             if (type == INVENTORY) {
-                name = data.length > 0 ? data[0] : "";
-                rotation = data.length > 1 ? Integer.parseInt(data[1]) % getMaxRotation() : 0;
                 initRotation = rotation;
 
                 int dmgPt = data.length > 2 ? Fn.limit(Integer.parseInt(data[2]), 0, getMaxPt()) : 0;
@@ -447,12 +425,9 @@ public class Chip implements Serializable {
                 color = data.length > 8 ? Fn.limit(Integer.parseInt(data[8]), 0, COLORSTRS.size()) : 0;
 
                 marked = data.length > 9 && "1".equals(data[9]);
-                id = data.length > 10 ? data[10] : UUID.randomUUID().toString();
 
                 combinationIndex = -1;
             } else {
-                name = data.length > 0 ? data[0] : "";
-                rotation = data.length > 1 ? Integer.parseInt(data[1]) % getMaxRotation() : 0;
                 initRotation = data.length > 2 ? Integer.parseInt(data[2]) % getMaxRotation() : 0;
 
                 star = data.length > 3 ? Fn.limit(Integer.parseInt(data[3]), 2, 5) : 5;
@@ -464,19 +439,18 @@ public class Chip implements Serializable {
                 int hitPt = data.length > 8 ? Fn.limit(Integer.parseInt(data[8]), 0, getMaxPt()) : 0;
                 int rldPt = data.length > 9 ? Fn.limit(Integer.parseInt(data[9]), 0, getMaxPt()) : 0;
 
-                id = data.length > 10 ? data[10] : UUID.randomUUID().toString();
-
                 pt = new Stat(dmgPt, brkPt, hitPt, rldPt);
             }
+            id = data.length > 10 ? data[10] : UUID.randomUUID().toString();
             tags = new HashSet<>();
         }
     }
 
     // ImageProcessor
-    public Chip(String name, int star, int color, Stat pt,
+    public Chip(Shape shape, int star, int color, Stat pt,
             int level, int rotation) {
         this.id = UUID.randomUUID().toString();
-        this.name = name;
+        this.shape = shape;
         this.star = star;
         this.color = color;
 
@@ -491,10 +465,10 @@ public class Chip implements Serializable {
     }
 
     // json (Inventory)
-    public Chip(String id, String name, int star, int color, Stat pt,
+    public Chip(String id, Shape shape, int star, int color, Stat pt,
             int level, int rotation) {
         this.id = id;
-        this.name = name;
+        this.shape = shape;
         this.star = star;
         this.color = color;
 
@@ -509,11 +483,11 @@ public class Chip implements Serializable {
     }
 
     public Chip(String id,
-            String name, int star, int color, Stat pt,
+            Shape shape, int star, int color, Stat pt,
             int level, int rotation,
             boolean marked, Set<Tag> tags) {
         this.id = id;
-        this.name = name;
+        this.shape = shape;
         this.star = star;
         this.color = color;
 
@@ -535,49 +509,28 @@ public class Chip implements Serializable {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Name">
-    public String getName() {
-        return name;
+    public Shape getShape() {
+        return shape;
     }
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Size and Type">
-    private static int indexOfType(String type) {
-        return Arrays.asList(TYPES).indexOf(type);
-    }
-
-    public static String[] getNames(String type) {
-        return NAMES_N[indexOfType(type)];
-    }
-
     public int getSize() {
-        return getSize(name);
+        return shape.getSize();
     }
 
-    public static int getSize(String name) {
-        return Integer.parseInt(name.substring(0, 1));
+    public Shape.Type getType() {
+        return shape.getType();
     }
 
-    public String getType() {
-        return getType(name);
+    public boolean typeGeq(Shape.Type type) {
+        return shape.getType().compareTo(type) >= 0;
     }
 
-    public boolean typeGeq(String type) {
-        if (getSize() < getSize(type)) {
-            return false;
-        }
-        return !(TYPE_5A.equals(getType()) && TYPE_5B.equals(type));
-    }
-
-    public static String getType(String name) {
-        return name.matches("5[C|I|L|V|P|Z]m?") ? TYPE_5A
-                : getSize(name) == 5 ? TYPE_5B
-                : name.substring(0, 1);
-    }
-
-    public static Rational getTypeMult(String type, int star) {
-        int a = getSize(type) < 5 ? 16 : 20;
-        int b = getSize(type) < 3 || TYPE_5A.equals(type) ? 4 : 0;
-        int c = getSize(type) < 4 || TYPE_5A.equals(type) ? 4 : 0;
+    public static Rational getTypeMult(Shape.Type type, int star) {
+        int a = type.getSize() < 5 ? 16 : 20;
+        int b = type.getSize() < 3 || type == Shape.Type._5A ? 4 : 0;
+        int c = type.getSize() < 4 || type == Shape.Type._5A ? 4 : 0;
         return new Rational(star * a - b - (3 < star ? c : 0), 100);
     }
     // </editor-fold>
@@ -605,11 +558,11 @@ public class Chip implements Serializable {
 
     // <editor-fold defaultstate="collapsed" desc="Rotation and Ticket">
     public final int getMaxRotation() {
-        return getMaxRotation(name);
+        return getMaxRotation(shape);
     }
 
-    public static int getMaxRotation(String name) {
-        return CHIP_ROTATION_MAP.get(name);
+    public static int getMaxRotation(Shape shape) {
+        return CHIP_ROTATION_MAP.get(shape);
     }
 
     public int getInitRotation() {
@@ -675,10 +628,7 @@ public class Chip implements Serializable {
     }
 
     public void setPt(int dmg, int brk, int hit, int rld) {
-        pt.dmg = dmg;
-        pt.brk = brk;
-        pt.hit = hit;
-        pt.rld = rld;
+        pt = new Stat(dmg, brk, hit, rld);
     }
 
     public boolean anyPtOver(Stat ptLimit) {
@@ -688,7 +638,7 @@ public class Chip implements Serializable {
                 || pt.rld > ptLimit.rld;
     }
 
-    public static int getPt(FRational rate, String type, int star, int level, int stat) {
+    public static int getPt(Rational rate, Shape.Type type, int star, int level, int stat) {
         for (int pt = 0; pt < PT_MAX; pt++) {
             if (getStat(rate, type, star, level, pt) == stat) {
                 return pt;
@@ -698,18 +648,19 @@ public class Chip implements Serializable {
     }
 
     public Stat getStat() {
-        int dmg = getStat(RATE_DMG, this, pt.dmg);
-        int brk = getStat(RATE_BRK, this, pt.brk);
-        int hit = getStat(RATE_HIT, this, pt.hit);
-        int rld = getStat(RATE_RLD, this, pt.rld);
-        return new Stat(dmg, brk, hit, rld);
+        return new Stat(
+                getStat(RATE_DMG, this, pt.dmg),
+                getStat(RATE_BRK, this, pt.brk),
+                getStat(RATE_HIT, this, pt.hit),
+                getStat(RATE_RLD, this, pt.rld)
+        );
     }
 
-    public static int getStat(FRational rate, Chip c, int pt) {
+    public static int getStat(Rational rate, Chip c, int pt) {
         return getStat(rate, c.getType(), c.star, c.level, pt);
     }
 
-    public static int getStat(FRational rate, String type, int star, int level, int pt) {
+    public static int getStat(Rational rate, Shape.Type type, int star, int level, int pt) {
         int base = new Rational(pt).mult(rate).mult(getTypeMult(type, star)).getIntCeil();
         return getLevelMult(level).mult(base).getIntCeil();
     }
@@ -722,12 +673,12 @@ public class Chip implements Serializable {
         return new Stat(dmg, brk, hit, rld);
     }
 
-    private static int getOldStat(FRational rate, Chip c, int pt) {
-        return getOldStat(rate, c.name, c.star, c.level, pt);
+    private static int getOldStat(Rational rate, Chip c, int pt) {
+        return getOldStat(rate, c.shape, c.star, c.level, pt);
     }
 
-    private static int getOldStat(FRational rate, String name, int star, int level, int pt) {
-        Rational base = new Rational(pt).mult(rate).mult(getTypeMult(getType(name), star));
+    private static int getOldStat(Rational rate, Shape shape, int star, int level, int pt) {
+        Rational base = new Rational(pt).mult(rate).mult(getTypeMult(shape.getType(), star));
         return getLevelMult(level).mult(base).getIntCeil();
     }
 
@@ -740,12 +691,12 @@ public class Chip implements Serializable {
         );
     }
 
-    public static int getMaxEffStat(FRational rate, int pt) {
+    public static int getMaxEffStat(Rational rate, int pt) {
         int base = new Rational(pt).mult(rate).getIntCeil();
         return getLevelMult(LEVEL_MAX).mult(base).getIntCeil();
     }
 
-    public static int getMaxEffStat(FRational rate, int pt, int level) {
+    public static int getMaxEffStat(Rational rate, int pt, int level) {
         int base = new Rational(pt).mult(rate).getIntCeil();
         return getLevelMult(level).mult(base).getIntCeil();
     }
@@ -862,14 +813,14 @@ public class Chip implements Serializable {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Matrix">
-    public static PuzzleMatrix<Boolean> generateMatrix(String name, int rotation) {
-        PuzzleMatrix<Boolean> matrix = new PuzzleMatrix<>(CHIP_MATRIX_MAP.get(name));
+    public static PuzzleMatrix<Boolean> generateMatrix(Shape shape, int rotation) {
+        PuzzleMatrix<Boolean> matrix = new PuzzleMatrix<>(CHIP_MATRIX_MAP.get(shape));
         matrix.rotate(rotation);
         return matrix;
     }
 
     private void generateMatrix() {
-        matrix = generateMatrix(name, rotation);
+        matrix = generateMatrix(shape, rotation);
     }
 
     private PuzzleMatrix<Boolean> getMatrix() {
@@ -928,10 +879,10 @@ public class Chip implements Serializable {
             int i = (getSize() + 1) % 3;
             return i == 0 ? app.orange() : i == 1 ? app.green() : app.blue();
         }
-        if (TYPE_5A.equals(getType())) {
+        if (shape.getType() == Shape.Type._5A) {
             return app.orange();
         }
-        if (TYPE_5B.equals(getType())) {
+        if (shape.getType() == Shape.Type._5B) {
             return app.green();
         }
         return app.blue();
@@ -1081,47 +1032,8 @@ public class Chip implements Serializable {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Compare">
-    private static class ChipComparator implements Comparator<String> {
-
-        private final Map<String, Integer> indices;
-
-        public ChipComparator() {
-            indices = new HashMap<>();
-            int i = 1;
-            for (String[] names : NAMES_N) {
-                for (String name : names) {
-                    indices.put(name, i);
-                    i++;
-                }
-            }
-        }
-
-        @Override
-        public int compare(String o1, String o2) {
-            if (o1.equals(o2)) {
-                return 0;
-            }
-            return indices.get(o1) - indices.get(o2);
-        }
-    }
-
-    private static Comparator<String> comparator = new ChipComparator();
-
-    public static Comparator<String> getComparator() {
-        return comparator;
-    }
-
     public static int compare(Chip c1, Chip c2) {
-        return comparator.compare(c1.getName(), c2.getName());
-    }
-
-    public static int compareName(String s1, String s2) {
-        return comparator.compare(s1, s2);
-    }
-
-    public static int compareType(String t1, String t2) {
-        List<String> types = Arrays.asList(TYPES);
-        return Integer.compare(types.indexOf(t1), types.indexOf(t2));
+        return Shape.compare(c1.shape, c2.shape);
     }
 
     public static int compareStar(Chip c1, Chip c2) {
@@ -1136,7 +1048,7 @@ public class Chip implements Serializable {
     public String toData() {
         String[] s = {
             id,
-            name,
+            String.valueOf(shape.id),
             String.valueOf(star),
             String.valueOf(color),
             pt.toData(),

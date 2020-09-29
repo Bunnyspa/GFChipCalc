@@ -7,7 +7,6 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 import main.App;
 import main.puzzle.Board;
-import main.puzzle.FStat;
 import main.puzzle.Stat;
 import main.resource.Language;
 import main.resource.Resources;
@@ -224,7 +223,7 @@ public class CalcSettingDialog extends JDialog {
             int i = maxPresetComboBox.getSelectedIndex();
             if (0 <= i) {
                 presetIndex = i;
-                FStat presetStat = BoardSetting.PRESET.get(getBoardName(), star, i).stat;
+                Stat presetStat = BoardSetting.PRESET.get(getBoardName(), star, i).stat;
                 maxDmgSpinner.setValue(presetStat.dmg);
                 maxBrkSpinner.setValue(presetStat.brk);
                 maxHitSpinner.setValue(presetStat.hit);

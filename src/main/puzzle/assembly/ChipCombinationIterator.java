@@ -6,8 +6,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import main.puzzle.BoardTemplate;
 import main.puzzle.Chip;
-import main.puzzle.preset.PuzzlePreset;
+import main.puzzle.Shape;
 
 /**
  *
@@ -15,20 +16,20 @@ import main.puzzle.preset.PuzzlePreset;
  */
 public class ChipCombinationIterator implements Iterator<List<Chip>> {
 
-    private final Map<String, List<Chip>> candidateMap;
-    private final List<String> names;
+    private final Map<Shape, List<Chip>> candidateMap;
+    private final List<Shape> shapes;
     private final List<int[]> combs;
 
     public ChipCombinationIterator(Collection<Chip> candidates) {
         candidateMap = new HashMap<>();
         candidates.forEach((c) -> {
-            String name = c.getName();
-            if (!candidateMap.containsKey(name)) {
-                candidateMap.put(name, new ArrayList<>());
+            Shape shape = c.getShape();
+            if (!candidateMap.containsKey(shape)) {
+                candidateMap.put(shape, new ArrayList<>());
             }
-            candidateMap.get(name).add(c);
+            candidateMap.get(shape).add(c);
         });
-        names = new ArrayList<>();
+        shapes = new ArrayList<>();
         combs = new ArrayList<>();
     }
 
@@ -43,7 +44,7 @@ public class ChipCombinationIterator implements Iterator<List<Chip>> {
         List<Chip> out = new ArrayList<>();
         for (int i = 0; i < combs.size(); i++) {
             int[] comb = combs.get(i);
-            List<Chip> candidates = candidateMap.get(names.get(i));
+            List<Chip> candidates = candidateMap.get(shapes.get(i));
             for (int index : comb) {
                 out.add(candidates.get(index));
             }
@@ -61,37 +62,37 @@ public class ChipCombinationIterator implements Iterator<List<Chip>> {
         return out;
     }
 
-    public void init(PuzzlePreset preset) {
-        init(preset.getNameCountMap());
+    public void init(BoardTemplate bt) {
+        init(bt.getShapeCountMap());
     }
 
-    public void init(Map<String, Integer> nameCountMap) {
-        names.clear();
+    public void init(Map<Shape, Integer> shapeCountMap) {
+        shapes.clear();
         combs.clear();
-        List<String> keys = new ArrayList<>(nameCountMap.keySet());
-        keys.sort(Chip.getComparator());
-        keys.forEach((name) -> {
-            int count = nameCountMap.get(name);
-            names.add(name);
+        List<Shape> keys = new ArrayList<>(shapeCountMap.keySet());
+        keys.sort((o1, o2)-> Shape.compare(o1, o2));
+        keys.forEach((shape) -> {
+            int count = shapeCountMap.get(shape);
+            shapes.add(shape);
             combs.add(nCrInit(count));
         });
     }
 
-    private int getSize(String name) {
-        if (!candidateMap.containsKey(name)) {
+    private int getCandidateSize(Shape shape) {
+        if (!candidateMap.containsKey(shape)) {
             return 0;
         }
-        return candidateMap.get(name).size();
+        return candidateMap.get(shape).size();
     }
 
-    public boolean hasEnoughChips(PuzzlePreset preset) {
-        Map<String, Integer> nameCountMap = preset.getNameCountMap();
+    public boolean hasEnoughChips(BoardTemplate template) {
+        Map<Shape, Integer> nameCountMap = template.getShapeCountMap();
         return nameCountMap.keySet().stream()
-                .allMatch((name) -> (nameCountMap.get(name) <= getSize(name)));
+                .allMatch((shape) -> (nameCountMap.get(shape) <= getCandidateSize(shape)));
     }
 
     private int[] nextComb(int i) {
-        return nCrNext(combs.get(i), getSize(names.get(i)));
+        return nCrNext(combs.get(i), getCandidateSize(shapes.get(i)));
     }
 
     private static int[] nCrInit(int n) {

@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import main.App;
 import main.puzzle.Board;
 import main.puzzle.Chip;
+import main.puzzle.Shape;
 import main.puzzle.Stat;
 import main.puzzle.Tag;
 
@@ -21,19 +22,6 @@ import main.puzzle.Tag;
  * @author Bunnyspa
  */
 public class JsonParser {
-
-    private static final Map<Integer, String> MAP_GRID = new HashMap<Integer, String>() // <editor-fold defaultstate="collapsed">
-    {
-        {
-            int i = 39;
-            for (String type : Chip.TYPES) {
-                for (String name : Chip.getNames(type)) {
-                    put(i, name);
-                    i--;
-                }
-            }
-        }
-    }; // </editor-fold>
 
     private static final String SIGNKEY = "sign";
     private static final String CHIPKEY_SQUAD = "squad_with_user_info";
@@ -102,7 +90,7 @@ public class JsonParser {
             // Raw
             String id = ((TextJson) chipJ.getValue("id")).getText();
             int gridData = Integer.valueOf(((TextJson) chipJ.getValue("grid_id")).getText());
-            String name = MAP_GRID.get(gridData);
+            Shape shape = Shape.byId(gridData);
             int dmg = Integer.valueOf(Json.getText(chipJ.getValue("assist_damage")));
             int brk = Integer.valueOf(Json.getText(chipJ.getValue("assist_def_break")));
             int hit = Integer.valueOf(Json.getText(chipJ.getValue("assist_hit")));
@@ -114,7 +102,7 @@ public class JsonParser {
             int squadID = Integer.valueOf(Json.getText(chipJ.getValue("squad_with_user_id")));
 
             Stat pt = new Stat(dmg, brk, hit, rld);
-            Chip chip = new Chip(id, name, star, color, pt, level, rotation);
+            Chip chip = new Chip(id, shape, star, color, pt, level, rotation);
             if (squadMap.containsKey(squadID)) {
                 Tag tag = squadMap.get(squadID);
                 chip.setTag(tag, true);

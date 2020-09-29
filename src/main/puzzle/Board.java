@@ -12,18 +12,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 import javax.swing.ImageIcon;
 import main.App;
-import main.util.FRational;
+import main.util.DoubleKeyHashMap;
 import main.util.Fn;
+import main.util.IO;
 import main.util.Rational;
-import main.util.StrIntMap;
 
 /**
  *
  * @author Bunnyspa
  */
-public class Board {
+public class Board implements Comparable<Board> {
 
     public static int UNUSED = -2;
     public static int EMPTY = -1;
@@ -37,8 +38,17 @@ public class Board {
     public static final String NAME_M2 = "M2";
     public static final String NAME_AT4 = "AT4";
     public static final String NAME_QLZ04 = "QLZ-04";
-    // Index from game data
-    public static String[] NAMES = {NAME_BGM71, NAME_AGS30, NAME_2B14, NAME_M2, NAME_AT4, NAME_QLZ04};
+    public static final String NAME_MK153 = "Mk 153";
+    public static String[] NAMES = {NAME_BGM71, NAME_AGS30, NAME_2B14, NAME_M2, NAME_AT4, NAME_QLZ04, NAME_MK153};
+
+    public static String getTrueName(String fileName) {
+        for (String name : NAMES) {
+            if (IO.toFileName(name).equals(fileName)) {
+                return name;
+            }
+        }
+        return "";
+    }
 
     public static final String STR_STAR_FULL = "★";
     public static final String STR_STAR_EMPTY = "☆";
@@ -109,6 +119,16 @@ public class Board {
                 {6, 6, 2, 2, 2, 2, 6, 6},
                 {6, 6, 6, 2, 2, 6, 6, 6}
             });
+            put(NAME_MK153, new Integer[][]{
+                {6, 6, 2, 2, 6, 6, 6, 6},
+                {6, 6, 2, 2, 5, 5, 5, 6},
+                {6, 6, 2, 2, 4, 4, 4, 6},
+                {6, 6, 2, 2, 3, 3, 4, 6},
+                {1, 1, 1, 1, 1, 1, 3, 3},
+                {1, 1, 1, 1, 1, 1, 3, 3},
+                {6, 5, 1, 1, 6, 6, 6, 6},
+                {6, 6, 1, 1, 6, 6, 6, 6}
+            });
         }
     }; // </editor-fold>
     private static final Map<String, Integer> MAP_COLOR = new HashMap<String, Integer>() // <editor-fold defaultstate="collapsed">
@@ -120,242 +140,329 @@ public class Board {
             put(NAME_M2, Chip.COLOR_BLUE);
             put(NAME_AT4, Chip.COLOR_BLUE);
             put(NAME_QLZ04, Chip.COLOR_ORANGE);
+            put(NAME_MK153, Chip.COLOR_BLUE);
         }
     }; // </editor-fold>
-    private static final Map<String, FStat> MAP_INNATEMAX = new HashMap<String, FStat>() // <editor-fold defaultstate="collapsed"> 
+    private static final Map<String, Stat> MAP_INNATEMAX = new HashMap<String, Stat>() // <editor-fold defaultstate="collapsed"> 
     {
         {
-            put(NAME_BGM71, new FStat(155, 402, 349, 83));
-            put(NAME_AGS30, new FStat(78, 144, 198, 386));
-            put(NAME_2B14, new FStat(152, 58, 135, 160));
-            put(NAME_M2, new FStat(113, 49, 119, 182));
-            put(NAME_AT4, new FStat(113, 261, 284, 134));
-            put(NAME_QLZ04, new FStat(77, 136, 188, 331));
+            put(NAME_BGM71, new Stat(155, 402, 349, 83));
+            put(NAME_AGS30, new Stat(78, 144, 198, 386));
+            put(NAME_2B14, new Stat(152, 58, 135, 160));
+            put(NAME_M2, new Stat(113, 49, 119, 182));
+            put(NAME_AT4, new Stat(113, 261, 284, 134));
+            put(NAME_QLZ04, new Stat(77, 136, 188, 331));
+            put(NAME_MK153, new Stat(107, 224, 233, 107));
         }
     }; // </editor-fold>
-    private static final Map<String, FStat[]> MAP_MAX = new HashMap<String, FStat[]>() // <editor-fold defaultstate="collapsed"> 
+    private static final Map<String, Stat[]> MAP_MAX = new HashMap<String, Stat[]>() // <editor-fold defaultstate="collapsed"> 
     {
         {
-            put(NAME_BGM71, new FStat[]{
-                new FStat(95, 165, 96, 23),
-                new FStat(114, 198, 115, 28),
-                new FStat(133, 231, 134, 32),
-                new FStat(162, 280, 162, 39),
-                new FStat(190, 329, 191, 46)
+            put(NAME_BGM71, new Stat[]{
+                new Stat(95, 165, 96, 23),
+                new Stat(114, 198, 115, 28),
+                new Stat(133, 231, 134, 32),
+                new Stat(162, 280, 162, 39),
+                new Stat(190, 329, 191, 46)
             });
-            put(NAME_AGS30, new FStat[]{
-                new FStat(53, 65, 60, 117),
-                new FStat(64, 78, 72, 140),
-                new FStat(75, 91, 84, 163),
-                new FStat(90, 111, 102, 198),
-                new FStat(106, 130, 120, 233)
+            put(NAME_AGS30, new Stat[]{
+                new Stat(53, 65, 60, 117),
+                new Stat(64, 78, 72, 140),
+                new Stat(75, 91, 84, 163),
+                new Stat(90, 111, 102, 198),
+                new Stat(106, 130, 120, 233)
             });
-            put(NAME_2B14, new FStat[]{
-                new FStat(114, 29, 45, 54),
-                new FStat(136, 35, 54, 64),
-                new FStat(159, 41, 63, 75),
-                new FStat(193, 49, 77, 91),
-                new FStat(227, 58, 90, 107)
+            put(NAME_2B14, new Stat[]{
+                new Stat(114, 29, 45, 54),
+                new Stat(136, 35, 54, 64),
+                new Stat(159, 41, 63, 75),
+                new Stat(193, 49, 77, 91),
+                new Stat(227, 58, 90, 107)
             });
-            put(NAME_M2, new FStat[]{
-                new FStat(103, 30, 49, 74),
-                new FStat(124, 36, 59, 89),
-                new FStat(145, 42, 68, 104),
-                new FStat(176, 51, 83, 126),
-                new FStat(206, 60, 97, 148)
+            put(NAME_M2, new Stat[]{
+                new Stat(103, 30, 49, 74),
+                new Stat(124, 36, 59, 89),
+                new Stat(145, 42, 68, 104),
+                new Stat(176, 51, 83, 126),
+                new Stat(206, 60, 97, 148)
             });
-            put(NAME_AT4, new FStat[]{
-                new FStat(85, 131, 95, 45),
-                new FStat(102, 157, 114, 54),
-                new FStat(118, 183, 133, 63),
-                new FStat(144, 222, 161, 76),
-                new FStat(169, 261, 190, 90)
+            put(NAME_AT4, new Stat[]{
+                new Stat(85, 131, 95, 45),
+                new Stat(102, 157, 114, 54),
+                new Stat(118, 183, 133, 63),
+                new Stat(144, 222, 161, 76),
+                new Stat(169, 261, 190, 90)
             });
-            put(NAME_QLZ04, new FStat[]{
-                new FStat(61, 72, 66, 117),
-                new FStat(73, 86, 79, 140),
-                new FStat(85, 100, 93, 163),
-                new FStat(103, 122, 112, 198),
-                new FStat(122, 143, 132, 233)
+            put(NAME_QLZ04, new Stat[]{
+                new Stat(61, 72, 66, 117),
+                new Stat(73, 86, 79, 140),
+                new Stat(85, 100, 93, 163),
+                new Stat(103, 122, 112, 198),
+                new Stat(122, 143, 132, 233)
             });
-        }
-    }; // </editor-fold>
-    public static final StrIntMap<FStat> MAP_RESONANCE = new StrIntMap<FStat>() // <editor-fold defaultstate="collapsed">
-    {
-        {
-            put(NAME_BGM71, new HashMap<Integer, FStat>() {
-                {
-                    put(4, new FStat(16, 0, 6, 0));
-                    put(10, new FStat(0, 8, 0, 3));
-                    put(16, new FStat(36, 0, 8, 0));
-                    put(22, new FStat(0, 14, 10, 0));
-                    put(28, new FStat(46, 0, 0, 6));
-                    put(32, new FStat(0, 18, 14, 0));
-                    put(36, new FStat(60, 26, 0, 0));
-                }
-            });
-            put(NAME_AGS30, new HashMap<Integer, FStat>() {
-                {
-                    put(4, new FStat(8, 0, 4, 0));
-                    put(10, new FStat(0, 4, 0, 8));
-                    put(16, new FStat(14, 0, 6, 0));
-                    put(24, new FStat(0, 8, 0, 10));
-                    put(30, new FStat(26, 0, 12, 0));
-                    put(34, new FStat(0, 14, 0, 12));
-                    put(38, new FStat(36, 0, 0, 16));
-                }
-            });
-            put(NAME_2B14, new HashMap<Integer, FStat>() {
-                {
-                    put(4, new FStat(16, 0, 6, 0));
-                    put(10, new FStat(0, 3, 0, 5));
-                    put(16, new FStat(36, 0, 0, 0));
-                    put(20, new FStat(0, 4, 8, 0));
-                    put(24, new FStat(58, 0, 0, 7));
-                    put(28, new FStat(0, 8, 0, 10));
-                    put(32, new FStat(82, 0, 8, 0));
-                }
-            });
-            put(NAME_M2, new HashMap<Integer, FStat>() {
-                {
-                    put(4, new FStat(13, 0, 6, 0));
-                    put(10, new FStat(0, 3, 0, 6));
-                    put(16, new FStat(30, 0, 0, 0));
-                    put(20, new FStat(0, 4, 8, 0));
-                    put(24, new FStat(48, 0, 0, 9));
-                    put(28, new FStat(0, 8, 0, 13));
-                    put(32, new FStat(68, 0, 8, 0));
-                }
-            });
-            put(NAME_AT4, new HashMap<Integer, FStat>() {
-                {
-                    put(4, new FStat(12, 0, 5, 0));
-                    put(10, new FStat(0, 5, 0, 5));
-                    put(16, new FStat(27, 0, 7, 0));
-                    put(22, new FStat(0, 10, 9, 0));
-                    put(28, new FStat(35, 0, 0, 10));
-                    put(32, new FStat(0, 12, 12, 0));
-                    put(36, new FStat(46, 18, 0, 0));
-                }
-            });
-            put(NAME_QLZ04, new HashMap<Integer, FStat>() {
-                {
-                    put(4, new FStat(9, 0, 6, 0));
-                    put(10, new FStat(0, 6, 0, 6));
-                    put(16, new FStat(15, 0, 6, 0));
-                    put(24, new FStat(0, 9, 0, 9));
-                    put(30, new FStat(28, 0, 12, 0));
-                    put(34, new FStat(0, 15, 0, 10));
-                    put(38, new FStat(38, 0, 0, 14));
-                }
+            put(NAME_MK153, new Stat[]{
+                new Stat(98, 137, 95, 44),
+                new Stat(117, 164, 114, 52),
+                new Stat(137, 191, 133, 61),
+                new Stat(166, 232, 162, 74),
+                new Stat(195, 273, 190, 87)
             });
         }
     }; // </editor-fold>
-    private static final Map<String, FStat[]> MAP_ITERATION = new HashMap<String, FStat[]>() // <editor-fold defaultstate="collapsed">
+    public static final DoubleKeyHashMap<String, Integer, Stat> MAP_RESONANCE = new DoubleKeyHashMap<String, Integer, Stat>() // <editor-fold defaultstate="collapsed">
     {
         {
-            put(NAME_BGM71, new FStat[]{
-                new FStat(4, 0, 6, 0),
-                new FStat(0, 10, 9, 0),
-                new FStat(5, 0, 0, 6),
-                new FStat(0, 12, 10, 0),
-                new FStat(7, 15, 0, 0),
-                new FStat(8, 0, 12, 0),
-                new FStat(0, 16, 14, 0),
-                new FStat(9, 0, 0, 10),
-                new FStat(0, 18, 18, 0),
-                new FStat(12, 24, 0, 0)
+            put(NAME_BGM71, new HashMap<Integer, Stat>() {
+                {
+                    put(4, new Stat(16, 0, 6, 0));
+                    put(10, new Stat(0, 8, 0, 3));
+                    put(16, new Stat(36, 0, 8, 0));
+                    put(22, new Stat(0, 14, 10, 0));
+                    put(28, new Stat(46, 0, 0, 6));
+                    put(32, new Stat(0, 18, 14, 0));
+                    put(36, new Stat(60, 26, 0, 0));
+                }
             });
-            put(NAME_AGS30, new FStat[]{
-                new FStat(2, 0, 5, 0),
-                new FStat(0, 4, 0, 8),
-                new FStat(3, 0, 8, 0),
-                new FStat(0, 6, 0, 12),
-                new FStat(3, 0, 0, 13),
-                new FStat(4, 0, 12, 0),
-                new FStat(0, 10, 0, 12),
-                new FStat(4, 0, 16, 0),
-                new FStat(0, 16, 0, 16),
-                new FStat(8, 0, 0, 18)
+            put(NAME_AGS30, new HashMap<Integer, Stat>() {
+                {
+                    put(4, new Stat(8, 0, 4, 0));
+                    put(10, new Stat(0, 4, 0, 8));
+                    put(16, new Stat(14, 0, 6, 0));
+                    put(24, new Stat(0, 8, 0, 10));
+                    put(30, new Stat(26, 0, 12, 0));
+                    put(34, new Stat(0, 14, 0, 12));
+                    put(38, new Stat(36, 0, 0, 16));
+                }
             });
-            put(NAME_2B14, new FStat[]{
-                new FStat(2, 0, 4, 0),
-                new FStat(2, 3, 0, 4),
-                new FStat(3, 0, 6, 0),
-                new FStat(4, 4, 0, 4),
-                new FStat(5, 0, 0, 5),
-                new FStat(6, 0, 9, 0),
-                new FStat(7, 3, 0, 6),
-                new FStat(7, 0, 10, 0),
-                new FStat(4, 5, 0, 9),
-                new FStat(10, 0, 0, 6)
+            put(NAME_2B14, new HashMap<Integer, Stat>() {
+                {
+                    put(4, new Stat(16, 0, 6, 0));
+                    put(10, new Stat(0, 3, 0, 5));
+                    put(16, new Stat(36, 0, 0, 0));
+                    put(20, new Stat(0, 4, 8, 0));
+                    put(24, new Stat(58, 0, 0, 7));
+                    put(28, new Stat(0, 8, 0, 10));
+                    put(32, new Stat(82, 0, 8, 0));
+                }
             });
-            put(NAME_M2, new FStat[]{
-                new FStat(2, 0, 4, 0),
-                new FStat(1, 3, 0, 5),
-                new FStat(3, 0, 6, 0),
-                new FStat(3, 4, 0, 5),
-                new FStat(4, 0, 0, 6),
-                new FStat(5, 0, 9, 0),
-                new FStat(6, 2, 0, 8),
-                new FStat(6, 0, 9, 0),
-                new FStat(3, 5, 0, 11),
-                new FStat(8, 0, 0, 8)
+            put(NAME_M2, new HashMap<Integer, Stat>() {
+                {
+                    put(4, new Stat(13, 0, 6, 0));
+                    put(10, new Stat(0, 3, 0, 6));
+                    put(16, new Stat(30, 0, 0, 0));
+                    put(20, new Stat(0, 4, 8, 0));
+                    put(24, new Stat(48, 0, 0, 9));
+                    put(28, new Stat(0, 8, 0, 13));
+                    put(32, new Stat(68, 0, 8, 0));
+                }
             });
-            put(NAME_AT4, new FStat[]{
-                new FStat(3, 0, 5, 0),
-                new FStat(0, 7, 8, 0),
-                new FStat(4, 0, 0, 10),
-                new FStat(0, 8, 9, 0),
-                new FStat(5, 10, 0, 0),
-                new FStat(6, 0, 10, 0),
-                new FStat(0, 11, 12, 0),
-                new FStat(7, 0, 0, 17),
-                new FStat(0, 12, 15, 0),
-                new FStat(9, 16, 0, 0)
+            put(NAME_AT4, new HashMap<Integer, Stat>() {
+                {
+                    put(4, new Stat(12, 0, 5, 0));
+                    put(10, new Stat(0, 5, 0, 5));
+                    put(16, new Stat(27, 0, 7, 0));
+                    put(22, new Stat(0, 10, 9, 0));
+                    put(28, new Stat(35, 0, 0, 10));
+                    put(32, new Stat(0, 12, 12, 0));
+                    put(36, new Stat(46, 18, 0, 0));
+                }
             });
-            put(NAME_QLZ04, new FStat[]{
-                new FStat(3, 0, 3, 0),
-                new FStat(2, 3, 0, 4),
-                new FStat(4, 0, 6, 0),
-                new FStat(3, 3, 0, 4),
-                new FStat(5, 0, 0, 5),
-                new FStat(5, 0, 10, 0),
-                new FStat(6, 4, 0, 6),
-                new FStat(6, 0, 10, 0),
-                new FStat(4, 6, 0, 10),
-                new FStat(8, 0, 0, 8)
+            put(NAME_QLZ04, new HashMap<Integer, Stat>() {
+                {
+                    put(4, new Stat(9, 0, 6, 0));
+                    put(10, new Stat(0, 6, 0, 6));
+                    put(16, new Stat(15, 0, 6, 0));
+                    put(24, new Stat(0, 9, 0, 9));
+                    put(30, new Stat(28, 0, 12, 0));
+                    put(34, new Stat(0, 15, 0, 10));
+                    put(38, new Stat(38, 0, 0, 14));
+                }
+            });
+            put(NAME_MK153, new HashMap<Integer, Stat>() {
+                {
+                    put(4, new Stat(24, 0, 6, 0));
+                    put(10, new Stat(0, 12, 0, 10));
+                    put(16, new Stat(24, 0, 6, 0));
+                    put(24, new Stat(0, 12, 12, 0));
+                    put(30, new Stat(32, 0, 0, 10));
+                    put(34, new Stat(0, 18, 12, 0));
+                    put(38, new Stat(32, 18, 0, 0));
+                }
             });
         }
     }; // </editor-fold>
-    private static final StrIntMap<Integer> MAP_ROTATIONSTEP = new StrIntMap<Integer>() // <editor-fold defaultstate="collapsed">
+    private static final Map<String, Stat[]> MAP_ITERATION = new HashMap<String, Stat[]>() // <editor-fold defaultstate="collapsed">
     {
         {
-            for (String name : NAMES) {
-                for (int star = 1; star <= 5; star++) {
-                    PuzzleMatrix<Integer> unrotated = initMatrix(name, star);
-                    for (int i = 1; i <= 4; i++) {
-                        PuzzleMatrix<Integer> b = initMatrix(name, star);
-                        b.rotateContent(i, UNUSED);
-                        if (unrotated.equals(b)) {
-                            put(name, star, i);
-                            break;
-                        }
+            put(NAME_BGM71, new Stat[]{
+                new Stat(4, 0, 6, 0),
+                new Stat(0, 10, 9, 0),
+                new Stat(5, 0, 0, 6),
+                new Stat(0, 12, 10, 0),
+                new Stat(7, 15, 0, 0),
+                new Stat(8, 0, 12, 0),
+                new Stat(0, 16, 14, 0),
+                new Stat(9, 0, 0, 10),
+                new Stat(0, 18, 18, 0),
+                new Stat(12, 24, 0, 0)
+            });
+            put(NAME_AGS30, new Stat[]{
+                new Stat(2, 0, 5, 0),
+                new Stat(0, 4, 0, 8),
+                new Stat(3, 0, 8, 0),
+                new Stat(0, 6, 0, 12),
+                new Stat(3, 0, 0, 13),
+                new Stat(4, 0, 12, 0),
+                new Stat(0, 10, 0, 12),
+                new Stat(4, 0, 16, 0),
+                new Stat(0, 16, 0, 16),
+                new Stat(8, 0, 0, 18)
+            });
+            put(NAME_2B14, new Stat[]{
+                new Stat(2, 0, 4, 0),
+                new Stat(2, 3, 0, 4),
+                new Stat(3, 0, 6, 0),
+                new Stat(4, 4, 0, 4),
+                new Stat(5, 0, 0, 5),
+                new Stat(6, 0, 9, 0),
+                new Stat(7, 3, 0, 6),
+                new Stat(7, 0, 10, 0),
+                new Stat(4, 5, 0, 9),
+                new Stat(10, 0, 0, 6)
+            });
+            put(NAME_M2, new Stat[]{
+                new Stat(2, 0, 4, 0),
+                new Stat(1, 3, 0, 5),
+                new Stat(3, 0, 6, 0),
+                new Stat(3, 4, 0, 5),
+                new Stat(4, 0, 0, 6),
+                new Stat(5, 0, 9, 0),
+                new Stat(6, 2, 0, 8),
+                new Stat(6, 0, 9, 0),
+                new Stat(3, 5, 0, 11),
+                new Stat(8, 0, 0, 8)
+            });
+            put(NAME_AT4, new Stat[]{
+                new Stat(3, 0, 5, 0),
+                new Stat(0, 7, 8, 0),
+                new Stat(4, 0, 0, 10),
+                new Stat(0, 8, 9, 0),
+                new Stat(5, 10, 0, 0),
+                new Stat(6, 0, 10, 0),
+                new Stat(0, 11, 12, 0),
+                new Stat(7, 0, 0, 17),
+                new Stat(0, 12, 15, 0),
+                new Stat(9, 16, 0, 0)
+            });
+            put(NAME_QLZ04, new Stat[]{
+                new Stat(3, 0, 3, 0),
+                new Stat(2, 3, 0, 4),
+                new Stat(4, 0, 6, 0),
+                new Stat(3, 3, 0, 4),
+                new Stat(5, 0, 0, 5),
+                new Stat(5, 0, 10, 0),
+                new Stat(6, 4, 0, 6),
+                new Stat(6, 0, 10, 0),
+                new Stat(4, 6, 0, 10),
+                new Stat(8, 0, 0, 8)
+            });
+            put(NAME_MK153, new Stat[]{
+                new Stat(4, 0, 4, 0),
+                new Stat(0, 8, 6, 0),
+                new Stat(6, 0, 0, 10),
+                new Stat(0, 8, 8, 0),
+                new Stat(6, 6, 0, 0),
+                new Stat(10, 0, 10, 0),
+                new Stat(0, 10, 10, 0),
+                new Stat(10, 0, 0, 10),
+                new Stat(0, 12, 12, 0),
+                new Stat(16, 16, 0, 0)
+            });
+        }
+    }; // </editor-fold>
+    private static final DoubleKeyHashMap<String, Integer, Integer> MAP_ROTATIONSTEP = new DoubleKeyHashMap<String, Integer, Integer>() // <editor-fold defaultstate="collapsed">
+    {
+        {
+            // generateRotationStep();
+            put("BGM-71", 1, 1);
+            put("BGM-71", 2, 2);
+            put("BGM-71", 3, 2);
+            put("BGM-71", 4, 4);
+            put("BGM-71", 5, 1);
+            put("AGS-30", 1, 1);
+            put("AGS-30", 2, 1);
+            put("AGS-30", 3, 2);
+            put("AGS-30", 4, 2);
+            put("AGS-30", 5, 2);
+            put("2B14", 1, 1);
+            put("2B14", 2, 2);
+            put("2B14", 3, 2);
+            put("2B14", 4, 2);
+            put("2B14", 5, 2);
+            put("M2", 1, 2);
+            put("M2", 2, 2);
+            put("M2", 3, 2);
+            put("M2", 4, 2);
+            put("M2", 5, 2);
+            put("AT4", 1, 4);
+            put("AT4", 2, 4);
+            put("AT4", 3, 4);
+            put("AT4", 4, 4);
+            put("AT4", 5, 1);
+            put("QLZ-04", 1, 4);
+            put("QLZ-04", 2, 4);
+            put("QLZ-04", 3, 4);
+            put("QLZ-04", 4, 4);
+            put("QLZ-04", 5, 4);
+            put("Mk 153", 1, 4);
+            put("Mk 153", 2, 4);
+            put("Mk 153", 3, 4);
+            put("Mk 153", 4, 4);
+            put("Mk 153", 5, 4);
+        }
+    };
+
+    private static void generateRotationStep() {
+        for (String name : NAMES) {
+            for (int star = 1; star <= 5; star++) {
+                PuzzleMatrix<Integer> unrotated = initMatrix(name, star);
+                for (int i = 1; i <= 4; i++) {
+                    PuzzleMatrix<Integer> b = initMatrix(name, star);
+                    b.rotateContent(i, UNUSED);
+                    if (unrotated.equals(b)) {
+                        System.out.println("put(\"" + name + "\"," + star + "," + i + ");");
+                        break;
                     }
                 }
             }
         }
-    }; // </editor-fold>
+    }
+    // </editor-fold>
 
     private final String name;
     private final int star;
     private List<Chip> chips;
     private PuzzleMatrix<Integer> matrix;
-    private final FStat maxStat;
+    private final Stat maxStat;
 
-    private final FStat stat, pt;
+    private final Stat stat, pt;
     private final double statPerc;
     private final int xp;
+
+    @Override
+    public int compareTo(Board o) {
+        int size = Integer.compare(chips.size(), o.chips.size());
+        if (size != 0) {
+            return size;
+        }
+        for (int i = 0; i < chips.size(); i++) {
+            int id = chips.get(i).getID().compareTo(o.chips.get(i).getID());
+            if (id != 0) {
+                return id;
+            }
+        }
+        return 0;
+    }
 
     // Combinator - fitness
     public Board(Board board) {
@@ -375,7 +482,7 @@ public class Board {
         this.xp = board.xp;
     }
 
-    // Combination File / Puzzle Preset
+    // Combination File / Board Template
     public Board(String name, int star, Stat maxStat, List<Chip> chips, List<Point> chipLocs) {
         this.name = name;
         this.star = star;
@@ -384,15 +491,10 @@ public class Board {
         colorChips();
 
         this.matrix = toPlacement(name, star, chips, chipLocs);
-        this.maxStat = new FStat(maxStat);
+        this.maxStat = maxStat;
 
-        Stat s = new Stat();
-        chips.forEach((c) -> s.add(c.getStat()));
-        this.stat = new FStat(s);
-
-        Stat p = new Stat();
-        chips.forEach((c) -> p.add(c.getPt()));
-        this.pt = new FStat(p);
+        this.stat = new Stat(chips.stream().map(c -> c.getStat()));
+        this.pt = new Stat(chips.stream().map(c -> c.getPt()));
 
         statPerc = getStatPerc(this.stat, this.maxStat);
 
@@ -470,22 +572,20 @@ public class Board {
         for (int rotation = 0; rotation < 4; rotation += MAP_ROTATIONSTEP.get(name, star)) {
             // Start a new board
             Board b = new Board(this);
-            Set<String> cNames = new HashSet<>();
+            Set<Shape> cShapes = new HashSet<>();
             Chip[] newUsedChips = new Chip[b.chips.size()];
             // Rotate board
             b.rotate(rotation);
 
-            b.chips.forEach((c) -> {
-                cNames.add(c.getName()); // Get names
-            });
+            b.chips.forEach((c) -> cShapes.add(c.getShape()));
 
-            cNames.forEach((cn) -> {
+            cShapes.forEach((cs) -> {
                 // Get indicies and candidates
                 Set<Integer> cIndices = new HashSet<>();
                 List<Chip> cCandidates = new ArrayList<>();
                 for (int i = 0; i < b.chips.size(); i++) {
                     Chip c = b.chips.get(i);
-                    if (c.getName().equals(cn)) {
+                    if (c.getShape() == cs) {
                         cIndices.add(i);
                         cCandidates.add(new Chip(c));
                     }
@@ -532,7 +632,7 @@ public class Board {
 
     // <editor-fold defaultstate="collapsed" desc="PT">
     public Stat getPt() {
-        return pt.toStat();
+        return pt;
     }
 
     public static Stat getMaxPt(String name, int star) {
@@ -556,28 +656,34 @@ public class Board {
             }
         });
 
-        Stat pt = new Stat(optimalPtArray);
-        int residue = getCellCount(name, star) - pt.sum();
+        int residue = getCellCount(name, star)
+                - (optimalPtArray[0]
+                + optimalPtArray[1]
+                + optimalPtArray[2]
+                + optimalPtArray[3]);
         if (residue > 0) {
-            pt.add(new Stat(residue));
+            for (int i = 0; i < 4; i++) {
+                optimalPtArray[i] += residue;
+            }
         }
+
+        Stat pt = new Stat(optimalPtArray);
+
         return pt;
     }
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Stat">
     public Stat getStat() {
-        return stat.toStat();
+        return stat;
     }
 
     public Stat getOldStat() {
-        Stat out = new Stat();
-        chips.forEach((c) -> out.add(c.getOldStat()));
-        return out;
+        return new Stat(chips.stream().map(c -> c.getOldStat()));
     }
 
     public Stat getCustomMaxStat() {
-        return maxStat.toStat();
+        return maxStat;
     }
 
     public Stat getOrigMaxStat() {
@@ -585,7 +691,7 @@ public class Board {
     }
 
     public static Stat getMaxStat(String name, int star) {
-        return new Stat(MAP_MAX.get(name)[Fn.limit(star - 1, 0, MAP_MAX.get(name).length)]);
+        return MAP_MAX.get(name)[Fn.limit(star - 1, 0, MAP_MAX.get(name).length)];
     }
     // </editor-fold>
 
@@ -600,14 +706,14 @@ public class Board {
         return getStatPerc(type, s, m);
     }
 
-    private static double getStatPerc(FStat stat, FStat max) {
+    private static double getStatPerc(Stat stat, Stat max) {
         if (max.allZero()) {
             return 1.0;
         }
-        if (stat.toStat().allGeq(max.toStat())) {
+        if (stat.allGeq(max)) {
             return 1.0;
         }
-        int[] sArray = stat.toStat().limit(max.toStat()).toArray();
+        int[] sArray = stat.limit(max).toArray();
         int[] mArray = max.toArray();
         double s = 0;
         double m = 0;
@@ -635,7 +741,7 @@ public class Board {
 
     // <editor-fold defaultstate="collapsed" desc="HOC, Resonance, and Version">
     public static Stat getHOCStat(String name) {
-        return new Stat(MAP_INNATEMAX.get(name));
+        return MAP_INNATEMAX.get(name);
     }
 
     public Stat getResonance() {
@@ -644,27 +750,18 @@ public class Board {
                 .mapToInt((c) -> c.getSize())
                 .sum();
 
-        Stat s = new Stat();
-
-        MAP_RESONANCE.keySet(name).stream()
+        return new Stat(MAP_RESONANCE.keySet(name).stream()
                 .filter((i) -> (i <= numCell))
-                .forEach((i) -> s.add(MAP_RESONANCE.get(name, i)));
-
-        return s;
+                .map(i -> MAP_RESONANCE.get(name, i)));
     }
 
     public static Stat getVersionStat(String name, int v) {
-        Stat s = new Stat();
-        FStat[] vus = MAP_ITERATION.get(name);
-        for (int i = 0; i < Math.min(v, 10); i++) {
-            s.add(vus[i]);
-        }
-        return s;
+        return new Stat(Arrays.stream(MAP_ITERATION.get(name)).limit(v));
     }
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Stat Calc">
-    private static int[] getPtDistribution(FRational rate, int nChip, int stat) {
+    private static int[] getPtDistribution(Rational rate, int nChip, int stat) {
         int stat_1pt = Chip.getMaxEffStat(rate, 1);
         int[] ptArray = new int[nChip];
         int i = 0;
@@ -682,7 +779,7 @@ public class Board {
         return ptArray;
     }
 
-    private static int calcStat(FRational rate, int[] pts) {
+    private static int calcStat(Rational rate, int[] pts) {
         int out = 0;
         for (int pt : pts) {
             out += Chip.getMaxEffStat(rate, pt);
@@ -747,11 +844,6 @@ public class Board {
         return null;
     }
 
-    public boolean isChipUseful(Stat pt, Chip c) {
-        pt.subtract(getPt()).subtract(c.getPt());
-        return !pt.anyNeg();
-    }
-
     public static boolean isChipPlaceable(PuzzleMatrix<Integer> matrix, Set<Point> cps) {
         return cps.stream().allMatch((cp)
                 -> matrix.get(cp.x, cp.y) != null
@@ -782,6 +874,58 @@ public class Board {
     public static int getCellCount(String name, int star) {
         PuzzleMatrix<Integer> s = initMatrix(name, star);
         return s.getNumNotContaining(UNUSED);
+    }
+
+    public static boolean rs_isValid(String name, int star, String data) {
+        String[] split = data.split(";");
+        String[] shapeStrs = split[0].split(",");
+        Integer[] rotations = Stream.of(split[1].split(","))
+                .map(Integer::valueOf)
+                .toArray(Integer[]::new);
+        Point[] locations = Stream.of(split[2].split(","))
+                .map((s) -> s.split("\\."))
+                .map((sp) -> new Point(Integer.valueOf(sp[0]), Integer.valueOf(sp[1])))
+                .toArray(Point[]::new);
+        PuzzleMatrix<Boolean> board = rs_getBoolMatrix(name, star);
+        for (int i = 0; i < shapeStrs.length; i++) {
+            Shape shape = Shape.byId(Integer.parseInt(shapeStrs[i]));
+            int rotation = rotations[i];
+            Point location = locations[i];
+
+            Set<Point> pts = rs_getPts(shape, rotation, location);
+            for (Point p : pts) {
+                if (p.x < 0 || WIDTH - 1 < p.x) {
+                    return false;
+                }
+                if (p.y < 0 || HEIGHT - 1 < p.y) {
+                    return false;
+                }
+                if (!board.get(p.x, p.y)) {
+                    return false;
+                }
+                board.set(p.x, p.y, false);
+            }
+        }
+        return true;
+    }
+
+    private static PuzzleMatrix<Boolean> rs_getBoolMatrix(String name, int star) {
+        Integer[][] im = MAP_MATRIX.get(name);
+        PuzzleMatrix<Boolean> bm = new PuzzleMatrix<>(HEIGHT, WIDTH, false);
+        for (int r = 0; r < HEIGHT; r++) {
+            for (int c = 0; c < WIDTH; c++) {
+                bm.set(r, c, im[r][c] <= star);
+            }
+        }
+        return bm;
+    }
+
+    private static Set<Point> rs_getPts(Shape shape, int rotation, Point location) {
+        PuzzleMatrix<Boolean> cm = new PuzzleMatrix<>(Chip.generateMatrix(shape, rotation));
+        Point pivot = cm.getPivot(true);
+        Set<Point> pts = cm.getCoords(true);
+        pts.forEach((p) -> p.translate(location.x - pivot.x, location.y - pivot.y));
+        return pts;
     }
     // </editor-fold>
 
@@ -845,23 +989,26 @@ public class Board {
 
     // <editor-fold defaultstate="collapsed" desc="File">
     public static PuzzleMatrix<Integer> toPlacement(String name, int star, List<Chip> chips, List<Point> locations) {
-        List<String> names = new ArrayList<>();
-        List<Integer> rotations = new ArrayList<>();
-        chips.forEach((c) -> {
-            names.add(c.getName());
-            rotations.add(c.getRotation());
-        });
-        return toPlacement(name, star, names, rotations, locations);
+        List<Puzzle> puzzles = new ArrayList<>(chips.size());
+        for (int i = 0; i < chips.size(); i++) {
+            Chip c = chips.get(i);
+            Shape s = c.getShape();
+            int r = c.getRotation();
+            Point l = locations.get(i);
+            puzzles.add(new Puzzle(s, r, l));
+        }
+
+        return toPlacement(name, star, puzzles);
     }
 
-    public static PuzzleMatrix<Integer> toPlacement(String name, int star, List<String> names, List<Integer> rotations, List<Point> locations) {
+    public static PuzzleMatrix<Integer> toPlacement(String name, int star, List<Puzzle> puzzles) {
         // Placement
         PuzzleMatrix<Integer> placement = initMatrix(name, star);
-        for (int i = 0; i < names.size(); i++) {
-            PuzzleMatrix<Boolean> matrix = Chip.generateMatrix(names.get(i), rotations.get(i));
+        for (int i = 0; i < puzzles.size(); i++) {
+            PuzzleMatrix<Boolean> matrix = Chip.generateMatrix(puzzles.get(i).shape, puzzles.get(i).rotation);
             Set<Point> pts = matrix.getCoords(true);
             Point fp = matrix.getPivot(true);
-            Point bp = locations.get(i);
+            Point bp = puzzles.get(i).location;
             for (Point p : pts) {
                 p.translate(bp.x - fp.x, bp.y - fp.y);
                 placement.set(p.x, p.y, i);

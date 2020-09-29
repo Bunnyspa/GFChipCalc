@@ -5,15 +5,12 @@ import java.awt.FontFormatException;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -22,7 +19,6 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 import main.App;
-import main.puzzle.preset.PuzzlePreset;
 import main.util.IO;
 
 /**
@@ -31,7 +27,7 @@ import main.util.IO;
  */
 public class Resources {
 
-    private static final String RESOURCE_PATH = "/resources/";
+    public static final String RESOURCE_PATH = "/resources/";
 
     public static final Image FAVICON = getImage("favicon.png");
     public static final ImageIcon BANNER = getIcon("banner.png");
@@ -157,17 +153,6 @@ public class Resources {
         } catch (FontFormatException | IOException ex) {
         }
         return null;
-    }
-
-    public static List<PuzzlePreset> loadPresets(String name, int star, String type, boolean isPartial) {
-        List<PuzzlePreset> out = new ArrayList<>();
-        String fileName = name + "_" + type + "_" + IO.data(isPartial) + "_" + star;
-        URL url = App.class.getResource(RESOURCE_PATH + "preset/" + fileName + ".dat");
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))) {
-            return IO.loadPresets_location(name, star, br);
-        } catch (Exception ex) {
-        }
-        return out;
     }
 
     public static Map<Locale, Properties> readInternalProp() {

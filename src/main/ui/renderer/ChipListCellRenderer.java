@@ -50,7 +50,6 @@ public class ChipListCellRenderer extends DefaultListCellRenderer {
                 cr.setIcon(new ImageIcon(image));
             }
             cr.setBackground(isSelected ? Color.LIGHT_GRAY : Color.WHITE);
-            cr.setToolTipText(c.getName());
         } else {
             cr.setIcon(null);
             cr.setBackground(Color.WHITE);

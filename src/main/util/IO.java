@@ -37,14 +37,16 @@ import java.util.stream.Stream;
 import javax.swing.JOptionPane;
 import main.App;
 import main.puzzle.Board;
+import main.puzzle.BoardTemplate;
 import main.puzzle.Chip;
-import main.puzzle.FStat;
+import main.puzzle.Puzzle;
 import main.puzzle.PuzzleMatrix;
+import main.puzzle.Shape;
 import main.puzzle.Stat;
 import main.puzzle.Tag;
 import main.puzzle.assembly.Progress;
-import main.puzzle.preset.PuzzlePreset;
 import main.resource.Language;
+import main.resource.Resources;
 import main.setting.BoardSetting;
 import main.setting.Setting;
 
@@ -69,17 +71,34 @@ public class IO {
     private static final String URL_GITHUB_UPDATE = "https://github.com/Bunnyspa/GFChipCalc-Update/releases/latest";
     private static final String URL_DOWNLOAD_UPDATE = URL_GITHUB_UPDATE + "/download/GFChipCalc-Update.jar";
 
-    private static int pre420rotation(String name) {
-        if (name.matches("4I|5[IZF]|5Zm|6[ACDIR]")) {
-            return 1;
+    private static int pre420rotation(Shape shape) {
+        switch (shape) {
+            case _4_I:
+            case _5A_I:
+            case _5A_Z:
+            case _5A_Zm:
+            case _5B_F:
+            case _6_A:
+            case _6_C:
+            case _6_D:
+            case _6_I:
+            case _6_R:
+                return 1;
+            case _4_T:
+            case _5A_P:
+            case _5A_Pm:
+            case _5B_T:
+            case _6_Y:
+                return 2;
+            case _4_Lm:
+            case _5A_C:
+            case _5B_W:
+            case _5B_Fm:
+            case _6_T:
+                return 3;
+            default:
+                return 0;
         }
-        if (name.matches("4T|5[PT]|5Pm|6Y")) {
-            return 2;
-        }
-        if (name.matches("4Lm|5[CW]|5Fm|6T")) {
-            return 3;
-        }
-        return 0;
     }
 
     public static List<Chip> loadInventory(String fileName) {
@@ -91,14 +110,14 @@ public class IO {
                 Version3 v = new Version3(s);
                 if (v.isCurrent(5, 3, 0)) {
                     Set<Tag> tags = new HashSet<>();
-                    bri.forEachRemaining((l) -> chips.add(parseChip(l, tags)));
+                    bri.forEachRemaining((l) -> chips.add(parseChip(v, l, tags)));
                 } else if (v.isCurrent(4, 0, 0)) {
                     // 4.0.0+
                     while (bri.hasNext()) {
                         Chip c = new Chip(v, bri.next().split(";"), Chip.INVENTORY);
                         // 4.0.0 - 4.1.x
                         if (!v.isCurrent(4, 2, 0)) {
-                            c.initRotate(pre420rotation(c.getName()));
+                            c.initRotate(pre420rotation(c.getShape()));
                         }
                         chips.add(c);
                     }
@@ -160,17 +179,17 @@ public class IO {
                     // Chips
                     int nChip = Integer.valueOf(bri.next());
                     List<Chip> chips = new ArrayList<>(nChip);
-                    List<String> names = new ArrayList<>(nChip);
+                    List<Shape> shapes = new ArrayList<>(nChip);
                     for (int i = 0; i < nChip; i++) {
                         String[] chipInfo = bri.next().split(";");
                         Chip c = new Chip(v, chipInfo, Chip.COMBINATION);
                         chips.add(c);
                         if (!v.isCurrent(4, 2, 0)) {
                             int r = c.getInitRotation();
-                            r += pre420rotation(c.getName());
+                            r += pre420rotation(c.getShape());
                             c.setInitRotation(r);
                         }
-                        names.add(c.getName());
+                        shapes.add(c.getShape());
                     }
                     chips.forEach((c) -> c.setMaxLevel());
 
@@ -179,7 +198,7 @@ public class IO {
                     for (int i = 0; i < nChip; i++) {
                         int r = Integer.valueOf(rotStrs[i]);
                         if (!v.isCurrent(4, 2, 0)) {
-                            r += pre420rotation(names.get(i));
+                            r += pre420rotation(shapes.get(i));
                         }
                         chips.get(i).setRotation(r);
                     }
@@ -216,7 +235,7 @@ public class IO {
                 List<Chip> chips = new ArrayList<>();
                 for (int i = 0; i < nChip; i++) {
                     Chip c = new Chip(new Version3(), bri.next().split(","), Chip.COMBINATION);
-                    c.rotate(pre420rotation(c.getName()));
+                    c.rotate(pre420rotation(c.getShape()));
                     chips.add(c);
                 }
                 chips.forEach((c) -> c.setMaxLevel());
@@ -269,7 +288,7 @@ public class IO {
                     return new Progress(Progress.FINISHED, name, star,
                             false, false, false, false,
                             0, 0, 0, 0,
-                            new FStat(stat), null,
+                            stat, null,
                             -1, 1, 1,
                             new ArrayList<>(chipSet), boards, 0);
                 }
@@ -327,211 +346,47 @@ public class IO {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Preset">
-    private static List<PuzzlePreset> loadExternalPresets_location(String name, int star, String fileName) {
-        try (BufferedReader br = new BufferedReader(new FileReader("private/preset/" + fileName))) {
-            return loadPresets_location(name, star, br);
-        } catch (Exception ex) {
-        }
-        return new ArrayList<>();
-    }
+    public static List<BoardTemplate> loadBoardTemplates(String name, int star, boolean isPartial) {
+        List<BoardTemplate> out = new ArrayList<>();
 
-    private static List<PuzzlePreset> loadExternalPresets_placement(String fileName) {
-        try (BufferedReader br = new BufferedReader(new FileReader("private/preset/" + fileName))) {
-            return loadPresets_placement(br);
-        } catch (Exception ex) {
-        }
-        return new ArrayList<>();
-    }
+        String fileName = "template_" + toFileName(name) + "_" + star + (isPartial ? "_p" : "") + ".dat";
+        URL url = App.class.getResource(Resources.RESOURCE_PATH + "template/" + fileName);
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))) {
+            Iterator<String> bri = br.lines().iterator();
+            while (bri.hasNext()) {
+                String[] line = bri.next().split(";");
 
-    public static List<PuzzlePreset> loadPresets_location(String name, int star, BufferedReader br) {
-        List<PuzzlePreset> out = new ArrayList<>();
-        Iterator<String> bri = br.lines().iterator();
-        while (bri.hasNext()) {
-            String[] line = bri.next().split(";");
-            // Names
-            List<String> chipNames = Arrays.asList(line[0].split(","));
-            // Rotations
-            List<Integer> rotations = new ArrayList<>(chipNames.size());
-            Stream.of(line[1].split(",")).forEach((r) -> rotations.add(Integer.valueOf(r)));
-            // Locations
-            List<Point> locations = new ArrayList<>(chipNames.size());
-            for (String pStr : line[2].split(",")) {
-                locations.add(parsePoint(pStr));
+                String[] names = line[0].split(",");
+                String[] rotations = line[1].split(",");
+                String[] locations = line[2].split(",");
+
+                List<Puzzle> puzzles = new ArrayList<>(names.length);
+                for (int i = 0; i < names.length; i++) {
+                    puzzles.add(new Puzzle(
+                            Shape.byId(Integer.parseInt(names[i])),
+                            Integer.parseInt(rotations[i]),
+                            parsePoint(locations[i])
+                    ));
+                }
+
+                if (line.length > 3) {
+                    // Symmetry
+                    boolean symmetry = parseBoolean(line[3]);
+
+                    BoardTemplate pp = new BoardTemplate(name, star, puzzles, symmetry);
+                    out.add(pp);
+                } else {
+                    BoardTemplate pp = new BoardTemplate(name, star, puzzles);
+                    out.add(pp);
+                }
             }
-            PuzzlePreset pp = new PuzzlePreset(name, star, chipNames, rotations, locations);
-            out.add(pp);
+        } catch (Exception ex) {
         }
         return out;
     }
 
-    private static List<PuzzlePreset> loadPresets_placement(BufferedReader br) {
-        List<PuzzlePreset> out = new ArrayList<>();
-        Iterator<String> bri = br.lines().iterator();
-        while (bri.hasNext()) {
-            Integer[][] data = new Integer[Board.HEIGHT][Board.WIDTH];
-            for (int r = 0; r < Board.HEIGHT; r++) {
-                String line = bri.next();
-                for (int c = 0; c < Board.WIDTH; c++) {
-                    String ch = line.substring(c, c + 1);
-                    int d = Board.UNUSED;
-                    if (!" ".equals(ch) && !"X".equals(ch)) {
-                        d = Integer.parseInt(ch);
-                    }
-                    data[r][c] = d;
-                }
-            }
-            if (bri.hasNext()) {
-                bri.next();
-            }
-            PuzzleMatrix<Integer> pm = new PuzzleMatrix<>(data);
-            PuzzlePreset pp = new PuzzlePreset(pm);
-            out.add(pp);
-        }
-        return out;
-    }
-
-    public static void convToLocation(String fileName) { // DEV
-        List<PuzzlePreset> presets = loadExternalPresets_placement(fileName);
-        List<String> presetLines = new ArrayList<>();
-        presets.forEach((p) -> presetLines.add(p.toData()));
-        sortPresets(presetLines);
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("private/preset/location_" + fileName))) {
-            String prev = "";
-            for (String p : presetLines) {
-                String now = p.split(";")[0];
-                if (now.equals(prev)) {
-                    System.out.println(now);
-                }
-                prev = now;
-                bw.write(p);
-                bw.newLine();
-            }
-        } catch (Exception ex) {
-            App.log(ex);
-        }
-    }
-
-    public static void convToPlacement(String fileName, String name, int star, int nCol) {
-        List<PuzzlePreset> presets = loadExternalPresets_location(name, star, fileName);
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("private/preset/placement_" + fileName))) {
-            List<String[]> lg = new ArrayList<>(nCol);
-            int i = 0;
-            for (PuzzlePreset p : presets) {
-                PuzzleMatrix<Integer> matrix = p.getMatrix();
-                String[] lines = matrix.toString().replace(" ", "\t").split(System.lineSeparator());
-                lg.add(lines);
-                i++;
-                if (i == nCol) {
-                    convToPlacement_write(bw, lg, i);
-                    //
-                    i = 0;
-                    lg.clear();
-                }
-            }
-            if (0 < i) {
-                convToPlacement_write(bw, lg, i);
-            }
-        } catch (Exception ex) {
-            App.log(ex);
-        }
-    }
-
-    private static void convToPlacement_write(BufferedWriter bw, List<String[]> lg, int nCol) throws IOException {
-        for (int r = 0; r < Board.HEIGHT; r++) {
-            StringBuilder sb = new StringBuilder();
-            for (int c = 0; c < nCol; c++) {
-                sb.append(lg.get(c)[r]).append("\t");
-            }
-            bw.write(sb.toString().trim());
-            bw.newLine();
-        }
-        bw.newLine();
-    }
-
-    public static void sortPresets() {
-        File folder_sorted = new File("private/preset_sorted");
-        if (!folder_sorted.exists()) {
-            folder_sorted.mkdir();
-        }
-
-        File folder = new File("private/preset");
-        File[] listOfFiles = folder.listFiles();
-        String[] fileNames = Stream.of(listOfFiles).map((f) -> f.getName()).toArray(String[]::new);
-        for (String fileName : fileNames) {
-            List<String> lines = new ArrayList<>();
-            try (BufferedReader br = new BufferedReader(new FileReader("private/preset/" + fileName))) {
-                br.lines().forEach((line) -> lines.add(line));
-            } catch (IOException ex) {
-            }
-
-            sortPresets(lines);
-
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter("private/preset_sorted/" + fileName))) {
-                for (String l : lines) {
-                    bw.write(l + System.lineSeparator());
-                }
-            } catch (Exception e) {
-            }
-        }
-    }
-
-    private static void sortPresets(List<String> lines) {
-        // Sort line
-        for (int i = 0; i < lines.size(); i++) {
-            // Load
-            String line = lines.get(i);
-            String[] split = line.split(";");
-            String[] names = split[0].split(",");
-            String[] rotations = split[1].split(",");
-            String[] locations = split[2].split(",");
-            List<NRL> nrls = new ArrayList<>();
-            for (int j = 0; j < names.length; j++) {
-                nrls.add(new NRL(names[j], rotations[j], locations[j]));
-            }
-            // Sort
-            nrls.sort((o1, o2) -> Chip.compareName(o1.name, o2.name));
-            List<String> newNames = new ArrayList<>();
-            List<String> newRotations = new ArrayList<>();
-            List<String> newLocations = new ArrayList<>();
-            nrls.forEach((nrl) -> {
-                newNames.add(nrl.name);
-                newRotations.add(nrl.rotation);
-                newLocations.add(nrl.location);
-            });
-            // Set
-            lines.set(i,
-                    String.join(",", newNames) + ";"
-                    + String.join(",", newRotations) + ";"
-                    + String.join(",", newLocations)
-            );
-        }
-        // Sort lines
-        lines.sort((o1, o2) -> {
-            String[] c1 = o1.split(";")[0].split(",");
-            String[] c2 = o2.split(";")[0].split(",");
-            int i = 0;
-            while (i < Math.min(c1.length, c2.length)) {
-                int comp = Chip.compareName(c1[i], c2[i]);
-                if (comp != 0) {
-                    return comp;
-                }
-                i++;
-            }
-            return 0;
-        });
-    }
-
-    private static class NRL {
-
-        final String name;
-        final String rotation;
-        final String location;
-
-        public NRL(String name, String rotation, String location) {
-            this.name = name;
-            this.rotation = rotation;
-            this.location = location;
-        }
+    public static String toFileName(String boardName) {
+        return boardName.replace("-", "").replace(" ", "").toLowerCase();
     }
     // </editor-fold>
 
@@ -767,16 +622,11 @@ public class IO {
     //========== Stat ==========//
     public static Stat parseStat(String s) {
         String[] d = s.split(",");
-        Stat stat = new Stat();
-        stat.dmg = d.length > 0 ? Integer.valueOf(d[0]) : 0;
-        stat.brk = d.length > 1 ? Integer.valueOf(d[1]) : 0;
-        stat.hit = d.length > 2 ? Integer.valueOf(d[2]) : 0;
-        stat.rld = d.length > 3 ? Integer.valueOf(d[3]) : 0;
-        return stat;
-    }
-
-    public static FStat parseFStat(String s) {
-        return new FStat(parseStat(s));
+        int dmg = d.length > 0 ? Integer.valueOf(d[0]) : 0;
+        int brk = d.length > 1 ? Integer.valueOf(d[1]) : 0;
+        int hit = d.length > 2 ? Integer.valueOf(d[2]) : 0;
+        int rld = d.length > 3 ? Integer.valueOf(d[3]) : 0;
+        return new Stat(dmg, brk, hit, rld);
     }
 
     //========== Board Setting ==========//
@@ -803,10 +653,10 @@ public class IO {
     }
 
     //========== Chip ==========//
-    public static Chip parseChip(String s, Set<Tag> tagPool) {
+    public static Chip parseChip(Version3 v, String s, Set<Tag> tagPool) {
         Iterator<String> it = Arrays.asList(s.split(";")).iterator();
         String id = it.next();
-        String name = it.next();
+        Shape shape = v.isCurrent(7, 0, 0) ? Shape.byId(Integer.valueOf(it.next())) : Shape.byName(it.next());
         int star = Integer.valueOf(it.next());
         int color = Integer.valueOf(it.next());
 
@@ -836,7 +686,7 @@ public class IO {
             });
         }
 
-        return new Chip(id, name, star, color, pt, initLevel, initRotation, isMarked, tags);
+        return new Chip(id, shape, star, color, pt, initLevel, initRotation, isMarked, tags);
     }
 
     //========== Progress ==========//
@@ -846,14 +696,14 @@ public class IO {
         int star = Integer.valueOf(it.next());
 
         if (!v.isCurrent(6, 5, 3) && status == Progress.FINISHED) {
-            FStat stat = parseFStat(it.next());
+            Stat stat = parseStat(it.next());
 
             int nComb = -1;
             if (v.isCurrent(6, 4, 0)) {
                 nComb = Integer.valueOf(it.next());
             }
 
-            List<Chip> chips = parseProgress_chips(it, invChips);
+            List<Chip> chips = parseProgress_chips(v, it, invChips);
             chips.forEach((c) -> c.setMaxLevel());
 
             List<Board> boards = parseProgress_boards(name, star, stat, chips, it);
@@ -861,7 +711,7 @@ public class IO {
             return new Progress(status, name, star,
                     true, true, true, false,
                     0, 0, 0, 0,
-                    stat, new FStat(0),
+                    stat, new Stat(0),
                     nComb, 1, 1,
                     chips, boards, 0);
         }
@@ -880,15 +730,15 @@ public class IO {
         int markType = Integer.valueOf(it.next());
         int sortType = Integer.valueOf(it.next());
 
-        FStat stat = parseFStat(it.next());
-        FStat pt = parseFStat(it.next());
+        Stat stat = parseStat(it.next());
+        Stat pt = parseStat(it.next());
 
         int nComb = Integer.valueOf(it.next());
         int progress = Integer.valueOf(it.next());
         int progMax = Integer.valueOf(it.next());
         int tag = Integer.valueOf(it.next());
 
-        List<Chip> chips = parseProgress_chips(it, invChips);
+        List<Chip> chips = parseProgress_chips(v, it, invChips);
         if (maxLevel) {
             chips.forEach((c) -> c.setMaxLevel());
         }
@@ -903,12 +753,12 @@ public class IO {
         );
     }
 
-    private static List<Chip> parseProgress_chips(Iterator<String> it, List<Chip> invChips) {
+    private static List<Chip> parseProgress_chips(Version3 v, Iterator<String> it, List<Chip> invChips) {
         int nChip = Integer.valueOf(it.next());
         List<Chip> chips = new ArrayList<>();
         Set<Tag> tags = new HashSet<>();
         for (int i = 0; i < nChip; i++) {
-            chips.add(parseChip(it.next(), tags));
+            chips.add(parseChip(v, it.next(), tags));
         }
         loadProgress_adjustInits(chips, invChips);
         return chips;
@@ -927,7 +777,7 @@ public class IO {
         });
     }
 
-    private static List<Board> parseProgress_boards(String name, int star, FStat stat, List<Chip> chips, Iterator<String> it) {
+    private static List<Board> parseProgress_boards(String name, int star, Stat stat, List<Chip> chips, Iterator<String> it) {
         List<Board> boards = new ArrayList<>();
         while (it.hasNext()) {
             int n = Integer.valueOf(it.next());
@@ -945,7 +795,7 @@ public class IO {
                 bChips.add(c);
                 bLocs.add(l);
             }
-            Board board = new Board(name, star, stat.toStat(), bChips, bLocs);
+            Board board = new Board(name, star, stat, bChips, bLocs);
             boards.add(board);
         }
         return boards;

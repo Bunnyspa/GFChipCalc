@@ -9,7 +9,6 @@ import java.util.Set;
 import javax.swing.JDialog;
 import main.App;
 import main.puzzle.Chip;
-import main.puzzle.Tag;
 import main.resource.Language;
 import main.util.Fn;
 
@@ -47,7 +46,6 @@ public class JsonFilterDialog extends JDialog {
         cell56RadioButton.setText(app.getText(Language.JSON_FILTER_SIZE, "5", "6"));
 
         markCheckBox.setText(app.getText(Language.JSON_MARK));
-        shapeTagCheckBox.setText(app.getText(Language.JSON_SHAPETAG));
 
         okButton.setText(app.getText(Language.ACTION_OK));
         cancelButton.setText(app.getText(Language.ACTION_CANCEL));
@@ -101,7 +99,6 @@ public class JsonFilterDialog extends JDialog {
         okButton = new javax.swing.JButton();
         countLabel = new javax.swing.JLabel();
         markListLabel = new javax.swing.JLabel();
-        shapeTagCheckBox = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("도움말");
@@ -141,8 +138,6 @@ public class JsonFilterDialog extends JDialog {
 
         markListLabel.setText("markList");
 
-        shapeTagCheckBox.setText("name tag");
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -159,7 +154,6 @@ public class JsonFilterDialog extends JDialog {
                         .addComponent(cancelButton))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(shapeTagCheckBox)
                             .addComponent(star5CheckBox)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(cell16RadioButton)
@@ -181,8 +175,6 @@ public class JsonFilterDialog extends JDialog {
                     .addComponent(cell56RadioButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(star5CheckBox)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(shapeTagCheckBox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(markCheckBox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -210,25 +202,6 @@ public class JsonFilterDialog extends JDialog {
                     .filter((c) -> !c.getTags().isEmpty())
                     .forEach((c) -> c.setMarked(true));
         }
-        // Shape tag
-        if (shapeTagCheckBox.isSelected()) {
-            Set<Tag> shapeTags = new HashSet<>();
-            chipsOutput.forEach((c) -> {
-                boolean added = false;
-                for (Tag t : shapeTags) {
-                    if (c.getName().equals(t.getName())) {
-                        c.setTag(t, true);
-                        added = true;
-                        break;
-                    }
-                }
-                if (!added) {
-                    Tag t = new Tag(Fn.getSizeColor(c.getSize()), c.getName());
-                    shapeTags.add(t);
-                    c.setTag(t, true);
-                }
-            });
-        }
         dispose();
     }//GEN-LAST:event_okButtonActionPerformed
 
@@ -247,7 +220,6 @@ public class JsonFilterDialog extends JDialog {
     private javax.swing.JCheckBox markCheckBox;
     private javax.swing.JLabel markListLabel;
     private javax.swing.JButton okButton;
-    private javax.swing.JCheckBox shapeTagCheckBox;
     private javax.swing.JCheckBox star5CheckBox;
     // End of variables declaration//GEN-END:variables
 }

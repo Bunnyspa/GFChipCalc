@@ -328,7 +328,7 @@ public class Language {
     public static final String JSON_TITLE = "JSON_TITLE";
     public static final String JSON_FILTER_STAR = "JSON_FILTER_STAR";
     public static final String JSON_FILTER_SIZE = "JSON_FILTER_SIZE";
-    public static final String JSON_SHAPETAG = "JSON_SHAPETAG";
+    public static final String JSON_SHAPETAG = "JSON_SHAPETAG"; //REMOVE
     public static final String JSON_MARK = "JSON_MARK";
     // </editor-fold>
 

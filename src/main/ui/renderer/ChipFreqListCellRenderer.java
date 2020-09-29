@@ -35,7 +35,6 @@ public class ChipFreqListCellRenderer extends DefaultListCellRenderer {
         if (value != null) {
             cr.setIcon(cf.chip.getImage(app));
             cr.setBackground(isSelected && blink.v ? Color.LIGHT_GRAY : Fn.percColor(app.orange(), app.green(), app.blue(), cf.freq, 0.0, 1.0));
-            cr.setToolTipText(cf.chip.getName());
         } else {
             cr.setIcon(null);
             cr.setBackground(Color.WHITE);

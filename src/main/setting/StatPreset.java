@@ -1,6 +1,7 @@
 package main.setting;
 
-import main.puzzle.FStat;
+import main.puzzle.Shape;
+import main.puzzle.Stat;
 
 /**
  *
@@ -8,10 +9,10 @@ import main.puzzle.FStat;
  */
 public class StatPreset {
 
-    public final FStat stat, pt, ptMin, ptMax;
-    public final String typeMin;
+    public final Stat stat, pt, ptMin, ptMax;
+    public final Shape.Type typeMin;
 
-    public StatPreset(FStat stat, FStat pt, FStat ptMin, FStat ptMax, String typeMin) {
+    public StatPreset(Stat stat, Stat pt, Stat ptMin, Stat ptMax, Shape.Type typeMin) {
         this.stat = stat;
         this.pt = pt;
         this.ptMin = ptMin;

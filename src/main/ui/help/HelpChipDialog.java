@@ -18,14 +18,14 @@ import javax.swing.table.DefaultTableModel;
 import main.App;
 import main.puzzle.Board;
 import main.puzzle.Chip;
-import main.puzzle.FStat;
+import main.puzzle.Shape;
 import main.puzzle.Stat;
 import main.resource.Language;
 import main.ui.renderer.ChipListCellRenderer;
 import main.ui.renderer.HelpLevelStatTableCellRenderer;
 import main.ui.renderer.HelpTableCellRenderer;
-import main.util.FRational;
 import main.util.Fn;
+import main.util.Rational;
 import main.util.Ref;
 
 /**
@@ -88,14 +88,14 @@ public class HelpChipDialog extends JDialog {
 
         fiveAList.setModel(alm);
         fiveAList.setCellRenderer(new ChipListCellRenderer(app, CHIP_SIZE_FACTOR));
-        for (String chipName : Chip.getNames(Chip.TYPE_5A)) {
-            alm.addElement(new Chip(chipName));
+        for (Shape shape : Shape.getShapes(Shape.Type._5A)) {
+            alm.addElement(new Chip(shape));
         }
 
         fiveBList.setModel(blm);
         fiveBList.setCellRenderer(new ChipListCellRenderer(app, CHIP_SIZE_FACTOR));
-        for (String chipName : Chip.getNames(Chip.TYPE_5B)) {
-            blm.addElement(new Chip(chipName));
+        for (Shape shape : Shape.getShapes(Shape.Type._5B)) {
+            blm.addElement(new Chip(shape));
         }
 
         int chipWidth = (int) (Chip.getImageWidth(false) * CHIP_SIZE_FACTOR);
@@ -158,9 +158,12 @@ public class HelpChipDialog extends JDialog {
         percTable.getTableHeader().setUI(null);
 
         percTM.addRow(percCols);
-        for (String row : Chip.TYPES) {
+        for (Shape.Type row : Shape.Type.values()) {
+            if (row == Shape.Type.NONE) {
+                continue;
+            }
             percTM.addRow(new Object[]{
-                row,
+                row.toString(),
                 Fn.iPercStr(Chip.getTypeMult(row, 5).getDouble()),
                 Fn.iPercStr(Chip.getTypeMult(row, 4).getDouble()),
                 Fn.iPercStr(Chip.getTypeMult(row, 3).getDouble()),
@@ -300,15 +303,16 @@ public class HelpChipDialog extends JDialog {
         resonanceTM.setRowCount(1);
         if (resonanceType == SECTION) {
             resonanceSteps.forEach((step) -> {
-                FStat stat = Board.MAP_RESONANCE.get(name, step);
+                Stat stat = Board.MAP_RESONANCE.get(name, step);
                 resonanceTM.addRow(new Integer[]{step, stat.dmg, stat.brk, stat.hit, stat.rld});
             });
         } else {
             resonanceSteps.forEach((step) -> {
-                Stat s = new Stat();
-                steps.stream()
-                        .filter((key) -> (key <= step))
-                        .forEachOrdered((key) -> s.add(Board.MAP_RESONANCE.get(name, key)));
+                Stat s = new Stat(
+                        steps.stream()
+                                .filter(key -> (key <= step))
+                                .map(key -> Board.MAP_RESONANCE.get(name, key))
+                );
                 resonanceTM.addRow(new Integer[]{step, s.dmg, s.brk, s.hit, s.rld});
             });
         }
@@ -333,7 +337,7 @@ public class HelpChipDialog extends JDialog {
         }
     }
 
-    private FRational getRate() {
+    private Rational getRate() {
         switch (lossComboBox.getSelectedIndex()) {
             case 0:
                 return Chip.RATE_DMG;

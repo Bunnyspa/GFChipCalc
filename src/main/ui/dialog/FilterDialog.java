@@ -1,6 +1,5 @@
 package main.ui.dialog;
 
-import java.awt.Dimension;
 import javax.swing.JDialog;
 import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
@@ -84,13 +83,13 @@ public class FilterDialog extends JDialog {
 
         cellPanel.setBorder(new TitledBorder(app.getText(Language.FILTER_GROUP_CELL)));
         String[] typeStrs = {
-            app.getText(Language.UNIT_CELL, Chip.TYPE_6),
+            app.getText(Language.UNIT_CELL, "6"),
             app.getText(Language.UNIT_CELLTYPE, "5", "B"),
             app.getText(Language.UNIT_CELLTYPE, "5", "A"),
-            app.getText(Language.UNIT_CELL, Chip.TYPE_4),
-            app.getText(Language.UNIT_CELL, Chip.TYPE_3),
-            app.getText(Language.UNIT_CELL, Chip.TYPE_2),
-            app.getText(Language.UNIT_CELL, Chip.TYPE_1)
+            app.getText(Language.UNIT_CELL, "4"),
+            app.getText(Language.UNIT_CELL, "3"),
+            app.getText(Language.UNIT_CELL, "2"),
+            app.getText(Language.UNIT_CELL, "1")
         };
         for (int i = 0; i < Filter.NUM_TYPE; i++) {
             typeTBs[i].setText(typeStrs[i]);
@@ -761,17 +760,19 @@ public class FilterDialog extends JDialog {
         app.filter.levelMin = getLevelMinSpinnerValue();
         app.filter.levelMax = getLevelMaxSpinnerValue();
 
-        Stat ptMin = app.filter.ptMin;
-        ptMin.dmg = (int) ptMinDmgSpinner.getValue();
-        ptMin.brk = (int) ptMinBrkSpinner.getValue();
-        ptMin.hit = (int) ptMinHitSpinner.getValue();
-        ptMin.rld = (int) ptMinRldSpinner.getValue();
+        app.filter.ptMin = new Stat(
+                (int) ptMinDmgSpinner.getValue(),
+                (int) ptMinBrkSpinner.getValue(),
+                (int) ptMinHitSpinner.getValue(),
+                (int) ptMinRldSpinner.getValue()
+        );
 
-        Stat ptMax = app.filter.ptMax;
-        ptMax.dmg = (int) ptMaxDmgSpinner.getValue();
-        ptMax.brk = (int) ptMaxBrkSpinner.getValue();
-        ptMax.hit = (int) ptMaxHitSpinner.getValue();
-        ptMax.rld = (int) ptMaxRldSpinner.getValue();
+        app.filter.ptMax = new Stat(
+                (int) ptMaxDmgSpinner.getValue(),
+                (int) ptMaxBrkSpinner.getValue(),
+                (int) ptMaxHitSpinner.getValue(),
+                (int) ptMaxRldSpinner.getValue()
+        );
 
         app.filter.includedTags.clear();
         for (int i = 0; i < tip.getCount(); i++) {

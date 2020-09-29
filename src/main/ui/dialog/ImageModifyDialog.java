@@ -11,6 +11,7 @@ import javax.swing.border.TitledBorder;
 import main.App;
 import main.puzzle.Board;
 import main.puzzle.Chip;
+import main.puzzle.Shape;
 import main.puzzle.Stat;
 import main.resource.Language;
 import main.resource.Resources;
@@ -26,10 +27,10 @@ public class ImageModifyDialog extends JDialog {
     private final App app;
     private final DefaultListModel<Chip> poolLM = new DefaultListModel<>();
 
-    private String name = Chip.NAME_DEFAULT;
+    private Shape shape = Chip.SHAPE_DEFAULT;
     private int star = 5;
     private int color = Chip.COLOR_ORANGE;
-    private Stat pt = new Stat();
+    private int[] pt = new int[4];
     private int level = 0;
     private int rotation = 0;
 
@@ -41,7 +42,7 @@ public class ImageModifyDialog extends JDialog {
         if (d.cancelled) {
             return null;
         }
-        return new Chip(d.name, d.star, d.color, d.pt, d.level, d.rotation);
+        return new Chip(d.shape, d.star, d.color, new Stat(d.pt), d.level, d.rotation);
     }
 
     private ImageModifyDialog(App app, Chip c) {
@@ -81,9 +82,9 @@ public class ImageModifyDialog extends JDialog {
         poolList.setModel(poolLM);// Renderer
         poolList.setCellRenderer(new ChipListCellRenderer(app));
         // Rows
-        for (String type : Chip.TYPES) {
-            for (String c : Chip.getNames(type)) {
-                poolLM.addElement(new Chip(c));
+        for (Shape.Type type : Shape.Type.values()) {
+            for (Shape s : Shape.getShapes(type)) {
+                poolLM.addElement(new Chip(s));
             }
         }
         poolList.addListSelectionListener((e) -> selectShape());
@@ -118,17 +119,17 @@ public class ImageModifyDialog extends JDialog {
     private void readChip(Chip chip) {
         // Read data
         if (chip != null) {
-            name = chip.getName();
+            shape = chip.getShape();
             star = chip.getStar();
             color = chip.getColor();
-            pt = chip.getPt();
+            pt = chip.getPt().toArray();
             level = chip.getLevel();
             rotation = chip.getRotation();
         }
         // Select shape
         for (int i = 0; i < poolLM.size(); i++) {
             Chip c = poolLM.get(i);
-            if (c.getName().equals(name)) {
+            if (c.getShape() == shape) {
                 poolList.setSelectedIndex(i);
                 break;
             }
@@ -155,27 +156,27 @@ public class ImageModifyDialog extends JDialog {
         brkComboBox.removeAllItems();
         hitComboBox.removeAllItems();
         rldComboBox.removeAllItems();
-        for (int i = 0; i <= Chip.getMaxPt(Chip.getSize(name)); i++) {
-            dmgComboBox.addItem(String.valueOf(Chip.getStat(Chip.RATE_DMG, Chip.getType(name), star, level, i)));
-            brkComboBox.addItem(String.valueOf(Chip.getStat(Chip.RATE_BRK, Chip.getType(name), star, level, i)));
-            hitComboBox.addItem(String.valueOf(Chip.getStat(Chip.RATE_HIT, Chip.getType(name), star, level, i)));
-            rldComboBox.addItem(String.valueOf(Chip.getStat(Chip.RATE_RLD, Chip.getType(name), star, level, i)));
+        for (int i = 0; i <= Chip.getMaxPt(shape.getSize()); i++) {
+            dmgComboBox.addItem(String.valueOf(Chip.getStat(Chip.RATE_DMG, shape.getType(), star, level, i)));
+            brkComboBox.addItem(String.valueOf(Chip.getStat(Chip.RATE_BRK, shape.getType(), star, level, i)));
+            hitComboBox.addItem(String.valueOf(Chip.getStat(Chip.RATE_HIT, shape.getType(), star, level, i)));
+            rldComboBox.addItem(String.valueOf(Chip.getStat(Chip.RATE_RLD, shape.getType(), star, level, i)));
         }
-        pt.dmg = Fn.limit(pt.dmg, 0, dmgComboBox.getItemCount() - 1);
-        pt.brk = Fn.limit(pt.brk, 0, brkComboBox.getItemCount() - 1);
-        pt.hit = Fn.limit(pt.hit, 0, hitComboBox.getItemCount() - 1);
-        pt.rld = Fn.limit(pt.rld, 0, rldComboBox.getItemCount() - 1);
-        dmgComboBox.setSelectedIndex(pt.dmg);
-        brkComboBox.setSelectedIndex(pt.brk);
-        hitComboBox.setSelectedIndex(pt.hit);
-        rldComboBox.setSelectedIndex(pt.rld);
-        dmgPtLabel.setText(String.valueOf(pt.dmg));
-        brkPtLabel.setText(String.valueOf(pt.brk));
-        hitPtLabel.setText(String.valueOf(pt.hit));
-        rldPtLabel.setText(String.valueOf(pt.rld));
+        pt[0] = Fn.limit(pt[0], 0, dmgComboBox.getItemCount() - 1);
+        pt[1] = Fn.limit(pt[1], 0, brkComboBox.getItemCount() - 1);
+        pt[2] = Fn.limit(pt[2], 0, hitComboBox.getItemCount() - 1);
+        pt[3] = Fn.limit(pt[3], 0, rldComboBox.getItemCount() - 1);
+        dmgComboBox.setSelectedIndex(pt[0]);
+        brkComboBox.setSelectedIndex(pt[1]);
+        hitComboBox.setSelectedIndex(pt[2]);
+        rldComboBox.setSelectedIndex(pt[3]);
+        dmgPtLabel.setText(String.valueOf(pt[0]));
+        brkPtLabel.setText(String.valueOf(pt[1]));
+        hitPtLabel.setText(String.valueOf(pt[2]));
+        rldPtLabel.setText(String.valueOf(pt[3]));
 
         // Verification
-        Chip chip = new Chip(name, star, color, pt, level, rotation);
+        Chip chip = new Chip(shape, star, color, new Stat(pt), level, rotation);
         boolean valid = ImageDialog.isValid(chip);
 
         dmgComboBox.setForeground(valid ? Color.BLACK : Color.RED);
@@ -193,7 +194,7 @@ public class ImageModifyDialog extends JDialog {
     }
 
     private void selectShape() {
-        name = poolList.getSelectedValue().getName();
+        shape = poolList.getSelectedValue().getShape();
         updateAndVerify();
     }
 
@@ -223,11 +224,10 @@ public class ImageModifyDialog extends JDialog {
 
     private void setPt() {
         if (!updating) {
-            pt = new Stat(dmgComboBox.getSelectedIndex(),
-                    brkComboBox.getSelectedIndex(),
-                    hitComboBox.getSelectedIndex(),
-                    rldComboBox.getSelectedIndex()
-            );
+            pt[0] = dmgComboBox.getSelectedIndex();
+            pt[1] = brkComboBox.getSelectedIndex();
+            pt[2] = hitComboBox.getSelectedIndex();
+            pt[3] = rldComboBox.getSelectedIndex();
             updateAndVerify();
         }
     }

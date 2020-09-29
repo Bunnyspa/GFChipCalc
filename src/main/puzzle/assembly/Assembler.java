@@ -11,17 +11,18 @@ import java.util.concurrent.BlockingQueue;
 import java.util.function.BooleanSupplier;
 import main.App;
 import main.puzzle.Board;
+import main.puzzle.BoardTemplate;
+import main.puzzle.BoardTemplateMap;
 import main.puzzle.Chip;
+import main.puzzle.Puzzle;
 import main.puzzle.PuzzleMatrix;
-import main.puzzle.Stat;
-import main.puzzle.preset.PuzzlePreset;
-import main.puzzle.preset.PuzzlePresetMap;
+import main.puzzle.Shape;
 import main.puzzle.zdd.ZDD;
 import main.puzzle.zdd.ZDDMemoCache;
 import main.puzzle.zdd.ZDDNode;
 import main.puzzle.zdd.ZDDNodeTable;
-import main.resource.Resources;
 import main.setting.Setting;
+import main.util.IO;
 
 /**
  *
@@ -36,7 +37,7 @@ public class Assembler {
     private static final int RESULT_LIMIT = 100;
 
     private final App app;
-    private final PuzzlePresetMap fullPM, partialPM;
+    private final BoardTemplateMap fullBTM, partialBTM;
 
     private Progress progress;
     private boolean boardsChanged;
@@ -46,41 +47,38 @@ public class Assembler {
 
     public Assembler(App app) {
         this.app = app;
-        // Full Preset
-        fullPM = new PuzzlePresetMap();
+        // Full BoardTemplate
+        fullBTM = new BoardTemplateMap();
         for (String name : Board.NAMES) {
             for (int star = 1; star <= 5; star++) {
-                String minType;
-                if (Board.NAME_M2.equals(name)) {
-                    minType = Chip.TYPE_4;
-                } else {
-                    minType = Chip.TYPE_5A;
-                }
-                List<PuzzlePreset> presets = Resources.loadPresets(name, star, minType, false);
-                if (!presets.isEmpty()) {
-                    fullPM.put(name, star, presets, minType);
-                }
+                List<BoardTemplate> templates = IO.loadBoardTemplates(name, star, false);
+                Shape.Type minType
+                        = (Board.NAME_MK153.equals(name) && star <= 2) || Board.NAME_M2.equals(name)
+                        ? Shape.Type._4
+                        : Shape.Type._5A;
+                fullBTM.put(name, star, templates, minType);
             }
         }
-        // Partial Preset
-        partialPM = new PuzzlePresetMap();
-        partialPM.put(Board.NAME_M2, 5, Resources.loadPresets(Board.NAME_M2, 5, Chip.TYPE_5B, true), Chip.TYPE_5B);
+        // Partial BoardTemplate
+        partialBTM = new BoardTemplateMap();
+        List<BoardTemplate> templates = IO.loadBoardTemplates(Board.NAME_M2, 5, true);
+        partialBTM.put(Board.NAME_M2, 5, templates, Shape.Type._5B);
     }
 
-    public boolean presetExists(String name, int star, boolean alt) {
-        return getPresets(name, star, alt) != null;
+    public boolean btExists(String name, int star, boolean alt) {
+        return getBT(name, star, alt) != null;
     }
 
-    private List<PuzzlePreset> getPresets(String name, int star, boolean alt) {
-        return alt ? partialPM.get(name, star) : fullPM.get(name, star);
+    private List<BoardTemplate> getBT(String name, int star, boolean alt) {
+        return alt ? partialBTM.get(name, star) : fullBTM.get(name, star);
     }
 
-    public String getMinType(String name, int star, boolean alt) {
-        return alt ? partialPM.getMinType(name, star) : fullPM.getMinType(name, star);
+    public Shape.Type getMinType(String name, int star, boolean alt) {
+        return alt ? partialBTM.getMinType(name, star) : fullBTM.getMinType(name, star);
     }
 
     public boolean hasPartial(String name, int star) {
-        return partialPM.containsKey(name, star);
+        return partialBTM.containsKey(name, star);
     }
 
     public void set(Progress p) {
@@ -133,7 +131,7 @@ public class Assembler {
         app.mf.process_setProgBar(progress.nDone, progress.nTotal);
     }
 
-    public void publishBoard(Board board) {
+    public synchronized void publishBoard(Board board) {
         switch (progress.markType) {
             case Setting.BOARD_MARKTYPE_CELL:
                 if (board.getMarkedCellCount() < progress.markMin || progress.markMax < board.getMarkedCellCount()) {
@@ -153,70 +151,39 @@ public class Assembler {
         board.colorChips();
 
         if (progress.settingRotation || board.getTicketCount() == 0) {
-            if (progress.isBoardEmpty()) {
-                progress.addBoard(board);
-            } else {
-                int i = 0;
-                int n = progress.getBoardSize();
-                boolean insert = false;
-                while (i < n && !insert) {
-                    Board cb = progress.getBoard(i);
-                    if (board.getStatPerc() > cb.getStatPerc()) {
-                        insert = true;
-                    } else if (board.getStatPerc() == cb.getStatPerc()) {
-                        switch (progress.sortType) {
-                            case Setting.BOARD_SORTTYPE_XP:
-                                if (board.getXP() < cb.getXP()
-                                        || (board.getXP() == cb.getXP() && board.getTicketCount() < cb.getTicketCount())) {
-                                    insert = true;
-                                }
-                                break;
-                            case Setting.BOARD_SORTTYPE_TICKET:
-                                if (board.getTicketCount() < cb.getTicketCount()
-                                        || (board.getTicketCount() == cb.getTicketCount() && board.getXP() < cb.getXP())) {
-                                    insert = true;
-                                }
-                                break;
-                            default:
-                                throw new AssertionError();
-                        }
-                    }
-                    i++;
-                }
-                progress.addBoard(i - (insert ? 1 : 0), board);
-                if (RESULT_LIMIT > 0 && progress.getBoardSize() > RESULT_LIMIT) {
-                    progress.removeLastBoard();
-                }
+            progress.addBoard(board);
+            if (RESULT_LIMIT > 0 && progress.getBoardSize() > RESULT_LIMIT) {
+                progress.removeLastBoard();
             }
             progress.nComb++;
             boardsChanged = true;
         }
     }
 
-    public static PuzzlePreset genPreset(String boardName, int boardStar, List<String> names, BooleanSupplier checkPause) {
-        return genPreset_DXZ(boardName, boardStar, names, checkPause);
+    public static BoardTemplate generateBT(String boardName, int boardStar, List<Shape> shapes, BooleanSupplier checkPause) {
+        return generateBT_DXZ(boardName, boardStar, shapes, checkPause);
     }
 
-    private static PuzzlePreset genPreset_DXZ(String boardName, int boardStar, List<String> names, BooleanSupplier checkPause) {
+    private static BoardTemplate generateBT_DXZ(String boardName, int boardStar, List<Shape> shapes, BooleanSupplier checkPause) {
         PuzzleMatrix<Integer> puzzle = Board.initMatrix(boardName, boardStar);
 
         Set<Point> emptyCoords = puzzle.getCoords(Board.EMPTY);
 
-        int nCol_name = names.size();
+        int nCol_name = shapes.size();
         int nCol_cell = puzzle.getNumContaining(Board.EMPTY);
         int nCol = nCol_name + nCol_cell;
 
         List<Point> cols_pt = new ArrayList<>(nCol_cell);
         puzzle.getCoords(Board.EMPTY).forEach((p) -> cols_pt.add(p));
 
-        List<String> rows_name = new ArrayList<>();
-        List<Integer> rows_rot = new ArrayList<>();
-        List<Point> rows_loc = new ArrayList<>();
+        List<Shape> rows_shape = new ArrayList<>();
+        List<Integer> rows_rotation = new ArrayList<>();
+        List<Point> rows_location = new ArrayList<>();
 
         List<boolean[]> rows = new ArrayList<>();
         for (int i = 0; i < nCol_name; i++) {
-            String name = names.get(i);
-            Chip c = new Chip(name);
+            Shape shape = shapes.get(i);
+            Chip c = new Chip(shape);
             for (int rot = 0; rot < c.getMaxRotation(); rot++) {
                 c.setRotation(rot);
                 for (Point bp : emptyCoords) {
@@ -226,39 +193,41 @@ public class Assembler {
                         row[i] = true;
                         tps.forEach((p) -> row[nCol_name + cols_pt.indexOf(p)] = true);
                         rows.add(row);
-                        rows_name.add(name);
-                        rows_rot.add(rot);
-                        rows_loc.add(bp);
+                        rows_shape.add(shape);
+                        rows_rotation.add(rot);
+                        rows_location.add(bp);
                     }
                 }
             }
         }
 
         if (rows.isEmpty()) {
-            return PuzzlePreset.empty();
+            return BoardTemplate.empty();
         }
 
         BinaryMatrix matrix = new BinaryMatrix(rows);
         ZDDNode node = DXZ(matrix, nCol_name, checkPause);
         if (node == null) {
-            return PuzzlePreset.empty();
+            return BoardTemplate.empty();
         }
         Set<Set<Integer>> results = node.get();
         for (Set<Integer> resultRows : results) {
-            List<String> rNames = new ArrayList<>();
-            List<Integer> rRots = new ArrayList<>();
-            List<Point> rLocs = new ArrayList<>();
+
+            List<Puzzle> puzzles = new ArrayList<>();
+
             List<Integer> sortedRows = new ArrayList<>(resultRows);
-            sortedRows.sort((o1, o2) -> Chip.compareName(rows_name.get(o1), rows_name.get(o2)));
+            sortedRows.sort((o1, o2) -> Shape.compare(rows_shape.get(o1), rows_shape.get(o2)));
             sortedRows.forEach((r) -> {
-                rNames.add(rows_name.get(r));
-                rRots.add(rows_rot.get(r));
-                rLocs.add(rows_loc.get(r));
+                puzzles.add(new Puzzle(
+                        rows_shape.get(r),
+                        rows_rotation.get(r),
+                        rows_location.get(r)
+                ));
             });
-            PuzzlePreset preset = new PuzzlePreset(boardName, boardStar, rNames, rRots, rLocs);
-            return preset;
+            BoardTemplate bt = new BoardTemplate(boardName, boardStar, puzzles);
+            return bt;
         }
-        return PuzzlePreset.empty();
+        return BoardTemplate.empty();
     }
 
     private static Set<Point> translate(Chip c, Point bp) {
@@ -319,88 +288,93 @@ public class Assembler {
     }
 
     private void combine() {
-        BlockingQueue<PuzzlePreset> q = new ArrayBlockingQueue<>(5);
+        BlockingQueue<BoardTemplate> q = new ArrayBlockingQueue<>(5);
         ChipCombinationIterator cIt = new ChipCombinationIterator(progress.chips);
 
-        Thread presetThread = new Thread(() -> combine_p(q, cIt));
-        Thread combineThread = new Thread(() -> combine_c(q, cIt));
+        Thread templateThread = new Thread(() -> combine_template(q, cIt));
+        Thread assembleThread = new Thread(() -> combine_assemble(q, cIt));
 
-        presetThread.start();
-        combineThread.start();
+        templateThread.start();
+        assembleThread.start();
         try {
-            presetThread.join();
-            combineThread.join();
+            templateThread.join();
+            assembleThread.join();
         } catch (InterruptedException ex) {
         }
     }
 
-    private void combine_p(BlockingQueue<PuzzlePreset> q, ChipCombinationIterator cIt) {
+    private void combine_template(BlockingQueue<BoardTemplate> q, ChipCombinationIterator cIt) {
         // Dictionary
         if (progress.status == Progress.DICTIONARY) {
-            List<PuzzlePreset> presets = getPresets(progress.name, progress.star, progress.tag == 1);
+            List<BoardTemplate> templates = getBT(progress.name, progress.star, progress.tag == 1);
 
-            progress.nTotal = (int) presets.stream()
+            progress.nTotal = (int) templates.stream()
                     .filter((p) -> cIt.hasEnoughChips(p))
                     .filter((p) -> !progress.settingSymmetry || p.isSymmetric())
                     .count();
 
             setProgBar();
 
-            Iterator<PuzzlePreset> pIt = presets.stream().skip(progress.nDone)
+            Iterator<BoardTemplate> pIt = templates.stream().skip(progress.nDone)
                     .filter((p) -> cIt.hasEnoughChips(p))
                     .filter((p) -> !progress.settingSymmetry || p.isSymmetric())
                     .iterator();
             while (checkPause() && pIt.hasNext()) {
-                PuzzlePreset preset = pIt.next();
-                offer(q, preset);
+                BoardTemplate template = pIt.next();
+                offer(q, template);
             }
         } //
         // Algorithm X
         else {
-            PresetCombinationIterator it = new PresetCombinationIterator(progress.name, progress.star, progress.chips);
+            TCIHandler it = new TCIHandler(progress.name, progress.star, progress.chips);
             progress.nTotal = it.total();
             setProgBar();
 
             it.skip(progress.nDone);
             while (checkPause() && it.hasNext()) {
-                PuzzlePreset preset = combine_p_algX_genPreset(it);
-                offer(q, preset);
+                BoardTemplate template = combine_template_algX(it);
+                offer(q, template);
             }
         }
-        offer(q, PuzzlePreset.end());
+        offer(q, BoardTemplate.end());
     }
 
-    private PuzzlePreset combine_p_algX_genPreset(PresetCombinationIterator iterator) {
+    private BoardTemplate combine_template_algX(TCIHandler iterator) {
         if (!iterator.isNextValid()) {
             iterator.skip();
-            return PuzzlePreset.empty();
+            return BoardTemplate.empty();
         }
-        List<String> names = iterator.next();
-        return genPreset(progress.name, progress.star, names, checkPause);
+        List<Shape> shapes = iterator.next();
+        return generateBT(progress.name, progress.star, shapes, checkPause);
     }
 
-    private void combine_c(BlockingQueue<PuzzlePreset> q, ChipCombinationIterator cIt) {
+    private void combine_assemble(BlockingQueue<BoardTemplate> q, ChipCombinationIterator cIt) {
+        progress.setComparator();
         while (checkPause()) {
-            PuzzlePreset preset = poll(q);
-            if (preset == null || preset.isEnd()) {
+            BoardTemplate template = poll(q);
+            if (template == null || template.isEnd()) {
                 return;
             }
-            if (!preset.isEmpty()) {
+            if (!template.isEmpty()) {
                 // Show progress
-                app.mf.process_showImage(preset);
-                cIt.init(preset);
+                app.mf.process_showImage(template);
+                cIt.init(template);
                 // For all combinations
                 while (checkPause() && cIt.hasNext()) {
                     List<Chip> candidates = cIt.next();
                     // Check PT
                     boolean addable = true;
-                    Stat pt = progress.pt.toStat();
+                    int[] pt = progress.pt.toArray();
                     for (Chip c : candidates) {
-                        pt.subtract(c.getPt());
-                        if (pt.anyNeg()) {
-                            addable = false;
-                            break;
+                        int[] cpt = c.getPt().toArray();
+                        for (int i = 0; i < 4; i++) {
+                            pt[i] -= cpt[i];
+                            if (pt[i] < 0) {
+                                addable = false;
+                                break;
+                            }
                         }
+
                     }
 
                     // add
@@ -408,10 +382,10 @@ public class Assembler {
                         List<Chip> chips = new ArrayList<>();
                         for (int i = 0; i < candidates.size(); i++) {
                             Chip c = new Chip(candidates.get(i));
-                            c.setRotation(preset.getChipRotations().get(i));
+                            c.setRotation(template.getChipRotations().get(i));
                             chips.add(c);
                         }
-                        publishBoard(new Board(progress.name, progress.star, progress.stat.toStat(), chips, preset.getChipLocations()));
+                        publishBoard(new Board(progress.name, progress.star, progress.stat, chips, template.getChipLocations()));
                     }
                 }
             }
@@ -426,18 +400,18 @@ public class Assembler {
         return status == Status.RUNNING;
     }
 
-    private void offer(BlockingQueue<PuzzlePreset> q, PuzzlePreset preset) {
-        while (checkPause() && !q.offer(preset)) {
+    private void offer(BlockingQueue<BoardTemplate> q, BoardTemplate template) {
+        while (checkPause() && !q.offer(template)) {
             wait_();
         }
     }
 
-    private PuzzlePreset poll(BlockingQueue<PuzzlePreset> q) {
-        PuzzlePreset preset = null;
-        while (checkPause() && null == (preset = q.poll())) {
+    private BoardTemplate poll(BlockingQueue<BoardTemplate> q) {
+        BoardTemplate template = null;
+        while (checkPause() && null == (template = q.poll())) {
             wait_();
         }
-        return preset;
+        return template;
     }
 
     private synchronized void wait_() {

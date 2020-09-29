@@ -23,10 +23,11 @@ import javax.swing.JScrollPane;
 import main.App;
 import main.puzzle.Chip;
 import main.puzzle.PuzzleMatrix;
+import main.puzzle.Shape;
 import main.puzzle.Stat;
 import main.resource.Resources;
+import main.util.DoubleKeyHashMap;
 import main.util.Fn;
-import main.util.StrIntMap;
 
 /**
  *
@@ -54,13 +55,13 @@ public class ImageProcessor {
         int color;
     }
 
-    private static class NameRot {
+    private static class ShapeRot {
 
-        final String name;
+        final Shape shape;
         final Integer rotation;
 
-        public NameRot(String name, Integer rotation) {
-            this.name = name;
+        public ShapeRot(Shape shape, Integer rotation) {
+            this.shape = shape;
             this.rotation = rotation;
         }
     }
@@ -154,13 +155,13 @@ public class ImageProcessor {
         ColorMatrix shapeAreaCM = cm.crop(shapeAreaRect).monochrome(Chip.COLORS.get(color));
         Rectangle shapeRect = filterRect_shape(shapeAreaCM.findRects(), factor);
 
-        NameRot nameRot = new NameRot(Chip.NAME_DEFAULT, 0);
+        ShapeRot shapeRot = new ShapeRot(Chip.SHAPE_DEFAULT, 0);
         if (shapeRect != null) {
             ColorMatrix shapeCM = shapeAreaCM.crop(shapeRect);
-            nameRot = idShape(shapeCM);
+            shapeRot = idShape(shapeCM);
         }
-        String name = nameRot.name;
-        int rotation = nameRot.rotation;
+        Shape shape = shapeRot.shape;
+        int rotation = shapeRot.rotation;
         // System.out.println("Name: " + name);
         // System.out.println("Rotation: " + rotation);
 
@@ -186,16 +187,16 @@ public class ImageProcessor {
                 // System.out.println(statType + ": " + stat);
                 switch (statType) {
                     case Stat.DMG:
-                        dmg = Chip.getPt(Chip.RATE_DMG, Chip.getType(name), star, level, stat);
+                        dmg = Chip.getPt(Chip.RATE_DMG, shape.getType(), star, level, stat);
                         break;
                     case Stat.BRK:
-                        brk = Chip.getPt(Chip.RATE_BRK, Chip.getType(name), star, level, stat);
+                        brk = Chip.getPt(Chip.RATE_BRK, shape.getType(), star, level, stat);
                         break;
                     case Stat.HIT:
-                        hit = Chip.getPt(Chip.RATE_HIT, Chip.getType(name), star, level, stat);
+                        hit = Chip.getPt(Chip.RATE_HIT, shape.getType(), star, level, stat);
                         break;
                     default:
-                        rld = Chip.getPt(Chip.RATE_RLD, Chip.getType(name), star, level, stat);
+                        rld = Chip.getPt(Chip.RATE_RLD, shape.getType(), star, level, stat);
                 }
 
                 // idChip_drawRect(debug, Color.MAGENTA, statRect);
@@ -205,7 +206,7 @@ public class ImageProcessor {
         int[] stats = new int[]{dmg, brk, hit, rld};
         for (int i = 0; i < 4; i++) {
             if (stats[i % 4] < 0 && stats[(i + 1) % 4] >= 0 && stats[(i + 2) % 4] >= 0 && stats[(i + 3) % 4] >= 0) {
-                stats[i % 4] = Chip.getSize(name) - stats[(i + 1) % 4] - stats[(i + 2) % 4] - stats[(i + 3) % 4];
+                stats[i % 4] = shape.getSize() - stats[(i + 1) % 4] - stats[(i + 2) % 4] - stats[(i + 3) % 4];
                 break;
             }
         }
@@ -233,7 +234,7 @@ public class ImageProcessor {
         // System.out.println("Name: " + nameRect);
         // idChip_drawRect(debug, Color.GREEN.darker(), shapeRect, shapeAreaRect.x, shapeAreaRect.y);
         // System.out.println("PT: " + pt.toString());
-        return new Chip(name, star, color, pt, level, rotation);
+        return new Chip(shape, star, color, pt, level, rotation);
     }
 
 //    private static void idChip_drawRect(DebugInfo debug, Color color, Rectangle rect) {
@@ -399,17 +400,15 @@ public class ImageProcessor {
         return digit;
     }
 
-    private static final StrIntMap<ColorMatrix> SHAPES = new StrIntMap<ColorMatrix>() // <editor-fold defaultstate="collapsed">
+    private static final Shape.Type[] TYPES = {Shape.Type._6, Shape.Type._5B, Shape.Type._5A, Shape.Type._4, Shape.Type._3};
+    private static final DoubleKeyHashMap<Shape, Integer, ColorMatrix> SHAPES = new DoubleKeyHashMap<Shape, Integer, ColorMatrix>() // <editor-fold defaultstate="collapsed">
     {
         {
-            for (String type : Chip.TYPES) {
-                if (type.equals("2")) {
-                    break;
-                }
-                for (String name : Chip.getNames(type)) {
-                    for (int rotation = 0; rotation < Chip.getMaxRotation(name); rotation++) {
-                        ColorMatrix resource = genShapeResource(name, rotation);
-                        put(name, rotation, resource);
+            for (Shape.Type type : TYPES) {
+                for (Shape shape : Shape.getShapes(type)) {
+                    for (int rotation = 0; rotation < Chip.getMaxRotation(shape); rotation++) {
+                        ColorMatrix resource = genShapeResource(shape, rotation);
+                        put(shape, rotation, resource);
                     }
                 }
             }
@@ -419,8 +418,8 @@ public class ImageProcessor {
     private static final int SHAPE_EDGE = 1;
     private static final int SHAPE_SQUARE = 8;
 
-    private static ColorMatrix genShapeResource(String name, int rotation) {
-        PuzzleMatrix<Boolean> pm = Chip.generateMatrix(name, rotation);
+    private static ColorMatrix genShapeResource(Shape shape, int rotation) {
+        PuzzleMatrix<Boolean> pm = Chip.generateMatrix(shape, rotation);
         ColorMatrix out = new ColorMatrix(SHAPE_SQUARE * pm.getNumCol() + SHAPE_EDGE * 2, SHAPE_SQUARE * pm.getNumRow() + SHAPE_EDGE * 2);
         for (int row = 0; row < pm.getNumRow(); row++) {
             for (int col = 0; col < pm.getNumCol(); col++) {
@@ -485,39 +484,36 @@ public class ImageProcessor {
     }
     // </editor-fold>
 
-    private static ColorMatrix getShapeResource(String name, int rotation) {
-        if (!SHAPES.containsKey(name, rotation)) {
+    private static ColorMatrix getShapeResource(Shape shape, int rotation) {
+        if (!SHAPES.containsKey(shape, rotation)) {
             return null;
         }
-        return SHAPES.get(name, rotation);
+        return SHAPES.get(shape, rotation);
     }
 
-    private static NameRot idShape(ColorMatrix monochromed) {
-        String n = Chip.NAME_DEFAULT;
+    private static ShapeRot idShape(ColorMatrix monochromed) {
+        Shape s = Chip.SHAPE_DEFAULT;
         int r = 0;
         double maxSim = 0;
         double monoRatio = getRatio(monochromed);
 
-        for (String type : Chip.TYPES) {
-            if (type.equals("2")) {
-                break;
-            }
-            for (String name : Chip.getNames(type)) {
-                for (int rotation = 0; rotation < Chip.getMaxRotation(name); rotation++) {
-                    ColorMatrix resource = getShapeResource(name, rotation);
+        for (Shape.Type type : TYPES) {
+            for (Shape shape : Shape.getShapes(type)) {
+                for (int rotation = 0; rotation < Chip.getMaxRotation(shape); rotation++) {
+                    ColorMatrix resource = getShapeResource(shape, rotation);
                     double resourceRatio = getRatio(resource);
                     if (Math.abs(monoRatio - resourceRatio) < 0.5) {
                         double sim = monochromed.similarity(resource);
                         if (maxSim < sim) {
                             maxSim = sim;
-                            n = name;
+                            s = shape;
                             r = rotation;
                         }
                     }
                 }
             }
         }
-        return new NameRot(n, r);
+        return new ShapeRot(s, r);
     }
 
     private static double getRatio(ColorMatrix matrix) {

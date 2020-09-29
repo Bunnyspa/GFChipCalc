@@ -38,14 +38,15 @@ import main.App;
 import main.http.ResearchConnection;
 import main.json.JsonParser;
 import main.puzzle.Board;
+import main.puzzle.BoardTemplate;
 import main.puzzle.Chip;
+import main.puzzle.Shape;
 import main.puzzle.Stat;
 import main.puzzle.Tag;
 import main.puzzle.assembly.Assembler;
 import main.puzzle.assembly.AssemblyResult;
 import main.puzzle.assembly.ChipFreq;
 import main.puzzle.assembly.Progress;
-import main.puzzle.preset.PuzzlePreset;
 import main.resource.Language;
 import main.resource.Resources;
 import main.setting.BoardSetting;
@@ -297,9 +298,9 @@ public class MainFrame extends JFrame {
         // Renderer
         poolList.setCellRenderer(new ChipListCellRenderer(app));
         // Rows
-        for (String type : Chip.TYPES) {
-            for (String c : Chip.getNames(type)) {
-                poolLM.addElement(new Chip(c));
+        for (Shape.Type type : Shape.Type.values()) {
+            for (Shape s : Shape.getShapes(type)) {
+                poolLM.addElement(new Chip(s));
             }
         }
 
@@ -1395,7 +1396,7 @@ public class MainFrame extends JFrame {
             // Size
             if (pass && app.filter.anyTypeTrue()) {
                 int i = 6 - c.getSize();
-                if (c.getSize() < 5 || Chip.TYPE_5A.equals(c.getType())) {
+                if (c.getSize() < 5 || c.getType() == Shape.Type._5A) {
                     i++;
                 }
                 pass = app.filter.getType(i);
@@ -1574,8 +1575,8 @@ public class MainFrame extends JFrame {
         StatPresetMap presetMap = BoardSetting.PRESET;
         boolean[] types = presetMap.getTypeFilter(name, star, presetIndex);
 
-        Stat ptMin = presetMap.get(name, star, presetIndex).ptMin.toStat();
-        Stat ptMax = presetMap.get(name, star, presetIndex).ptMax.toStat();
+        Stat ptMin = presetMap.get(name, star, presetIndex).ptMin;
+        Stat ptMax = presetMap.get(name, star, presetIndex).ptMax;
 
         return app.filter.equals(stars, types, ptMin, ptMax);
     }
@@ -1595,8 +1596,8 @@ public class MainFrame extends JFrame {
         StatPresetMap presetMap = BoardSetting.PRESET;
         boolean[] types = presetMap.getTypeFilter(name, star, presetIndex);
 
-        Stat ptMin = presetMap.get(name, star, presetIndex).ptMin.toStat();
-        Stat ptMax = presetMap.get(name, star, presetIndex).ptMax.toStat();
+        Stat ptMin = presetMap.get(name, star, presetIndex).ptMin;
+        Stat ptMax = presetMap.get(name, star, presetIndex).ptMax;
 
         app.filter.setColors(colors);
         app.filter.setStars(stars);
@@ -1939,7 +1940,7 @@ public class MainFrame extends JFrame {
         boolean start = true;
         int status = Progress.DICTIONARY;
         boolean alt = false;
-        String minType = assembler.getMinType(name, star, false);
+        Shape.Type minType = assembler.getMinType(name, star, false);
 
         if (app.setting.advancedSetting) {
             // Partial option
@@ -1974,9 +1975,7 @@ public class MainFrame extends JFrame {
                 }
                 // Query
                 if (status == Progress.ALGX) {
-                    String combOption0Text = minType.length() > 1
-                            ? app.getText(Language.UNIT_CELLTYPE, minType.substring(0, 1), minType.substring(1, 2))
-                            : app.getText(Language.UNIT_CELL, minType);
+                    String combOption0Text = minType.toString(app);
                     String[] options = {
                         app.getText(Language.COMB_OPTION_DEFAULT_0, combOption0Text),
                         app.getText(Language.COMB_OPTION_DEFAULT_1),
@@ -2004,7 +2003,7 @@ public class MainFrame extends JFrame {
         }
 
         // If preset DNE
-        if (!assembler.presetExists(name, star, alt)) {
+        if (!assembler.btExists(name, star, alt)) {
             status = Progress.ALGX;
         }
 
@@ -2204,10 +2203,10 @@ public class MainFrame extends JFrame {
         combProgressBar.setValue(n);
     }
 
-    public void process_showImage(PuzzlePreset preset) {
+    public void process_showImage(BoardTemplate template) {
         SwingUtilities.invokeLater(() -> {
             if (app.setting.showProgImage && assembler.getStatus() == Assembler.Status.RUNNING) {
-                boardImageLabel.setIcon(preset.getImage(app, boardImageLabel.getWidth()));
+                boardImageLabel.setIcon(template.getImage(app, boardImageLabel.getWidth()));
                 boardImageLabel.repaint();
             }
         });

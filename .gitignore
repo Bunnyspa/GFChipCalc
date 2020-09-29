@@ -24,4 +24,4 @@ hs_err_pid*
 
 # Private files
 AuthCode.java
-Test.java
+/src/main/pvt/

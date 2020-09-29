@@ -88,12 +88,10 @@ public class StatDialog extends JDialog {
         int[] resStat = board.getResonance().toArray();
         int[] verStat = Board.getVersionStat(name, version).toArray();
 
-        Stat totalStat = new Stat();
-        totalStat.add(hocStat);
-        totalStat.add(chipStat);
-        totalStat.add(resStat);
-        totalStat.add(verStat);
-        int[] totalArray = totalStat.toArray();
+        int[] totalStat = new int[4];
+        for (int i = 0; i < 4; i++) {
+            totalStat[i] = hocStat[i] + chipStat[i] + resStat[i] + verStat[i];
+        }
 
         String totalKey = app.getText(Language.STAT_TOTAL);
 
@@ -105,7 +103,7 @@ public class StatDialog extends JDialog {
             values.clear();
 
             keys.add(totalKey);
-            values.add(totalArray[i]
+            values.add(totalStat[i]
                     + " = " + Fn.htmlColor(hocStat[i], Chip.COLOR_LEVEL)
                     + " + " + chipStat[i]
                     + " + " + Fn.htmlColor(resStat[i], Chip.COLORS.get(board.getColor()))
@@ -131,7 +129,7 @@ public class StatDialog extends JDialog {
                     break;
                 case Stat.RLD:
                     // Fire Rate
-                    int firerate = rldToFirerate(totalStat.rld);
+                    int firerate = rldToFirerate(totalStat[3]);
                     keys.add(app.getText(Language.STAT_RLD_FIRERATE));
                     values.add(String.valueOf(firerate));
 
