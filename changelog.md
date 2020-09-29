@@ -610,3 +610,10 @@
 ### Changed
 - Adjusted the window sizes for Filter dialog and Calculation Settings dialog
 - A bit of Japanese translation
+
+
+## 7.0.0 (9/29/2020)
+
+### Added
+- New HOC "Mk 153"
+- Fast calculations for 1-4 star Mk 153 (5-star Mk 153 is not available yet)
