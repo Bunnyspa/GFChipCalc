@@ -168,7 +168,7 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Component id="ptSumLabel" alignment="0" max="32767" attributes="0"/>
               <Component id="maxPanel" alignment="0" max="32767" attributes="0"/>
-              <Component id="maxPresetComboBox" alignment="0" max="32767" attributes="0"/>
+              <Component id="statPresetComboBox" alignment="0" max="32767" attributes="0"/>
               <Component id="jPanel2" alignment="0" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
@@ -177,7 +177,7 @@
               <Group type="102" alignment="0" attributes="0">
                   <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="maxPresetComboBox" min="-2" max="-2" attributes="0"/>
+                  <Component id="statPresetComboBox" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="maxPanel" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
@@ -335,7 +335,7 @@
             <Property name="text" type="java.lang.String" value="pt: 123"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JComboBox" name="maxPresetComboBox">
+        <Component class="javax.swing.JComboBox" name="statPresetComboBox">
           <Properties>
             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[100, 21]"/>

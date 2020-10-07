@@ -626,3 +626,8 @@
 
 ### Added
 - 5-star Mk 153 stat presets and filters
+
+## 7.2.1 (10/7/2020)
+
+### Fixed
+- A bug that caused the stat preset selector not working properly

@@ -1,6 +1,7 @@
 package main.ui.dialog;
 
 import java.awt.Font;
+import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.SpinnerNumberModel;
@@ -101,7 +102,7 @@ public class CalcSettingDialog extends JDialog {
         presetIndex = setting.board.getPresetIndex(name, star);
         if (star != 5 || !StatPresetMap.PRESET.containsKey(name, star)) {
             maxPresetRadioButton.setEnabled(false);
-            maxPresetComboBox.setVisible(false);
+            statPresetComboBox.setVisible(false);
         }
 
         // Stat
@@ -153,7 +154,7 @@ public class CalcSettingDialog extends JDialog {
         maxPtRadioButton.addItemListener((e) -> maxRadioEvent());
         maxPresetRadioButton.addItemListener((e) -> maxRadioEvent());
 
-        maxPresetComboBox.addActionListener((e) -> maxComboBoxEvent());
+        statPresetComboBox.addActionListener((e) -> maxComboBoxEvent());
 
         maxDmgSpinner.addChangeListener((e) -> maxSpinnerEvent());
         maxBrkSpinner.addChangeListener((e) -> maxSpinnerEvent());
@@ -184,8 +185,8 @@ public class CalcSettingDialog extends JDialog {
         maxHitSpinner.setEnabled(editable);
         maxRldSpinner.setEnabled(editable);
 
-        maxPresetComboBox.setVisible(mode == BoardSetting.MAX_PRESET);
-        maxPresetComboBox.removeAllItems();
+        statPresetComboBox.setVisible(mode == BoardSetting.MAX_PRESET);
+        statPresetComboBox.removeAllItems();
 
         switch (mode) {
             case BoardSetting.MAX_STAT:
@@ -201,10 +202,12 @@ public class CalcSettingDialog extends JDialog {
                 maxRldSpinner.setValue(pt.rld);
                 break;
             case BoardSetting.MAX_PRESET:
-                StatPresetMap.PRESET.getStrings(app, name, star).forEach((item) -> {
-                    maxPresetComboBox.addItem(item);
-                });
-                maxPresetComboBox.setSelectedIndex(presetIndex < maxPresetComboBox.getItemCount() ? presetIndex : 0);
+                List<String> strs = StatPresetMap.PRESET.getStrings(app, name, star);
+                for (int i = 0; i < strs.size(); i++) {
+                    String s = strs.get(i);
+                    statPresetComboBox.addItem((i + 1) + ": " + s);
+                }
+                statPresetComboBox.setSelectedIndex(presetIndex < statPresetComboBox.getItemCount() ? presetIndex : 0);
                 break;
             default:
                 Stat maxStat = Board.getMaxStat(getBoardName(), getBoardStar());
@@ -221,7 +224,7 @@ public class CalcSettingDialog extends JDialog {
 
     private void maxComboBoxEvent() {
         if (!radioLoading) {
-            int i = maxPresetComboBox.getSelectedIndex();
+            int i = statPresetComboBox.getSelectedIndex();
             if (0 <= i) {
                 presetIndex = i;
                 Stat presetStat = StatPresetMap.PRESET.get(getBoardName(), star, i).stat;
@@ -333,7 +336,7 @@ public class CalcSettingDialog extends JDialog {
         maxHitSpinner = new javax.swing.JSpinner();
         maxRldSpinner = new javax.swing.JSpinner();
         ptSumLabel = new javax.swing.JLabel();
-        maxPresetComboBox = new javax.swing.JComboBox<>();
+        statPresetComboBox = new javax.swing.JComboBox<>();
         jPanel2 = new javax.swing.JPanel();
         maxNormalRadioButton = new javax.swing.JRadioButton();
         maxPresetRadioButton = new javax.swing.JRadioButton();
@@ -477,7 +480,7 @@ public class CalcSettingDialog extends JDialog {
         ptSumLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         ptSumLabel.setText("pt: 123");
 
-        maxPresetComboBox.setPreferredSize(new java.awt.Dimension(100, 21));
+        statPresetComboBox.setPreferredSize(new java.awt.Dimension(100, 21));
 
         maxButtonGroup.add(maxNormalRadioButton);
         maxNormalRadioButton.setFont(maxNormalRadioButton.getFont().deriveFont(maxNormalRadioButton.getFont().getStyle() | java.awt.Font.BOLD));
@@ -530,7 +533,7 @@ public class CalcSettingDialog extends JDialog {
             statPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(ptSumLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(maxPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(maxPresetComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(statPresetComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         statPanelLayout.setVerticalGroup(
@@ -538,7 +541,7 @@ public class CalcSettingDialog extends JDialog {
             .addGroup(statPanelLayout.createSequentialGroup()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(maxPresetComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(statPresetComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(maxPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -766,7 +769,6 @@ public class CalcSettingDialog extends JDialog {
     private javax.swing.JCheckBox maxLevelCheckBox;
     private javax.swing.JRadioButton maxNormalRadioButton;
     private javax.swing.JPanel maxPanel;
-    private javax.swing.JComboBox<String> maxPresetComboBox;
     private javax.swing.JRadioButton maxPresetRadioButton;
     private javax.swing.JRadioButton maxPtRadioButton;
     private javax.swing.JSpinner maxRldSpinner;
@@ -781,6 +783,7 @@ public class CalcSettingDialog extends JDialog {
     private javax.swing.JRadioButton sortTicketRadioButton;
     private javax.swing.JRadioButton sortXPRadioButton;
     private javax.swing.JPanel statPanel;
+    private javax.swing.JComboBox<String> statPresetComboBox;
     private javax.swing.JCheckBox symmetryCheckBox;
     // End of variables declaration//GEN-END:variables
 }
