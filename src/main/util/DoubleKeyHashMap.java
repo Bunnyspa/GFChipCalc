@@ -7,6 +7,8 @@ import java.util.Set;
 /**
  *
  * @author Bunnyspa
+ * @param <KA>
+ * @param <KB>
  * @param <V>
  */
 public class DoubleKeyHashMap<KA, KB, V> {
@@ -49,5 +51,10 @@ public class DoubleKeyHashMap<KA, KB, V> {
         if (!data.containsKey(s)) {
             data.put(s, new HashMap<>());
         }
+    }
+
+    @Override
+    public String toString() {
+        return data.toString();
     }
 }

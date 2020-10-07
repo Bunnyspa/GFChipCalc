@@ -20,10 +20,11 @@ import main.puzzle.Board;
 import main.puzzle.Chip;
 import main.puzzle.Shape;
 import main.puzzle.Stat;
-import main.resource.Language;
 import main.ui.renderer.ChipListCellRenderer;
 import main.ui.renderer.HelpLevelStatTableCellRenderer;
 import main.ui.renderer.HelpTableCellRenderer;
+import main.ui.resource.GFLGraphics;
+import main.ui.resource.GFLTexts;
 import main.util.Fn;
 import main.util.Rational;
 import main.util.Ref;
@@ -76,15 +77,15 @@ public class HelpChipDialog extends JDialog {
     }
 
     private void init() {
-        setTitle(app.getText(Language.HELP_CHIP));
+        setTitle(app.getText(GFLTexts.HELP_CHIP));
 
-        aTabbedPane.addTab(app.getText(Language.HELP_CHIP_INFO_POINT_TITLE), genTextPanel(app.getText(Language.HELP_CHIP_INFO_POINT_BODY), multiplierPanel));
-        aTabbedPane.addTab(app.getText(Language.HELP_CHIP_INFO_EFFICIENCY_TITLE), genTextPanel(app.getText(Language.HELP_CHIP_INFO_EFFICIENCY_BODY), efficiencyPanel, chipPanel));
-        aTabbedPane.addTab(app.getText(Language.HELP_CHIP_INFO_COLOR_TITLE), genTextPanel(app.getText(Language.HELP_CHIP_INFO_COLOR_BODY), bonusPanel));
-        aTabbedPane.addTab(app.getText(Language.HELP_CHIP_INFO_CALC_TITLE), genTextPanel(app.getText(Language.HELP_CHIP_INFO_CALC_BODY), calcPanel));
+        aTabbedPane.addTab(app.getText(GFLTexts.HELP_CHIP_INFO_POINT_TITLE), genTextPanel(app.getText(GFLTexts.HELP_CHIP_INFO_POINT_BODY), multiplierPanel));
+        aTabbedPane.addTab(app.getText(GFLTexts.HELP_CHIP_INFO_EFFICIENCY_TITLE), genTextPanel(app.getText(GFLTexts.HELP_CHIP_INFO_EFFICIENCY_BODY), efficiencyPanel, chipPanel));
+        aTabbedPane.addTab(app.getText(GFLTexts.HELP_CHIP_INFO_COLOR_TITLE), genTextPanel(app.getText(GFLTexts.HELP_CHIP_INFO_COLOR_BODY), bonusPanel));
+        aTabbedPane.addTab(app.getText(GFLTexts.HELP_CHIP_INFO_CALC_TITLE), genTextPanel(app.getText(GFLTexts.HELP_CHIP_INFO_CALC_BODY), calcPanel));
 
-        fiveAPanel.setBorder(new TitledBorder(app.getText(Language.UNIT_CELLTYPE, "5", "A")));
-        fiveBPanel.setBorder(new TitledBorder(app.getText(Language.UNIT_CELLTYPE, "5", "B")));
+        fiveAPanel.setBorder(new TitledBorder(app.getText(GFLTexts.UNIT_CELLTYPE, "5", "A")));
+        fiveBPanel.setBorder(new TitledBorder(app.getText(GFLTexts.UNIT_CELLTYPE, "5", "B")));
 
         fiveAList.setModel(alm);
         fiveAList.setCellRenderer(new ChipListCellRenderer(app, CHIP_SIZE_FACTOR));
@@ -98,8 +99,8 @@ public class HelpChipDialog extends JDialog {
             blm.addElement(new Chip(shape));
         }
 
-        int chipWidth = (int) (Chip.getImageWidth(false) * CHIP_SIZE_FACTOR);
-        int chipHeight = (int) (Chip.getImageHeight(false) * CHIP_SIZE_FACTOR);
+        int chipWidth = (int) (GFLGraphics.chip_imageWidth(false) * CHIP_SIZE_FACTOR);
+        int chipHeight = (int) (GFLGraphics.chip_imageHeight(false) * CHIP_SIZE_FACTOR);
 
         fiveAList.setFixedCellWidth(chipWidth);
         fiveAList.setFixedCellHeight(chipHeight);
@@ -113,7 +114,7 @@ public class HelpChipDialog extends JDialog {
             resonanceBoardComboBox.addItem(boardName);
         }
 
-        closeButton.setText(app.getText(Language.ACTION_CLOSE));
+        closeButton.setText(app.getText(GFLTexts.ACTION_CLOSE));
 
         initTables();
         addListeners();
@@ -128,11 +129,11 @@ public class HelpChipDialog extends JDialog {
         resonanceTable.setModel(resonanceTM);
         resonanceTable.setDefaultRenderer(String.class, new HelpTableCellRenderer(1, 1));
         String[] resonanceCols = {
-            app.getText(Language.HELP_CHIP_COL_CELL),
-            app.getText(Language.CHIP_STAT_DMG_LONG),
-            app.getText(Language.CHIP_STAT_BRK_LONG),
-            app.getText(Language.CHIP_STAT_HIT_LONG),
-            app.getText(Language.CHIP_STAT_RLD_LONG)
+            app.getText(GFLTexts.HELP_CHIP_COL_CELL),
+            app.getText(GFLTexts.CHIP_STAT_DMG_LONG),
+            app.getText(GFLTexts.CHIP_STAT_BRK_LONG),
+            app.getText(GFLTexts.CHIP_STAT_HIT_LONG),
+            app.getText(GFLTexts.CHIP_STAT_RLD_LONG)
         };
         for (String col : resonanceCols) {
             resonanceTM.addColumn(col);
@@ -140,17 +141,17 @@ public class HelpChipDialog extends JDialog {
         resonanceTable.getTableHeader().setUI(null);
 
         resonanceTM.addRow(resonanceCols);
-        int resonanceRowCount = Board.MAP_RESONANCE.size(Board.NAMES[0]);
+        int resonanceRowCount = Board.MAP_STAT_RESONANCE.size(Board.NAMES[0]);
         resonanceTablePanel.setPreferredSize(new Dimension(200, resonanceTable.getRowHeight() * (resonanceRowCount + 1) + GAP));
 
         percTable.setModel(percTM);
         percTable.setDefaultRenderer(String.class, new HelpTableCellRenderer(1, 1));
         String[] percCols = {
-            app.getText(Language.HELP_CHIP_COL_CELL),
-            app.getText(Language.UNIT_STAR_SHORT, "5"),
-            app.getText(Language.UNIT_STAR_SHORT, "4"),
-            app.getText(Language.UNIT_STAR_SHORT, "3"),
-            app.getText(Language.UNIT_STAR_SHORT, "2")
+            app.getText(GFLTexts.HELP_CHIP_COL_CELL),
+            app.getText(GFLTexts.UNIT_STAR_SHORT, "5"),
+            app.getText(GFLTexts.UNIT_STAR_SHORT, "4"),
+            app.getText(GFLTexts.UNIT_STAR_SHORT, "3"),
+            app.getText(GFLTexts.UNIT_STAR_SHORT, "2")
         };
         for (String col : percCols) {
             percTM.addColumn(col);
@@ -175,10 +176,10 @@ public class HelpChipDialog extends JDialog {
         multTable.setModel(multTM);
         multTable.setDefaultRenderer(String.class, new HelpTableCellRenderer(0, 1));
         String[] multCols = {
-            app.getText(Language.CHIP_STAT_DMG_LONG),
-            app.getText(Language.CHIP_STAT_BRK_LONG),
-            app.getText(Language.CHIP_STAT_HIT_LONG),
-            app.getText(Language.CHIP_STAT_RLD_LONG)
+            app.getText(GFLTexts.CHIP_STAT_DMG_LONG),
+            app.getText(GFLTexts.CHIP_STAT_BRK_LONG),
+            app.getText(GFLTexts.CHIP_STAT_HIT_LONG),
+            app.getText(GFLTexts.CHIP_STAT_RLD_LONG)
         };
         for (String col : multCols) {
             multTM.addColumn(col);
@@ -191,12 +192,12 @@ public class HelpChipDialog extends JDialog {
 
         setResonanceType(SECTION);
 
-        lossLabel.setText(app.getText(Language.HELP_CHIP_CALC_DESC));
+        lossLabel.setText(app.getText(GFLTexts.HELP_CHIP_CALC_DESC));
 
         lossTable.setModel(lossTM);
         lossTable.setDefaultRenderer(String.class, new HelpLevelStatTableCellRenderer(app, 1, 2, toggleType));
         String[] header1 = new String[Chip.LEVEL_MAX + 2];
-        header1[0] = app.getText(Language.HELP_CHIP_COL_LEVEL);
+        header1[0] = app.getText(GFLTexts.HELP_CHIP_COL_LEVEL);
         for (int level = 0; level <= Chip.LEVEL_MAX; level++) {
             header1[level + 1] = String.valueOf(level);
         }
@@ -215,10 +216,10 @@ public class HelpChipDialog extends JDialog {
         lossTM.addRow(header1);
         lossTM.addRow(header2);
 
-        lossComboBox.addItem(app.getText(Language.CHIP_STAT_DMG_LONG));
-        lossComboBox.addItem(app.getText(Language.CHIP_STAT_BRK_LONG));
-        lossComboBox.addItem(app.getText(Language.CHIP_STAT_HIT_LONG));
-        lossComboBox.addItem(app.getText(Language.CHIP_STAT_RLD_LONG));
+        lossComboBox.addItem(app.getText(GFLTexts.CHIP_STAT_DMG_LONG));
+        lossComboBox.addItem(app.getText(GFLTexts.CHIP_STAT_BRK_LONG));
+        lossComboBox.addItem(app.getText(GFLTexts.CHIP_STAT_HIT_LONG));
+        lossComboBox.addItem(app.getText(GFLTexts.CHIP_STAT_RLD_LONG));
 
         setLossType(LOSS);
 
@@ -273,9 +274,9 @@ public class HelpChipDialog extends JDialog {
     private void setResonanceType(boolean type) {
         resonanceType = type;
         if (type == SECTION) {
-            resonanceButton.setText(app.getText(Language.HELP_CHIP_COLOR_SECTION));
+            resonanceButton.setText(app.getText(GFLTexts.HELP_CHIP_COLOR_SECTION));
         } else {
-            resonanceButton.setText(app.getText(Language.HELP_CHIP_COLOR_CUMULATIVE));
+            resonanceButton.setText(app.getText(GFLTexts.HELP_CHIP_COLOR_CUMULATIVE));
         }
         updateResonance();
     }
@@ -283,9 +284,9 @@ public class HelpChipDialog extends JDialog {
     private void setLossType(boolean type) {
         toggleType.v = type;
         if (toggleType.v == STAT) {
-            lossButton.setText(app.getText(Language.HELP_CHIP_CALC_STAT));
+            lossButton.setText(app.getText(GFLTexts.HELP_CHIP_CALC_STAT));
         } else {
-            lossButton.setText(app.getText(Language.HELP_CHIP_CALC_LOSS));
+            lossButton.setText(app.getText(GFLTexts.HELP_CHIP_CALC_LOSS));
         }
         updateStatTable();
     }
@@ -294,8 +295,8 @@ public class HelpChipDialog extends JDialog {
         String name = resonanceBoardComboBox.getItemAt(resonanceBoardComboBox.getSelectedIndex());
 
         int color = Board.getColor(name);
-        boardLabel.setText(app.getText(Language.CHIP_COLOR) + ": " + app.getText(Chip.COLORSTRS.get(color)));
-        Set<Integer> steps = Board.MAP_RESONANCE.keySet(name);
+        boardLabel.setText(app.getText(GFLTexts.CHIP_COLOR) + ": " + app.getText(GFLTexts.TEXT_MAP_COLOR.get(color)));
+        Set<Integer> steps = Board.MAP_STAT_RESONANCE.keySet(name);
 
         List<Integer> resonanceSteps = new ArrayList<>(steps);
         resonanceSteps.sort(Collections.reverseOrder());
@@ -303,18 +304,20 @@ public class HelpChipDialog extends JDialog {
         resonanceTM.setRowCount(1);
         if (resonanceType == SECTION) {
             resonanceSteps.forEach((step) -> {
-                Stat stat = Board.MAP_RESONANCE.get(name, step);
+                Stat stat = Board.MAP_STAT_RESONANCE.get(name, step);
                 resonanceTM.addRow(new Integer[]{step, stat.dmg, stat.brk, stat.hit, stat.rld});
             });
         } else {
-            resonanceSteps.forEach((step) -> {
-                Stat s = new Stat(
-                        steps.stream()
-                                .filter(key -> (key <= step))
-                                .map(key -> Board.MAP_RESONANCE.get(name, key))
-                );
+            for (Integer step : resonanceSteps) {
+                List<Stat> stats = new ArrayList<>();
+                for (Integer key : steps) {
+                    if (key <= step) {
+                        stats.add(Board.MAP_STAT_RESONANCE.get(name, key));
+                    }
+                }
+                Stat s = new Stat(stats);
                 resonanceTM.addRow(new Integer[]{step, s.dmg, s.brk, s.hit, s.rld});
-            });
+            }
         }
     }
 

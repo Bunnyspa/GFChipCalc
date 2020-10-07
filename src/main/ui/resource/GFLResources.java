@@ -1,4 +1,4 @@
-package main.resource;
+package main.ui.resource;
 
 import java.awt.Font;
 import java.awt.FontFormatException;
@@ -25,7 +25,7 @@ import main.util.IO;
  *
  * @author Bunnyspa
  */
-public class Resources {
+public class GFLResources {
 
     public static final String RESOURCE_PATH = "/resources/";
 
@@ -158,7 +158,7 @@ public class Resources {
     public static Map<Locale, Properties> readInternalProp() {
         Map<Locale, Properties> out = new HashMap<>();
 
-        for (Locale locale : Language.LOCALES) {
+        for (Locale locale : GFLTexts.LOCALES) {
             URL url = App.class.getResource(RESOURCE_PATH + "language/" + locale.toLanguageTag() + ".properties");
             try (Reader r = new InputStreamReader(url.openStream(), IO.UTF8)) {
                 Properties props = new Properties();

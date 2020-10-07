@@ -44,11 +44,14 @@ import main.puzzle.PuzzleMatrix;
 import main.puzzle.Shape;
 import main.puzzle.Stat;
 import main.puzzle.Tag;
+import main.puzzle.assembly.CalcExtraSetting;
+import main.puzzle.assembly.CalcSetting;
 import main.puzzle.assembly.Progress;
-import main.resource.Language;
-import main.resource.Resources;
+import main.puzzle.assembly.ProgressFile;
 import main.setting.BoardSetting;
 import main.setting.Setting;
+import main.ui.resource.GFLResources;
+import main.ui.resource.GFLTexts;
 
 /**
  *
@@ -263,14 +266,14 @@ public class IO {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Progress">
-    public static Progress loadProgress(String fileName, List<Chip> invChips) {
+    public static ProgressFile loadProgressFile(String fileName, List<Chip> invChips) {
         try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
             Iterator<String> bri = br.lines().iterator();
             if (bri.hasNext()) {
                 String s = bri.next();
                 Version3 v = new Version3(s);
                 if (v.isCurrent(5, 3, 0)) {
-                    return parseProgress(v, bri, invChips);
+                    return parseProgressFile(v, bri, invChips);
                 } else {
                     List<Board> boards = loadCombination(s, bri);
                     String name = "";
@@ -285,12 +288,11 @@ public class IO {
                     Set<Chip> chipSet = new HashSet<>();
                     boards.forEach((b) -> b.forEachChip((c) -> chipSet.add(c)));
                     loadProgress_adjustInits(chipSet, invChips);
-                    return new Progress(Progress.FINISHED, name, star,
-                            false, false, false, false,
-                            0, 0, 0, 0,
-                            stat, null,
-                            -1, 1, 1,
-                            new ArrayList<>(chipSet), boards, 0);
+                    return new ProgressFile(
+                            new CalcSetting(name, star, false, false, false, stat, null),
+                            new CalcExtraSetting(CalcExtraSetting.CALCMODE_FINISHED, 0, false, 0, 0, 0, 0, new ArrayList<>(chipSet)),
+                            new Progress(0, -1, 1, 1, boards)
+                    );
                 }
             }
         } catch (Exception ex) {
@@ -299,11 +301,11 @@ public class IO {
         return null;
     }
 
-    public static void saveProgress(String fileName, Progress prog) {
+    public static void saveProgressFile(String fileName, ProgressFile pf) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileName))) {
             bw.write(App.VERSION.toData());
             bw.newLine();
-            bw.write(prog.toData());
+            bw.write(pf.toData());
         } catch (Exception ex) {
             App.log(ex);
         }
@@ -350,39 +352,43 @@ public class IO {
         List<BoardTemplate> out = new ArrayList<>();
 
         String fileName = "template_" + toFileName(name) + "_" + star + (isPartial ? "_p" : "") + ".dat";
-        URL url = App.class.getResource(Resources.RESOURCE_PATH + "template/" + fileName);
+        URL url = App.class.getResource(GFLResources.RESOURCE_PATH + "template/" + fileName);
         try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))) {
             Iterator<String> bri = br.lines().iterator();
             while (bri.hasNext()) {
-                String[] line = bri.next().split(";");
-
-                String[] names = line[0].split(",");
-                String[] rotations = line[1].split(",");
-                String[] locations = line[2].split(",");
-
-                List<Puzzle> puzzles = new ArrayList<>(names.length);
-                for (int i = 0; i < names.length; i++) {
-                    puzzles.add(new Puzzle(
-                            Shape.byId(Integer.parseInt(names[i])),
-                            Integer.parseInt(rotations[i]),
-                            parsePoint(locations[i])
-                    ));
-                }
-
-                if (line.length > 3) {
-                    // Symmetry
-                    boolean symmetry = parseBoolean(line[3]);
-
-                    BoardTemplate pp = new BoardTemplate(name, star, puzzles, symmetry);
-                    out.add(pp);
-                } else {
-                    BoardTemplate pp = new BoardTemplate(name, star, puzzles);
-                    out.add(pp);
-                }
+                String line = bri.next();
+                out.add(loadBoardTemplate(name, star, line));
             }
         } catch (Exception ex) {
         }
         return out;
+    }
+
+    private static BoardTemplate loadBoardTemplate(String name, int star, String line) {
+        String[] split = line.split(";");
+        String[] names = split[0].split(",");
+        String[] rotations = split[1].split(",");
+        String[] locations = split[2].split(",");
+
+        List<Puzzle> puzzles = new ArrayList<>(names.length);
+        for (int i = 0; i < names.length; i++) {
+            puzzles.add(new Puzzle(
+                    Shape.byId(Integer.parseInt(names[i])),
+                    Integer.parseInt(rotations[i]),
+                    parsePoint(locations[i])
+            ));
+        }
+
+        if (split.length > 3) {
+            // Symmetry
+            boolean symmetry = parseBoolean(split[3]);
+
+            BoardTemplate pp = new BoardTemplate(name, star, puzzles, symmetry);
+            return pp;
+        } else {
+            BoardTemplate pp = new BoardTemplate(name, star, puzzles);
+            return pp;
+        }
     }
 
     public static String toFileName(String boardName) {
@@ -398,7 +404,7 @@ public class IO {
     // <editor-fold defaultstate="collapsed" desc="Locales and Properties">
     public static List<Locale> getInternalLocales() {
         List<Locale> locales = new ArrayList<>();
-        locales.addAll(Arrays.asList(Language.LOCALES));
+        locales.addAll(Arrays.asList(GFLTexts.LOCALES));
         return locales;
     }
 
@@ -429,19 +435,19 @@ public class IO {
         File folder = new File(PATH_EX_LANG);
         if (!folder.exists()) {
             if (!folder.mkdir()) {
-                JOptionPane.showMessageDialog(component, app.getText(Language.DISPLAY_EXPORT_FAIL_BODY), app.getText(Language.DISPLAY_EXPORT_FAIL_TITLE), JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(component, app.getText(GFLTexts.DISPLAY_EXPORT_FAIL_BODY), app.getText(GFLTexts.DISPLAY_EXPORT_FAIL_TITLE), JOptionPane.ERROR_MESSAGE);
             }
         }
 
         try {
             for (Locale locale : getInternalLocales()) {
                 String filePath = PATH_EX_LANG + "/" + locale.toLanguageTag() + ".properties";
-                String fileContent = Language.getFileContent(locale);
+                String fileContent = GFLTexts.getFileContent(locale);
                 write(filePath, fileContent);
             }
-            JOptionPane.showMessageDialog(component, app.getText(Language.DISPLAY_EXPORT_DONE_BODY, PATH_EX_LANG), app.getText(Language.DISPLAY_EXPORT_DONE_TITLE), JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(component, app.getText(GFLTexts.DISPLAY_EXPORT_DONE_BODY, PATH_EX_LANG), app.getText(GFLTexts.DISPLAY_EXPORT_DONE_TITLE), JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(component, Language.DISPLAY_EXPORT_FAIL_BODY, Language.DISPLAY_EXPORT_FAIL_TITLE, JOptionPane.ERROR);
+            JOptionPane.showMessageDialog(component, GFLTexts.DISPLAY_EXPORT_FAIL_BODY, GFLTexts.DISPLAY_EXPORT_FAIL_TITLE, JOptionPane.ERROR);
         }
     }
 
@@ -503,8 +509,8 @@ public class IO {
         String mainLatest = getVersion(URL_GITHUB_MAIN, App.VERSION.toData());
         if (!App.VERSION.isCurrent(mainLatest)) {
             int retval = JOptionPane.showConfirmDialog(app.mf,
-                    app.getText(Language.NEWVER_CONFIRM_BODY, mainLatest),
-                    app.getText(Language.NEWVER_CONFIRM_TITLE),
+                    app.getText(GFLTexts.NEWVER_CONFIRM_BODY, mainLatest),
+                    app.getText(GFLTexts.NEWVER_CONFIRM_TITLE),
                     JOptionPane.YES_NO_OPTION);
             if (retval == JOptionPane.YES_OPTION) {
                 if (!runUpdate(app)) {
@@ -568,7 +574,7 @@ public class IO {
         try {
             Desktop.getDesktop().browse(new URI(link));
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(c, app.getText(Language.NEWVER_ERROR_BODY), app.getText(Language.NEWVER_ERROR_TITLE), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(c, app.getText(GFLTexts.NEWVER_ERROR_BODY), app.getText(GFLTexts.NEWVER_ERROR_TITLE), JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -690,12 +696,12 @@ public class IO {
     }
 
     //========== Progress ==========//
-    public static Progress parseProgress(Version3 v, Iterator<String> it, List<Chip> invChips) {
-        int status = Integer.valueOf(it.next());
+    public static ProgressFile parseProgressFile(Version3 v, Iterator<String> it, List<Chip> invChips) {
+        int calcMode = Integer.valueOf(it.next());
         String name = it.next();
         int star = Integer.valueOf(it.next());
 
-        if (!v.isCurrent(6, 5, 3) && status == Progress.FINISHED) {
+        if (!v.isCurrent(6, 5, 3) && calcMode == CalcExtraSetting.CALCMODE_FINISHED) {
             Stat stat = parseStat(it.next());
 
             int nComb = -1;
@@ -708,17 +714,16 @@ public class IO {
 
             List<Board> boards = parseProgress_boards(name, star, stat, chips, it);
 
-            return new Progress(status, name, star,
-                    true, true, true, false,
-                    0, 0, 0, 0,
-                    stat, new Stat(0),
-                    nComb, 1, 1,
-                    chips, boards, 0);
+            return new ProgressFile(
+                    new CalcSetting(name, star, true, true, false, stat, new Stat(0)),
+                    new CalcExtraSetting(calcMode, 0, true, 0, 0, 0, 0, chips),
+                    new Progress(0, nComb, 1, 1, boards)
+            );
         }
 
         boolean maxLevel = parseBoolean(it.next());
         boolean matchColor = parseBoolean(it.next());
-        boolean allowRotation = parseBoolean(it.next());
+        boolean rotation = parseBoolean(it.next());
 
         boolean symmetry = false;
         if (v.isCurrent(6, 9, 0)) {
@@ -745,11 +750,10 @@ public class IO {
 
         List<Board> boards = parseProgress_boards(name, star, stat, chips, it);
 
-        return new Progress(status, name, star,
-                maxLevel, matchColor, allowRotation, symmetry,
-                markMin, markMax, markType, sortType,
-                stat, pt,
-                nComb, progress, progMax, chips, boards, tag
+        return new ProgressFile(
+                new CalcSetting(name, star, maxLevel, rotation, symmetry, stat, pt),
+                new CalcExtraSetting(calcMode, tag, matchColor, markMin, markMax, markType, sortType, chips),
+                new Progress(sortType, nComb, progress, progMax, boards)
         );
     }
 

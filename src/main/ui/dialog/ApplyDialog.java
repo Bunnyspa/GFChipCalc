@@ -10,9 +10,9 @@ import javax.swing.JOptionPane;
 import main.App;
 import main.puzzle.Chip;
 import main.puzzle.Tag;
-import main.resource.Language;
-import main.resource.Resources;
 import main.ui.component.TagPanel;
+import main.ui.resource.GFLResources;
+import main.ui.resource.GFLTexts;
 import main.util.Fn;
 
 /**
@@ -36,20 +36,20 @@ public class ApplyDialog extends JDialog {
     }
 
     private void init() {
-        setTitle(app.getText(Language.APPLY_TITLE));
+        setTitle(app.getText(GFLTexts.APPLY_TITLE));
         tagPanel.add(tp);
 
-        colorOrangeButton.setText(app.getText(Language.CHIP_COLOR_ORANGE));
-        colorBlueButton.setText(app.getText(Language.CHIP_COLOR_BLUE));
-        levelMinButton.setText(app.getText(Language.UNIT_LEVEL, "0"));
-        levelMaxButton.setText(app.getText(Language.UNIT_LEVEL, Chip.LEVEL_MAX));
-        markAllButton.setText(app.getText(Language.APPLY_MARK_ALL));
-        markNoneButton.setText(app.getText(Language.APPLY_MARK_NONE));
-        tagDescLabel.setText(app.getText(Language.APPLY_TAG_DESC));
-        cancelButton.setText(app.getText(Language.ACTION_CANCEL));
+        colorOrangeButton.setText(app.getText(GFLTexts.CHIP_COLOR_ORANGE));
+        colorBlueButton.setText(app.getText(GFLTexts.CHIP_COLOR_BLUE));
+        levelMinButton.setText(app.getText(GFLTexts.UNIT_LEVEL, "0"));
+        levelMaxButton.setText(app.getText(GFLTexts.UNIT_LEVEL, Chip.LEVEL_MAX));
+        markAllButton.setText(app.getText(GFLTexts.APPLY_MARK_ALL));
+        markNoneButton.setText(app.getText(GFLTexts.APPLY_MARK_NONE));
+        tagDescLabel.setText(app.getText(GFLTexts.APPLY_TAG_DESC));
+        cancelButton.setText(app.getText(GFLTexts.ACTION_CANCEL));
 
-        rotateLeftButton.setIcon(Resources.ROTATE_LEFT);
-        rotateRightButton.setIcon(Resources.ROTATE_RIGHT);
+        rotateLeftButton.setIcon(GFLResources.ROTATE_LEFT);
+        rotateRightButton.setIcon(GFLResources.ROTATE_RIGHT);
         
         addListeners();
 
@@ -91,7 +91,7 @@ public class ApplyDialog extends JDialog {
     }
 
     private void confirmAndApply(Consumer<? super Chip> action) {
-        int val = JOptionPane.showConfirmDialog(this, app.getText(Language.APPLY_CONFIRM_DESC), app.getText(Language.APPLY_TITLE), JOptionPane.YES_NO_OPTION);
+        int val = JOptionPane.showConfirmDialog(this, app.getText(GFLTexts.APPLY_CONFIRM_DESC), app.getText(GFLTexts.APPLY_TITLE), JOptionPane.YES_NO_OPTION);
         if (val == JOptionPane.YES_OPTION) {
             app.mf.invStat_applyAll(action);
             closeDialog();

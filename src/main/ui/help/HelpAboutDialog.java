@@ -5,8 +5,8 @@ import java.awt.event.MouseEvent;
 import javax.swing.JDialog;
 import javax.swing.Timer;
 import main.App;
-import main.resource.Language;
-import main.resource.Resources;
+import main.ui.resource.GFLResources;
+import main.ui.resource.GFLTexts;
 import main.util.Fn;
 
 /**
@@ -32,8 +32,8 @@ public class HelpAboutDialog extends JDialog {
     }
 
     private void init() {
-        setTitle(app.getText(Language.HELP_ABOUT));
-        imageLabel.setIcon(Resources.BANNER);
+        setTitle(app.getText(GFLTexts.HELP_ABOUT));
+        imageLabel.setIcon(GFLResources.BANNER);
         label.setText(Fn.toHTML("<center>" + App.NAME_EN + "</center>" + System.lineSeparator()
                 + "Developer: Bunnyspa" + System.lineSeparator()
                 + "Email:" + System.lineSeparator()
@@ -57,7 +57,7 @@ public class HelpAboutDialog extends JDialog {
                 + "ひかげ" + System.lineSeparator()
         ));
 
-        closeButton.setText(app.getText(Language.ACTION_CLOSE));
+        closeButton.setText(app.getText(GFLTexts.ACTION_CLOSE));
 
         addListeners();
         pack();

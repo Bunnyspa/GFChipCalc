@@ -10,7 +10,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import main.App;
-import main.resource.Resources;
+import main.ui.resource.GFLResources;
 import main.util.Fn;
 
 /**
@@ -53,7 +53,7 @@ public class HelpAboutHiddenDialog extends JDialog {
     }
 
     private void loadImage(double height) {
-        ImageIcon icon = Resources.MP448;
+        ImageIcon icon = GFLResources.MP448;
         double factor = height / icon.getIconHeight();
         Image image = icon.getImage().getScaledInstance((int) (icon.getIconWidth() * factor), (int) (icon.getIconHeight() * factor), Image.SCALE_SMOOTH);
         imageLabel.setIcon(new ImageIcon(image));

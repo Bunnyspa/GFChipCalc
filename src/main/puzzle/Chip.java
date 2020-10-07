@@ -1,21 +1,10 @@
 package main.puzzle;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.image.BufferedImage;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import javax.swing.ImageIcon;
-import main.App;
-import main.resource.Language;
-import main.resource.Resources;
+import main.ui.resource.GFLTexts;
 import main.util.Fn;
 import main.util.IO;
 import main.util.Rational;
@@ -27,258 +16,15 @@ import main.util.Version3;
  */
 public class Chip implements Serializable {
 
-    private static final boolean O = true;
-    private static final boolean X = false;
-
     public static final Rational RATE_DMG = new Rational(44, 10);
     public static final Rational RATE_BRK = new Rational(127, 10);
     public static final Rational RATE_HIT = new Rational(71, 10);
     public static final Rational RATE_RLD = new Rational(57, 10);
     public static final Rational[] RATES = {Chip.RATE_DMG, Chip.RATE_BRK, Chip.RATE_HIT, Chip.RATE_RLD};
 
-    public static final String STR_STAR = Board.STR_STAR_FULL;
-    public static final Shape SHAPE_DEFAULT = Shape._1;
-
-    private static final Map<Shape, Boolean[][]> CHIP_MATRIX_MAP = new HashMap<Shape, Boolean[][]>() // <editor-fold defaultstate="collapsed">
-    {
-        {
-            // 1
-            put(Shape._1, new Boolean[][]{
-                {O}
-            });
-
-            // 2
-            put(Shape._2, new Boolean[][]{
-                {O},
-                {O}
-            });
-
-            // 3
-            put(Shape._3_I, new Boolean[][]{
-                {O},
-                {O},
-                {O}
-            });
-            put(Shape._3_L, new Boolean[][]{
-                {O, X},
-                {O, O}
-            });
-
-            // 4
-            put(Shape._4_I, new Boolean[][]{
-                {O, O, O, O}
-            });
-            put(Shape._4_L, new Boolean[][]{
-                {O, X},
-                {O, X},
-                {O, O}
-            });
-            put(Shape._4_Lm, new Boolean[][]{
-                {O, X, X},
-                {O, O, O}
-            });
-            put(Shape._4_O, new Boolean[][]{
-                {O, O},
-                {O, O}
-            });
-            put(Shape._4_T, new Boolean[][]{
-                {X, O, X},
-                {O, O, O}
-            });
-            put(Shape._4_Z, new Boolean[][]{
-                {O, O, X},
-                {X, O, O}
-            });
-            put(Shape._4_Zm, new Boolean[][]{
-                {X, O, O},
-                {O, O, X}
-            });
-
-            // 5A
-            put(Shape._5A_C, new Boolean[][]{
-                {O, O, O},
-                {O, X, O}
-            });
-            put(Shape._5A_I, new Boolean[][]{
-                {O, O, O, O, O}
-            });
-            put(Shape._5A_L, new Boolean[][]{
-                {O, X},
-                {O, X},
-                {O, X},
-                {O, O}
-            });
-            put(Shape._5A_Lm, new Boolean[][]{
-                {X, O},
-                {X, O},
-                {X, O},
-                {O, O}
-            });
-            put(Shape._5A_P, new Boolean[][]{
-                {X, O},
-                {O, O},
-                {O, O}
-            });
-            put(Shape._5A_Pm, new Boolean[][]{
-                {O, X},
-                {O, O},
-                {O, O}
-            });
-            put(Shape._5A_V, new Boolean[][]{
-                {O, X, X},
-                {O, X, X},
-                {O, O, O}
-            });
-            put(Shape._5A_Z, new Boolean[][]{
-                {X, X, O},
-                {O, O, O},
-                {O, X, X}
-            });
-            put(Shape._5A_Zm, new Boolean[][]{
-                {O, X, X},
-                {O, O, O},
-                {X, X, O}
-            });
-
-            // 5B
-            put(Shape._5B_F, new Boolean[][]{
-                {O, X, X},
-                {O, O, O},
-                {X, O, X}
-            });
-            put(Shape._5B_Fm, new Boolean[][]{
-                {X, X, O},
-                {O, O, O},
-                {X, O, X}
-            });
-            put(Shape._5B_N, new Boolean[][]{
-                {X, O},
-                {O, O},
-                {O, X},
-                {O, X}
-            });
-            put(Shape._5B_Nm, new Boolean[][]{
-                {O, X},
-                {O, O},
-                {X, O},
-                {X, O}
-            });
-            put(Shape._5B_T, new Boolean[][]{
-                {X, O, X},
-                {X, O, X},
-                {O, O, O}
-            });
-            put(Shape._5B_W, new Boolean[][]{
-                {X, O, O},
-                {O, O, X},
-                {O, X, X}
-            });
-            put(Shape._5B_X, new Boolean[][]{
-                {X, O, X},
-                {O, O, O},
-                {X, O, X}
-            });
-            put(Shape._5B_Y, new Boolean[][]{
-                {X, O},
-                {O, O},
-                {X, O},
-                {X, O}
-            });
-            put(Shape._5B_Ym, new Boolean[][]{
-                {O, X},
-                {O, O},
-                {O, X},
-                {O, X}
-            });
-
-            // 6
-            put(Shape._6_A, new Boolean[][]{
-                {O, X, X},
-                {O, O, X},
-                {O, O, O}
-            });
-            put(Shape._6_C, new Boolean[][]{
-                {O, X, X, O},
-                {O, O, O, O}
-            });
-            put(Shape._6_D, new Boolean[][]{
-                {X, O, O, X},
-                {O, O, O, O}
-            });
-            put(Shape._6_I, new Boolean[][]{
-                {O, O, O, O, O, O}
-            });
-            put(Shape._6_O, new Boolean[][]{
-                {O, O},
-                {O, O},
-                {O, O}
-            });
-            put(Shape._6_R, new Boolean[][]{
-                {X, O, X},
-                {O, O, O},
-                {O, O, X}
-            });
-            put(Shape._6_T, new Boolean[][]{
-                {X, X, O, X},
-                {O, O, O, O},
-                {X, X, O, X}
-            });
-            put(Shape._6_Y, new Boolean[][]{
-                {X, O, X},
-                {O, O, O},
-                {O, X, O}
-            });
-            put(Shape._6_Z, new Boolean[][]{
-                {O, O, O, X},
-                {X, O, O, O}
-            });
-            put(Shape._6_Zm, new Boolean[][]{
-                {X, O, O, O},
-                {O, O, O, X}
-            });
-        }
-    }; // </editor-fold>
-    private static final Map<Shape, Integer> CHIP_ROTATION_MAP = new HashMap<Shape, Integer>() // <editor-fold defaultstate="collapsed">
-    {
-        {
-            for (Shape shape : Shape.values()) {
-                if (shape == Shape.NONE) {
-                    continue;
-                }
-                PuzzleMatrix<Boolean> a = new PuzzleMatrix<>(CHIP_MATRIX_MAP.get(shape));
-                for (int i = 1; i <= 4; i++) {
-                    PuzzleMatrix<Boolean> b = new PuzzleMatrix<>(CHIP_MATRIX_MAP.get(shape));
-                    b.rotate(i);
-                    if (a.equals(b)) {
-                        put(shape, i);
-                        break;
-                    }
-                }
-            }
-        }
-    }; // </editor-fold>
-
     public static final int COLOR_NA = -1;
     public static final int COLOR_ORANGE = 0;
     public static final int COLOR_BLUE = 1;
-
-    public static final Color COLOR_STAR = new Color(255, 170, 0);
-    public static final Color COLOR_LEVEL = new Color(10, 205, 171);
-
-    public static final Map<Integer, Color> COLORS = new HashMap<Integer, Color>() // <editor-fold defaultstate="collapsed">
-    {
-        {
-            put(Chip.COLOR_ORANGE, new Color(240, 107, 65));
-            put(Chip.COLOR_BLUE, new Color(111, 137, 218));
-        }
-    }; // </editor-fold>
-    public static final Map<Integer, String> COLORSTRS = new HashMap<Integer, String>() // <editor-fold defaultstate="collapsed">
-    {
-        {
-            put(COLOR_ORANGE, Language.CHIP_COLOR_ORANGE);
-            put(COLOR_BLUE, Language.CHIP_COLOR_BLUE);
-        }
-    }; // </editor-fold>
 
     public static final boolean COUNTERCLOCKWISE = true;
     public static final boolean CLOCKWISE = false;
@@ -290,20 +36,13 @@ public class Chip implements Serializable {
     public static final int STAR_MIN = 2;
     public static final int STAR_MAX = 5;
 
-    private static final int STAT = 0;
-    private static final int PT = 1;
-
     private final String id;
     private final Shape shape;
 
     private Stat pt;
     private int initRotation, rotation, initLevel, level, star, color, displayType;
-    private int combinationIndex = -1;
+    private int boardIndex = -1;
     private boolean marked;
-    private boolean imageUpdated;
-    private boolean matrixUpdated;
-    private PuzzleMatrix<Boolean> matrix;
-    private ImageIcon icon;
     private final Set<Tag> tags;
 
     // Pool init
@@ -343,9 +82,6 @@ public class Chip implements Serializable {
         initRotation = c.initRotation;
         rotation = c.rotation;
 
-        matrixUpdated = c.matrixUpdated;
-        imageUpdated = c.imageUpdated;
-
         displayType = c.displayType;
         marked = c.marked;
         tags = new HashSet<>(c.tags);
@@ -374,15 +110,15 @@ public class Chip implements Serializable {
             i++;
             pt = new Stat(dmgPt, brkPt, hitPt, rldPt);
 
-            rotation = data.length > i ? Integer.parseInt(data[i]) % getMaxRotation() : 0;
+            rotation = data.length > i ? Integer.parseInt(data[i]) % shape.getMaxRotation() : 0;
             i++;
 
             if (type == INVENTORY) {
                 initRotation = rotation;
                 marked = data.length > i && "1".equals(data[i]);
-                combinationIndex = -1;
+                boardIndex = -1;
             } else {
-                initRotation = data.length > i ? Integer.parseInt(data[i]) % getMaxRotation() : 0;
+                initRotation = data.length > i ? Integer.parseInt(data[i]) % shape.getMaxRotation() : 0;
             }
             i++;
 
@@ -398,7 +134,7 @@ public class Chip implements Serializable {
                 initLevel = level;
             }
 
-            color = data.length > i ? Fn.limit(Integer.parseInt(data[i]), 0, COLORSTRS.size()) : 0;
+            color = data.length > i ? Fn.limit(Integer.parseInt(data[i]), 0, GFLTexts.TEXT_MAP_COLOR.size()) : 0;
             i++;
 
             tags = new HashSet<>();
@@ -410,7 +146,7 @@ public class Chip implements Serializable {
         } else {
             // 1.0.0 - 3.0.0
             shape = data.length > 0 ? Shape.byName(data[0]) : Shape.NONE;
-            rotation = data.length > 1 ? Integer.parseInt(data[1]) % getMaxRotation() : 0;
+            rotation = data.length > 1 ? Integer.parseInt(data[1]) % shape.getMaxRotation() : 0;
             if (type == INVENTORY) {
                 initRotation = rotation;
 
@@ -422,17 +158,17 @@ public class Chip implements Serializable {
 
                 star = data.length > 6 ? Fn.limit(Integer.parseInt(data[6]), 2, 5) : 5;
                 level = data.length > 7 ? Fn.limit(Integer.parseInt(data[7]), 0, LEVEL_MAX) : 0;
-                color = data.length > 8 ? Fn.limit(Integer.parseInt(data[8]), 0, COLORSTRS.size()) : 0;
+                color = data.length > 8 ? Fn.limit(Integer.parseInt(data[8]), 0, GFLTexts.TEXT_MAP_COLOR.size()) : 0;
 
                 marked = data.length > 9 && "1".equals(data[9]);
 
-                combinationIndex = -1;
+                boardIndex = -1;
             } else {
-                initRotation = data.length > 2 ? Integer.parseInt(data[2]) % getMaxRotation() : 0;
+                initRotation = data.length > 2 ? Integer.parseInt(data[2]) % shape.getMaxRotation() : 0;
 
                 star = data.length > 3 ? Fn.limit(Integer.parseInt(data[3]), 2, 5) : 5;
                 level = data.length > 4 ? Fn.limit(Integer.parseInt(data[4]), 0, LEVEL_MAX) : 0;
-                color = data.length > 5 ? Fn.limit(Integer.parseInt(data[5]), 0, COLORSTRS.size()) : 0;
+                color = data.length > 5 ? Fn.limit(Integer.parseInt(data[5]), 0, GFLTexts.TEXT_MAP_COLOR.size()) : 0;
 
                 int dmgPt = data.length > 6 ? Fn.limit(Integer.parseInt(data[6]), 0, getMaxPt()) : 0;
                 int brkPt = data.length > 7 ? Fn.limit(Integer.parseInt(data[7]), 0, getMaxPt()) : 0;
@@ -458,8 +194,8 @@ public class Chip implements Serializable {
 
         this.initLevel = level;
         this.level = level;
-        this.rotation = rotation % getMaxRotation();
-        this.initRotation = rotation % getMaxRotation();
+        this.rotation = rotation % shape.getMaxRotation();
+        this.initRotation = rotation % shape.getMaxRotation();
 
         this.tags = new HashSet<>();
     }
@@ -476,8 +212,8 @@ public class Chip implements Serializable {
 
         this.initLevel = level;
         this.level = level;
-        this.rotation = rotation % getMaxRotation();
-        this.initRotation = rotation % getMaxRotation();
+        this.rotation = rotation % shape.getMaxRotation();
+        this.initRotation = rotation % shape.getMaxRotation();
 
         this.tags = new HashSet<>();
     }
@@ -495,8 +231,8 @@ public class Chip implements Serializable {
 
         this.initLevel = level;
         this.level = level;
-        this.rotation = rotation % getMaxRotation();
-        this.initRotation = rotation % getMaxRotation();
+        this.rotation = rotation % shape.getMaxRotation();
+        this.initRotation = rotation % shape.getMaxRotation();
 
         this.marked = marked;
         this.tags = tags;
@@ -548,7 +284,6 @@ public class Chip implements Serializable {
     // <editor-fold defaultstate="collapsed" desc="Color">
     public void setColor(int color) {
         this.color = color;
-        imageUpdated = false;
     }
 
     public int getColor() {
@@ -557,14 +292,13 @@ public class Chip implements Serializable {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Rotation and Ticket">
-    public final int getMaxRotation() {
-        return getMaxRotation(shape);
-    }
-
-    public static int getMaxRotation(Shape shape) {
-        return CHIP_ROTATION_MAP.get(shape);
-    }
-
+//    public final int getMaxRotation() {
+//        return getMaxRotation(shape);
+//    }
+//
+//    public static int getMaxRotation(Shape shape) {
+//        return CHIP_ROTATION_MAP.get(shape);
+//    }
     public int getInitRotation() {
         return initRotation;
     }
@@ -574,15 +308,13 @@ public class Chip implements Serializable {
     }
 
     public void setInitRotation(int r) {
-        this.initRotation = r % getMaxRotation();
+        this.initRotation = r % shape.getMaxRotation();
         this.rotation = initRotation;
-        repaint();
     }
 
     public void setRotation(int r) {
-        int rot = r % getMaxRotation();
+        int rot = r % shape.getMaxRotation();
         this.rotation = rot;
-        repaint();
     }
 
     public void resetRotation() {
@@ -724,13 +456,11 @@ public class Chip implements Serializable {
 
     public void resetLevel() {
         this.level = this.initLevel;
-        imageUpdated = false;
     }
 
     public void setInitLevel(int initLevel) {
         this.initLevel = initLevel;
         this.level = initLevel;
-        imageUpdated = false;
     }
 
     public void setMinInitLevel() {
@@ -739,7 +469,6 @@ public class Chip implements Serializable {
 
     public void setMaxLevel() {
         level = LEVEL_MAX;
-        imageUpdated = false;
     }
 
     public void setMaxInitLevel() {
@@ -772,7 +501,6 @@ public class Chip implements Serializable {
 
     public void setMarked(boolean marked) {
         this.marked = marked;
-        imageUpdated = false;
     }
     // </editor-fold>
 
@@ -791,7 +519,6 @@ public class Chip implements Serializable {
         } else {
             removeTag(t);
         }
-        imageUpdated = false;
     }
 
     private void addTag(Tag t) {
@@ -802,10 +529,12 @@ public class Chip implements Serializable {
         tags.remove(t);
     }
 
-    private boolean containsHOCTagName() {
+    public boolean containsHOCTagName() {
         for (String hoc : Board.NAMES) {
-            if (tags.stream().anyMatch((t) -> hoc.equals(t.getName()))) {
-                return true;
+            for (Tag t : tags) {
+                if (hoc.equals(t.getName())) {
+                    return true;
+                }
             }
         }
         return false;
@@ -814,220 +543,35 @@ public class Chip implements Serializable {
 
     // <editor-fold defaultstate="collapsed" desc="Matrix">
     public static PuzzleMatrix<Boolean> generateMatrix(Shape shape, int rotation) {
-        PuzzleMatrix<Boolean> matrix = new PuzzleMatrix<>(CHIP_MATRIX_MAP.get(shape));
+        PuzzleMatrix<Boolean> matrix = new PuzzleMatrix<>(Shape.MATRIX_MAP.get(shape));
         matrix.rotate(rotation);
         return matrix;
     }
 
-    private void generateMatrix() {
-        matrix = generateMatrix(shape, rotation);
-    }
-
-    private PuzzleMatrix<Boolean> getMatrix() {
-        if (matrix == null || !matrixUpdated) {
-            generateMatrix();
-            matrixUpdated = true;
-        }
-        return matrix;
-    }
-
-    private int getWidth() {
-        return getMatrix().getNumCol();
-    }
-
-    private int getHeight() {
-        return getMatrix().getNumRow();
-    }
-
-    public Point getPivot() {
-        return getMatrix().getPivot(true);
-    }
-
-    public Set<Point> getAllCoords() {
-        return getMatrix().getCoords(true);
+    public PuzzleMatrix<Boolean> generateMatrix() {
+        return generateMatrix(shape, rotation);
     }
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Image">
     public void setDisplayType(int displayType) {
         this.displayType = displayType;
-        imageUpdated = false;
     }
 
-    public void repaint() {
-        matrixUpdated = false;
-        imageUpdated = false;
+    public int getDisplayType() {
+        return displayType;
     }
 
-    public ImageIcon getImage(App app) {
-        if (!imageUpdated) {
-            generateImage(app);
-        }
-        return icon;
+    public void setBoardIndex(int i) {
+        boardIndex = i;
     }
 
-    private static final int TILESIZE = 12;
-    private static final int GAP = 2;
-    private static int HEIGHT1 = TILESIZE * 6 + GAP * 2;
-    private static int HEIGHT2 = TILESIZE * 3 + GAP * 4;
-
-    private Color getPoolColor(App app) {
-        if (app == null) {
-            return Color.GRAY;
-        }
-        if (getSize() < 5) {
-            int i = (getSize() + 1) % 3;
-            return i == 0 ? app.orange() : i == 1 ? app.green() : app.blue();
-        }
-        if (shape.getType() == Shape.Type._5A) {
-            return app.orange();
-        }
-        if (shape.getType() == Shape.Type._5B) {
-            return app.green();
-        }
-        return app.blue();
+    public int getBoardIndex() {
+        return boardIndex;
     }
 
-    public void setResultIndex(int i) {
-        combinationIndex = i;
-        imageUpdated = false;
-    }
-
-    public static int getImageHeight(boolean isInventory) {
-        return isInventory ? HEIGHT1 + HEIGHT2 : HEIGHT1;
-    }
-
-    public static int getImageWidth(boolean isInventory) {
-        int width = TILESIZE * 6 + GAP * 2;
-        if (isInventory) {
-            width = Math.max(width, TILESIZE * 5);
-        }
-        return width;
-    }
-
-    private boolean showPt() {
+    public boolean statExists() {
         return null != pt;
-    }
-
-    private void generateImage(App app) {
-        int width = getImageWidth(showPt());
-        int height = getImageHeight(showPt());
-
-        int yOffset1 = TILESIZE + GAP * 2;
-        int yOffset2 = TILESIZE * 7 + GAP * 4;
-
-        BufferedImage bi = new BufferedImage(width + 1, height + 1, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = (Graphics2D) bi.getGraphics();
-
-        if (showPt()) {
-            g.setColor(Color.BLACK);
-            g.drawRect(0, 0, width, height);
-            g.fillRect(0, 0, width, yOffset1 + 1);
-            g.fillRect(0, yOffset2, width, height - yOffset2);
-        }
-
-        for (int row = 0; row < getHeight(); row++) {
-            for (int col = 0; col < getWidth(); col++) {
-                if (getMatrix().get(row, col)) {
-                    int tileXOffset = (int) (width / 2 + (col - (double) getWidth() / 2) * TILESIZE);
-                    int tileYOffset = (int) ((3 + row - (double) getHeight() / 2) * TILESIZE) + (showPt() ? TILESIZE + GAP * 2 : 0) + GAP;
-
-                    g.setColor(Color.BLACK);
-                    g.fillRect(tileXOffset, tileYOffset, TILESIZE + 1, TILESIZE + 1);
-
-                    g.setColor(
-                            combinationIndex > -1 ? app.colors()[combinationIndex % app.colors().length]
-                                    : !showPt() ? getPoolColor(app)
-                                            : isMarked() ? Chip.COLORS.get(color).darker().darker()
-                                                    : Chip.COLORS.get(color)
-                    );
-                    g.fillRect(tileXOffset + 1, tileYOffset + 1, TILESIZE - 1, TILESIZE - 1);
-                }
-            }
-        }
-
-        if (showPt()) {
-            g.setColor(COLOR_STAR);
-            String starString = "";
-            for (int i = 0; i < star; i++) {
-                starString += STR_STAR;
-            }
-            int xOffset = width / 2;
-
-            g.drawString(starString, GAP, TILESIZE + GAP);
-
-            // Level
-            g.setFont(Resources.FONT_DIGIT);
-            if (0 < level) {
-                String levelStr = (initLevel == level)
-                        ? "+" + level
-                        : initLevel + "→" + level;
-                int levelWidth = Fn.getWidth(levelStr, g.getFont());
-
-                g.setColor(COLOR_LEVEL);
-                if (initLevel == level) {
-                    g.fillPolygon(new int[]{width, width, width - TILESIZE * 2 - GAP}, new int[]{yOffset2, yOffset2 - TILESIZE * 2 - GAP, yOffset2}, 3);
-                } else {
-                    g.fillRect(width - levelWidth - 1, yOffset2 - TILESIZE - GAP, levelWidth + 1, TILESIZE + GAP);
-                }
-                g.setColor(Color.WHITE);
-                g.drawString(levelStr, width - levelWidth, yOffset2 - 1);
-            }
-
-            // Equipped
-            if (containsHOCTagName()) {
-                g.drawImage(Resources.CHIP_EQUIPPED,
-                        0, yOffset1,
-                        TILESIZE, TILESIZE, null);
-            }
-
-            // Rotation
-            if (initRotation != rotation) {
-                g.drawImage(Resources.CHIP_ROTATED,
-                        width - TILESIZE + 1, yOffset1,
-                        TILESIZE, TILESIZE, null);
-            }
-
-            // Mark
-            if (isMarked()) {
-                g.drawImage(Resources.CHIP_MARKED,
-                        0, yOffset2 - TILESIZE,
-                        TILESIZE, TILESIZE, null);
-            }
-
-            if (isPtValid()) {
-                int[] stats = (displayType == STAT ? getStat() : pt).toArray();
-                Point[] iPts = {
-                    new Point(GAP, yOffset2 + TILESIZE + GAP),
-                    new Point(xOffset, yOffset2 + TILESIZE + GAP),
-                    new Point(GAP, yOffset2 + GAP),
-                    new Point(xOffset, yOffset2 + GAP)};
-                Point[] sPts = {
-                    new Point(TILESIZE + GAP + 1, yOffset2 + TILESIZE * 2 + GAP - 1),
-                    new Point(TILESIZE + 1 + xOffset, yOffset2 + TILESIZE * 2 + GAP - 1),
-                    new Point(TILESIZE + GAP + 1, yOffset2 + TILESIZE + GAP - 1),
-                    new Point(TILESIZE + 1 + xOffset, yOffset2 + TILESIZE + GAP - 1)};
-
-                int pi = 0;
-                for (int i = 0; i < 4; i++) {
-                    if (stats[i] > 0) {
-                        g.setColor(Color.WHITE);
-                        g.fillRect(iPts[pi].x, iPts[pi].y, TILESIZE, TILESIZE);
-                        Image image = Resources.STATS[i].getImage();
-                        g.drawImage(image, iPts[pi].x, iPts[pi].y, TILESIZE, TILESIZE, null);
-                        g.setColor(level == 0 || displayType == PT ? Color.WHITE : COLOR_LEVEL);
-                        int x = sPts[pi].x + (xOffset - TILESIZE - Fn.getWidth(String.valueOf(stats[i]), Resources.FONT_DIGIT)) / 2;
-                        int y = sPts[pi].y;
-                        g.drawString(String.valueOf(stats[i]), x, y);
-                        pi++;
-                    }
-                }
-            }
-
-        }
-
-        icon = new ImageIcon(bi);
-        imageUpdated = true;
     }
     // </editor-fold>
 
@@ -1076,7 +620,7 @@ public class Chip implements Serializable {
     @Override
     public int hashCode() {
         int hash = 3;
-        hash = 59 * hash + Objects.hashCode(this.id);
+        hash = 59 * hash + this.id.hashCode();
         return hash;
     }
 

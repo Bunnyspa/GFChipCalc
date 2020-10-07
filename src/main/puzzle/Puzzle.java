@@ -14,9 +14,9 @@ import main.util.IO;
  */
 public class Puzzle implements Comparable<Puzzle> {
 
-    final Shape shape;
-    final int rotation;
-    final Point location;
+    public final Shape shape;
+    public final int rotation;
+    public final Point location;
 
     public Puzzle(Shape shape, int rotation, Point location) {
         this.shape = shape;

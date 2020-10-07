@@ -12,8 +12,8 @@ import javax.swing.JSeparator;
 import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 import main.App;
-import main.resource.Language;
-import main.resource.Resources;
+import main.ui.resource.GFLResources;
+import main.ui.resource.GFLTexts;
 import main.util.Fn;
 
 /**
@@ -71,8 +71,8 @@ public class HelpAppDialog extends JDialog {
     }
 
     private void init() {
-        setTitle(app.getText(Language.HELP_PROGRAM));
-        closeButton.setText(app.getText(Language.ACTION_CLOSE));
+        setTitle(app.getText(GFLTexts.HELP_PROGRAM));
+        closeButton.setText(app.getText(GFLTexts.ACTION_CLOSE));
         addTabs();
         addListeners();
         pack();
@@ -83,17 +83,13 @@ public class HelpAppDialog extends JDialog {
     }
 
     private void addTabs() {
-        aTabbedPane.addTab(
-                app.getText(Language.HELP_APP_IMPORT), generatePanels(
-                new IconText(app.getText(Language.HELP_APP_IMPORT_PROXY), Resources.PHONE),
-                new IconText(app.getText(Language.HELP_APP_IMPORT_IMAGESCAN), Resources.PICTURE),
-                new IconText(app.getText(Language.HELP_APP_IMPORT_OPEN), Resources.OPEN)
+        aTabbedPane.addTab(app.getText(GFLTexts.HELP_APP_IMPORT), generatePanels(new IconText(app.getText(GFLTexts.HELP_APP_IMPORT_PROXY), GFLResources.PHONE),
+                new IconText(app.getText(GFLTexts.HELP_APP_IMPORT_IMAGESCAN), GFLResources.PICTURE),
+                new IconText(app.getText(GFLTexts.HELP_APP_IMPORT_OPEN), GFLResources.OPEN)
         ));
-        aTabbedPane.addTab(
-                app.getText(Language.HELP_APP_OPTIMIZE), generatePanels(
-                new IconText(app.getText(Language.HELP_APP_OPTIMIZE_FILTER), Resources.FILTER, Resources.FILTER_APPLY),
-                new IconText(app.getText(Language.HELP_APP_OPTIMIZE_SETTING), Resources.SETTING, Resources.SETTING_PRESET, Resources.SETTING_STAT, Resources.SETTING_PT),
-                new IconText(app.getText(Language.HELP_APP_OPTIMIZE_MARK), Resources.UNCHECKED, Resources.CHECKED)
+        aTabbedPane.addTab(app.getText(GFLTexts.HELP_APP_OPTIMIZE), generatePanels(new IconText(app.getText(GFLTexts.HELP_APP_OPTIMIZE_FILTER), GFLResources.FILTER, GFLResources.FILTER_APPLY),
+                new IconText(app.getText(GFLTexts.HELP_APP_OPTIMIZE_SETTING), GFLResources.SETTING, GFLResources.SETTING_PRESET, GFLResources.SETTING_STAT, GFLResources.SETTING_PT),
+                new IconText(app.getText(GFLTexts.HELP_APP_OPTIMIZE_MARK), GFLResources.UNCHECKED, GFLResources.CHECKED)
         ));
     }
 

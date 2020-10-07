@@ -15,8 +15,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import main.App;
 import main.puzzle.Tag;
-import main.resource.Language;
 import main.ui.renderer.TagTableCellRenderer;
+import main.ui.resource.GFLTexts;
 
 /**
  *
@@ -46,9 +46,9 @@ public class TagPanel extends JPanel {
     }
 
     private void init() {
-        addButton.setText(app.getText(Language.ACTION_ADD));
-        colorButton.setText(app.getText(Language.CHIP_COLOR));
-        applyButton.setText(app.getText(Language.ACTION_APPLY));
+        addButton.setText(app.getText(GFLTexts.ACTION_ADD));
+        colorButton.setText(app.getText(GFLTexts.CHIP_COLOR));
+        applyButton.setText(app.getText(GFLTexts.ACTION_APPLY));
 
         tagTable.setModel(tm);
         tagTable.setSelectionBackground(app.orange());

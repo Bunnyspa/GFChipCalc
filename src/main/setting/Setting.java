@@ -57,7 +57,7 @@ public class Setting {
     public int displayType = DISPLAY_STAT;
 
     // Chip
-    public boolean levelMax = true;
+    public boolean maxLevel = true;
     public boolean colorMatch = true;
     public boolean rotation = true;
     public boolean symmetry = false;
@@ -112,7 +112,7 @@ public class Setting {
                     }//
                     // Chip
                     else if (line.startsWith("CHIP_MAXLEVEL=")) {
-                        levelMax = IO.parseBoolean(afterEqual(line));
+                        maxLevel = IO.parseBoolean(afterEqual(line));
                     } else if (line.startsWith("CHIP_MATCHCOLOR=")) {
                         colorMatch = IO.parseBoolean(afterEqual(line));
                     } else if (line.startsWith("CHIP_ROTATABLE=")) {
@@ -146,7 +146,7 @@ public class Setting {
                 poolPanelVisible = IO.parseBoolean(generalLines.get(5));
                 displayType = Integer.valueOf(generalLines.get(6));
 
-                levelMax = IO.parseBoolean(generalLines.get(7));
+                maxLevel = IO.parseBoolean(generalLines.get(7));
                 colorMatch = IO.parseBoolean(generalLines.get(8));
                 rotation = IO.parseBoolean(generalLines.get(9));
                 colorPreset = Integer.valueOf(generalLines.get(11));
@@ -176,7 +176,7 @@ public class Setting {
 
         lines.add("DISPLAY_TYPE=" + displayType);
 
-        lines.add("CHIP_MAXLEVEL=" + IO.data(levelMax));
+        lines.add("CHIP_MAXLEVEL=" + IO.data(maxLevel));
         lines.add("CHIP_MATCHCOLOR=" + IO.data(colorMatch));
         lines.add("CHIP_ROTATABLE=" + IO.data(rotation));
         lines.add("CHIP_SYMMETRY=" + IO.data(symmetry));

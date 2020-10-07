@@ -13,9 +13,10 @@ import main.puzzle.Board;
 import main.puzzle.Chip;
 import main.puzzle.Shape;
 import main.puzzle.Stat;
-import main.resource.Language;
-import main.resource.Resources;
 import main.ui.renderer.ChipListCellRenderer;
+import main.ui.resource.GFLGraphics;
+import main.ui.resource.GFLResources;
+import main.ui.resource.GFLTexts;
 import main.util.Fn;
 
 /**
@@ -27,7 +28,7 @@ public class ImageModifyDialog extends JDialog {
     private final App app;
     private final DefaultListModel<Chip> poolLM = new DefaultListModel<>();
 
-    private Shape shape = Chip.SHAPE_DEFAULT;
+    private Shape shape = Shape.DEFAULT;
     private int star = 5;
     private int color = Chip.COLOR_ORANGE;
     private int[] pt = new int[4];
@@ -55,12 +56,12 @@ public class ImageModifyDialog extends JDialog {
     private void init() {
         initPool();
 
-        poolRotLButton.setIcon(Resources.ROTATE_LEFT);
-        poolRotRButton.setIcon(Resources.ROTATE_RIGHT);
-        dmgTextLabel.setIcon(Resources.DMG);
-        brkTextLabel.setIcon(Resources.BRK);
-        hitTextLabel.setIcon(Resources.HIT);
-        rldTextLabel.setIcon(Resources.RLD);
+        poolRotLButton.setIcon(GFLResources.ROTATE_LEFT);
+        poolRotRButton.setIcon(GFLResources.ROTATE_RIGHT);
+        dmgTextLabel.setIcon(GFLResources.DMG);
+        brkTextLabel.setIcon(GFLResources.BRK);
+        hitTextLabel.setIcon(GFLResources.HIT);
+        rldTextLabel.setIcon(GFLResources.RLD);
 
         String[] piStarCBList = new String[]{
             Board.getStarHTML_star(5),
@@ -91,16 +92,16 @@ public class ImageModifyDialog extends JDialog {
     }
 
     private void initText() {
-        setTitle(app.getText(app.getText(Language.IMAGE_TITLE)));
-        statPanel.setBorder(new TitledBorder(app.getText(Language.CSET_GROUP_STAT)));
-        dmgTextLabel.setText(app.getText(Language.CHIP_STAT_DMG));
-        brkTextLabel.setText(app.getText(Language.CHIP_STAT_BRK));
-        hitTextLabel.setText(app.getText(Language.CHIP_STAT_HIT));
-        rldTextLabel.setText(app.getText(Language.CHIP_STAT_RLD));
+        setTitle(app.getText(app.getText(GFLTexts.IMAGE_TITLE)));
+        statPanel.setBorder(new TitledBorder(app.getText(GFLTexts.CSET_GROUP_STAT)));
+        dmgTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_DMG));
+        brkTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_BRK));
+        hitTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_HIT));
+        rldTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_RLD));
 
-        levelLabel.setText(app.getText(Language.CHIP_LEVEL));
-        okButton.setText(app.getText(Language.ACTION_OK));
-        cancelButton.setText(app.getText(Language.ACTION_CANCEL));
+        levelLabel.setText(app.getText(GFLTexts.CHIP_LEVEL));
+        okButton.setText(app.getText(GFLTexts.ACTION_OK));
+        cancelButton.setText(app.getText(GFLTexts.ACTION_CANCEL));
     }
 
     private void addListeners() {
@@ -233,7 +234,7 @@ public class ImageModifyDialog extends JDialog {
     }
 
     private void cycleColor() {
-        setColor((color + 1) % Chip.COLORSTRS.size());
+        setColor((color + 1) % GFLTexts.TEXT_MAP_COLOR.size());
     }
 
     private void setColor(int c) {
@@ -242,8 +243,8 @@ public class ImageModifyDialog extends JDialog {
     }
 
     private void setColorText() {
-        poolColorButton.setText(app.getText(Chip.COLORSTRS.get(color)));
-        poolColorButton.setForeground(Chip.COLORS.get(color));
+        poolColorButton.setText(app.getText(GFLTexts.TEXT_MAP_COLOR.get(color)));
+        poolColorButton.setForeground(GFLGraphics.COLORS_CHIP.get(color));
     }
 
     /**

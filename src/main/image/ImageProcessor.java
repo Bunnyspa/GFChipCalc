@@ -2,30 +2,24 @@ package main.image;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.imageio.ImageIO;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
-import main.App;
 import main.puzzle.Chip;
 import main.puzzle.PuzzleMatrix;
 import main.puzzle.Shape;
 import main.puzzle.Stat;
-import main.resource.Resources;
+import main.ui.resource.GFLGraphics;
+import main.ui.resource.GFLResources;
 import main.util.DoubleKeyHashMap;
 import main.util.Fn;
 
@@ -35,8 +29,8 @@ import main.util.Fn;
  */
 public class ImageProcessor {
 
-    private static final Color STAR = Chip.COLOR_STAR;
-    private static final Color LEVEL = Chip.COLOR_LEVEL;
+    private static final Color STAR = GFLGraphics.COLOR_STAR_YELLOW;
+    private static final Color LEVEL = GFLGraphics.COLOR_LEVEL;
     private static final Color GRAY = new Color(66, 66, 66);
     private static final Color WHITE = Color.WHITE;
     private static final Color BLACK = Color.BLACK;
@@ -45,8 +39,6 @@ public class ImageProcessor {
 
     private static final double THRESHOLD_STAR = 0.05;
     private static final double THRESHOLD_COLOR = 0.01;
-
-    private static final Map<Integer, Color> COLORS = Chip.COLORS;
 
     private static class DebugInfo {
 
@@ -111,8 +103,8 @@ public class ImageProcessor {
         // System.out.println("Used: " + used);
 
         // Color
-        Color orange = used ? used(COLORS.get(Chip.COLOR_ORANGE)) : COLORS.get(Chip.COLOR_ORANGE);
-        Color blue = used ? used(COLORS.get(Chip.COLOR_BLUE)) : COLORS.get(Chip.COLOR_BLUE);
+        Color orange = used ? used(GFLGraphics.COLORS_CHIP.get(Chip.COLOR_ORANGE)) : GFLGraphics.COLORS_CHIP.get(Chip.COLOR_ORANGE);
+        Color blue = used ? used(GFLGraphics.COLORS_CHIP.get(Chip.COLOR_BLUE)) : GFLGraphics.COLORS_CHIP.get(Chip.COLOR_BLUE);
         int colorNOrange = matrix.monochromeCount(orange, THRESHOLD_COLOR);
         int colorNBlue = matrix.monochromeCount(blue, THRESHOLD_COLOR);
         int color = colorNBlue > colorNOrange ? Chip.COLOR_BLUE : Chip.COLOR_ORANGE;
@@ -152,10 +144,10 @@ public class ImageProcessor {
         int shapeY1 = (int) (getMaxY(starRects, (int) (10 * factor)) + 8 * factor);
         int shapeY2 = (int) (getMinY(statIconAreaRects, (int) (56 * factor)) + 4 * factor);
         Rectangle shapeAreaRect = new Rectangle(0, shapeY1, cm.getWidth(), shapeY2 - shapeY1);
-        ColorMatrix shapeAreaCM = cm.crop(shapeAreaRect).monochrome(Chip.COLORS.get(color));
+        ColorMatrix shapeAreaCM = cm.crop(shapeAreaRect).monochrome(GFLGraphics.COLORS_CHIP.get(color));
         Rectangle shapeRect = filterRect_shape(shapeAreaCM.findRects(), factor);
 
-        ShapeRot shapeRot = new ShapeRot(Chip.SHAPE_DEFAULT, 0);
+        ShapeRot shapeRot = new ShapeRot(Shape.DEFAULT, 0);
         if (shapeRect != null) {
             ColorMatrix shapeCM = shapeAreaCM.crop(shapeRect);
             shapeRot = idShape(shapeCM);
@@ -271,7 +263,7 @@ public class ImageProcessor {
     }
 
     private static ColorMatrix simplify(ColorMatrix matrix, boolean used, int color) {
-        return matrix.simplify(used, STAR, LEVEL, WHITE, GRAY, BLACK, COLORS.get(color));
+        return matrix.simplify(used, STAR, LEVEL, WHITE, GRAY, BLACK, GFLGraphics.COLORS_CHIP.get(color));
     }
 
     private static ColorMatrix simplify_statDigits(ColorMatrix matrix, boolean used, boolean leveled) {
@@ -333,10 +325,10 @@ public class ImageProcessor {
     }
 
     private static final ColorMatrix[] CM_STATS = new ColorMatrix[]{
-        new ColorMatrix(Resources.IP_DMG),
-        new ColorMatrix(Resources.IP_BRK),
-        new ColorMatrix(Resources.IP_HIT),
-        new ColorMatrix(Resources.IP_RLD)
+        new ColorMatrix(GFLResources.IP_DMG),
+        new ColorMatrix(GFLResources.IP_BRK),
+        new ColorMatrix(GFLResources.IP_HIT),
+        new ColorMatrix(GFLResources.IP_RLD)
     };
 
     private static int idStatType(ColorMatrix matrix) {
@@ -358,16 +350,16 @@ public class ImageProcessor {
     }
 
     private static final ColorMatrix[] CM_DIGITS = new ColorMatrix[]{
-        new ColorMatrix(Resources.IP_DIGITS[0]),
-        new ColorMatrix(Resources.IP_DIGITS[1]),
-        new ColorMatrix(Resources.IP_DIGITS[2]),
-        new ColorMatrix(Resources.IP_DIGITS[3]),
-        new ColorMatrix(Resources.IP_DIGITS[4]),
-        new ColorMatrix(Resources.IP_DIGITS[5]),
-        new ColorMatrix(Resources.IP_DIGITS[6]),
-        new ColorMatrix(Resources.IP_DIGITS[7]),
-        new ColorMatrix(Resources.IP_DIGITS[8]),
-        new ColorMatrix(Resources.IP_DIGITS[9])
+        new ColorMatrix(GFLResources.IP_DIGITS[0]),
+        new ColorMatrix(GFLResources.IP_DIGITS[1]),
+        new ColorMatrix(GFLResources.IP_DIGITS[2]),
+        new ColorMatrix(GFLResources.IP_DIGITS[3]),
+        new ColorMatrix(GFLResources.IP_DIGITS[4]),
+        new ColorMatrix(GFLResources.IP_DIGITS[5]),
+        new ColorMatrix(GFLResources.IP_DIGITS[6]),
+        new ColorMatrix(GFLResources.IP_DIGITS[7]),
+        new ColorMatrix(GFLResources.IP_DIGITS[8]),
+        new ColorMatrix(GFLResources.IP_DIGITS[9])
     };
 
     private static int idDigits(ColorMatrix monochromed, Set<Rectangle> rects) {
@@ -406,7 +398,7 @@ public class ImageProcessor {
         {
             for (Shape.Type type : TYPES) {
                 for (Shape shape : Shape.getShapes(type)) {
-                    for (int rotation = 0; rotation < Chip.getMaxRotation(shape); rotation++) {
+                    for (int rotation = 0; rotation < shape.getMaxRotation(); rotation++) {
                         ColorMatrix resource = genShapeResource(shape, rotation);
                         put(shape, rotation, resource);
                     }
@@ -492,14 +484,14 @@ public class ImageProcessor {
     }
 
     private static ShapeRot idShape(ColorMatrix monochromed) {
-        Shape s = Chip.SHAPE_DEFAULT;
+        Shape s = Shape.DEFAULT;
         int r = 0;
         double maxSim = 0;
         double monoRatio = getRatio(monochromed);
 
         for (Shape.Type type : TYPES) {
             for (Shape shape : Shape.getShapes(type)) {
-                for (int rotation = 0; rotation < Chip.getMaxRotation(shape); rotation++) {
+                for (int rotation = 0; rotation < shape.getMaxRotation(); rotation++) {
                     ColorMatrix resource = getShapeResource(shape, rotation);
                     double resourceRatio = getRatio(resource);
                     if (Math.abs(monoRatio - resourceRatio) < 0.5) {
@@ -620,10 +612,11 @@ public class ImageProcessor {
 //            frame.dispose();
 //        }
 //    }
-    public static void test() {
-        test_image("C:\\Users\\bunny\\Documents\\GitHub\\GFChipCalc\\private\\image test\\test.png");
-    }
-
+//
+//    public static void test() {
+//        test_image("C:\\Users\\bunny\\Documents\\GitHub\\GFChipCalc\\private\\image test\\test.png");
+//    }
+//
 //    private static void test_shape() {
 //        ColorMatrix appended = new ColorMatrix();
 //        for (String[] names : Chip.NAMES_N) {
@@ -637,60 +630,60 @@ public class ImageProcessor {
 //        }
 //        testImage(appended);
 //    }
-    private static void test_image(String filePath) {
-        JFrame frame = new JFrame();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        try {
-            ColorMatrix matrix = new ColorMatrix(ImageIO.read(new File(filePath)));
-            ColorMatrix appended = new ColorMatrix();
-            List<Rectangle> rects = detectChips(matrix);
-            if (!rects.isEmpty()) {
-                for (Rectangle r : rects) {
-                    ColorMatrix crop = matrix.crop(r);
-                    DebugInfo debug = new DebugInfo();
-                    debug.image = crop.grayscale();
-                    Chip chip = idChip(crop, debug);
-                    Icon icon = chip.getImage(null);
-                    // System.out.println(chip.toData());
-                    BufferedImage bi = new BufferedImage(
-                            icon.getIconWidth(),
-                            icon.getIconHeight(),
-                            BufferedImage.TYPE_INT_RGB);
-                    Graphics g = bi.createGraphics();
-                    // paint the Icon to the BufferedImage.
-                    g.setColor(Color.WHITE);
-                    g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
-                    icon.paintIcon(null, g, 0, 0);
-                    g.dispose();
-                    ColorMatrix simp = simplify(crop, debug.used, debug.color);
-                    debug.image = debug.image
-                            .appendRight(simp)
-                            .appendRight(crop.monochrome(debug.used ? used(STAR) : STAR, THRESHOLD_STAR))
-                            .appendRight(crop.monochrome(debug.used ? used(Chip.COLORS.get(debug.color)) : Chip.COLORS.get(debug.color), THRESHOLD_COLOR))
-                            //
-                            .appendRight(simp.monochrome(Chip.COLORS.get(debug.color)))
-                            .appendRight(simp.monochrome(STAR))
-                            .appendRight(simp.monochrome(LEVEL))
-                            .appendRight(simplify_statDigits(crop, debug.used, debug.leveled).monochrome(GRAY).invert())
-                            .appendRight(simp.monochrome(WHITE))
-                            .appendRight(simp.monochrome(debug.leveled ? LEVEL : WHITE))
-                            .appendRight(new ColorMatrix(bi));
-                    appended = appended.appendDown(debug.image);
-                }
-            } else {
-                // System.out.println("WARNING: None detected");
-            }
-            JLabel label = new JLabel(new ImageIcon(appended.getImage()));
-            JScrollPane pane = new JScrollPane(label);
-            frame.getContentPane().add(pane, BorderLayout.CENTER);
-        } catch (IOException ex) {
-            App.log(ex);
-            frame.dispose();
-        }
-        frame.pack();
-        frame.setVisible(true);
-    }
-
+//
+//    private static void test_image(String filePath) {
+//        JFrame frame = new JFrame();
+//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        try {
+//            ColorMatrix matrix = new ColorMatrix(ImageIO.read(new File(filePath)));
+//            ColorMatrix appended = new ColorMatrix();
+//            List<Rectangle> rects = detectChips(matrix);
+//            if (!rects.isEmpty()) {
+//                for (Rectangle r : rects) {
+//                    ColorMatrix crop = matrix.crop(r);
+//                    DebugInfo debug = new DebugInfo();
+//                    debug.image = crop.grayscale();
+//                    Chip chip = idChip(crop, debug);
+//                    Icon icon = chip.getImage(null);
+//                    // System.out.println(chip.toData());
+//                    BufferedImage bi = new BufferedImage(
+//                            icon.getIconWidth(),
+//                            icon.getIconHeight(),
+//                            BufferedImage.TYPE_INT_RGB);
+//                    Graphics g = bi.createGraphics();
+//                    // paint the Icon to the BufferedImage.
+//                    g.setColor(Color.WHITE);
+//                    g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
+//                    icon.paintIcon(null, g, 0, 0);
+//                    g.dispose();
+//                    ColorMatrix simp = simplify(crop, debug.used, debug.color);
+//                    debug.image = debug.image
+//                            .appendRight(simp)
+//                            .appendRight(crop.monochrome(debug.used ? used(STAR) : STAR, THRESHOLD_STAR))
+//                            .appendRight(crop.monochrome(debug.used ? used(GFLGraphics.COLORS_CHIP.get(debug.color)) : GFLGraphics.COLORS_CHIP.get(debug.color), THRESHOLD_COLOR))
+//                            //
+//                            .appendRight(simp.monochrome(GFLGraphics.COLORS_CHIP.get(debug.color)))
+//                            .appendRight(simp.monochrome(STAR))
+//                            .appendRight(simp.monochrome(LEVEL))
+//                            .appendRight(simplify_statDigits(crop, debug.used, debug.leveled).monochrome(GRAY).invert())
+//                            .appendRight(simp.monochrome(WHITE))
+//                            .appendRight(simp.monochrome(debug.leveled ? LEVEL : WHITE))
+//                            .appendRight(new ColorMatrix(bi));
+//                    appended = appended.appendDown(debug.image);
+//                }
+//            } else {
+//                // System.out.println("WARNING: None detected");
+//            }
+//            JLabel label = new JLabel(new ImageIcon(appended.getImage()));
+//            JScrollPane pane = new JScrollPane(label);
+//            frame.getContentPane().add(pane, BorderLayout.CENTER);
+//        } catch (IOException ex) {
+//            App.log(ex);
+//            frame.dispose();
+//        }
+//        frame.pack();
+//        frame.setVisible(true);
+//    }
     private static void testImage(ColorMatrix matrix) {
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

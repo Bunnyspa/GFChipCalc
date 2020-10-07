@@ -2,7 +2,7 @@ package main.ui.help;
 
 import javax.swing.JDialog;
 import main.App;
-import main.resource.Language;
+import main.ui.resource.GFLTexts;
 import main.util.Fn;
 import main.util.IO;
 
@@ -27,7 +27,7 @@ public class HelpDialog extends JDialog {
     }
 
     private void init() {
-        setTitle(app.getText(Language.HELP_TITLE));
+        setTitle(app.getText(GFLTexts.HELP_TITLE));
 
         versionLabel.setText("Version: " + App.VERSION.toData());
 
@@ -37,12 +37,12 @@ public class HelpDialog extends JDialog {
                 + "bunnyspa@naver.com"
         ));
 
-        chipButton.setText(app.getText(Language.HELP_CHIP));
-        appButton.setText(app.getText(Language.HELP_PROGRAM));
-        proxyButton.setText(app.getText(Language.HELP_PROXY));
-        changelogButton.setText(app.getText(Language.HELP_CHANGELOG));
-        aboutButton.setText(app.getText(Language.HELP_ABOUT));
-        closeButton.setText(app.getText(Language.ACTION_CLOSE));
+        chipButton.setText(app.getText(GFLTexts.HELP_CHIP));
+        appButton.setText(app.getText(GFLTexts.HELP_PROGRAM));
+        proxyButton.setText(app.getText(GFLTexts.HELP_PROXY));
+        changelogButton.setText(app.getText(GFLTexts.HELP_CHANGELOG));
+        aboutButton.setText(app.getText(GFLTexts.HELP_ABOUT));
+        closeButton.setText(app.getText(GFLTexts.ACTION_CLOSE));
 
         addListeners();
         pack();

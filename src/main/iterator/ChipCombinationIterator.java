@@ -1,7 +1,8 @@
-package main.puzzle.assembly;
+package main.iterator;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -22,13 +23,13 @@ public class ChipCombinationIterator implements Iterator<List<Chip>> {
 
     public ChipCombinationIterator(Collection<Chip> candidates) {
         candidateMap = new HashMap<>();
-        candidates.forEach((c) -> {
+        for (Chip c : candidates) {
             Shape shape = c.getShape();
             if (!candidateMap.containsKey(shape)) {
                 candidateMap.put(shape, new ArrayList<>());
             }
             candidateMap.get(shape).add(c);
-        });
+        }
         shapes = new ArrayList<>();
         combs = new ArrayList<>();
     }
@@ -70,12 +71,12 @@ public class ChipCombinationIterator implements Iterator<List<Chip>> {
         shapes.clear();
         combs.clear();
         List<Shape> keys = new ArrayList<>(shapeCountMap.keySet());
-        keys.sort((o1, o2)-> Shape.compare(o1, o2));
-        keys.forEach((shape) -> {
+        Collections.sort(keys, (o1, o2) -> Shape.compare(o1, o2));
+        for (Shape shape : keys) {
             int count = shapeCountMap.get(shape);
             shapes.add(shape);
             combs.add(nCrInit(count));
-        });
+        }
     }
 
     private int getCandidateSize(Shape shape) {
@@ -87,8 +88,12 @@ public class ChipCombinationIterator implements Iterator<List<Chip>> {
 
     public boolean hasEnoughChips(BoardTemplate template) {
         Map<Shape, Integer> nameCountMap = template.getShapeCountMap();
-        return nameCountMap.keySet().stream()
-                .allMatch((shape) -> (nameCountMap.get(shape) <= getCandidateSize(shape)));
+        for (Shape shape : nameCountMap.keySet()) {
+            if (nameCountMap.get(shape) > getCandidateSize(shape)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private int[] nextComb(int i) {

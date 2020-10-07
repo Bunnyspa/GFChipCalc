@@ -7,10 +7,10 @@ import javax.swing.JDialog;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import main.App;
-import main.resource.Language;
-import main.resource.Resources;
 import main.setting.Setting;
 import main.ui.component.ColorLabel;
+import main.ui.resource.GFLResources;
+import main.ui.resource.GFLTexts;
 import main.util.Fn;
 import main.util.IO;
 import main.util.Ref;
@@ -38,19 +38,19 @@ public class AppSettingDialog extends JDialog {
     }
 
     private void init() {
-        setTitle(app.getText(Language.DISPLAY_TITLE));
+        setTitle(app.getText(GFLTexts.DISPLAY_TITLE));
 
         languagePanel.setBorder(new EmptyBorder(GAP, GAP, GAP, GAP));
         colorFontPanel.setBorder(new EmptyBorder(GAP, GAP, GAP, GAP));
 
-        aTabbedPane.addTab(app.getText(Language.DISPLAY_LANGUAGE_TITLE), languagePanel);
-        aTabbedPane.addTab(app.getText(Language.DISPLAY_COLORFONT_TITLE), colorFontPanel);
+        aTabbedPane.addTab(app.getText(GFLTexts.DISPLAY_LANGUAGE_TITLE), languagePanel);
+        aTabbedPane.addTab(app.getText(GFLTexts.DISPLAY_COLORFONT_TITLE), colorFontPanel);
 
-        exportPropButton.setText(app.getText(Language.DISPLAY_EXPORT));
-        langInfoLabel.setText(app.getText(Language.DISPLAY_HOWTO_ADDLANGUAGE));
-        fontResetButton.setText(app.getText(Language.DISPLAY_FONT_RESET));
-        okButton.setText(app.getText(Language.ACTION_OK));
-        cancelButton.setText(app.getText(Language.ACTION_CANCEL));
+        exportPropButton.setText(app.getText(GFLTexts.DISPLAY_EXPORT));
+        langInfoLabel.setText(app.getText(GFLTexts.DISPLAY_HOWTO_ADDLANGUAGE));
+        fontResetButton.setText(app.getText(GFLTexts.DISPLAY_FONT_RESET));
+        okButton.setText(app.getText(GFLTexts.ACTION_OK));
+        cancelButton.setText(app.getText(GFLTexts.ACTION_CANCEL));
 
         aLabel = new ColorLabel(app);
         aLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -91,9 +91,9 @@ public class AppSettingDialog extends JDialog {
     private static String getColorStr(int preset) {
         switch (preset) {
             case Setting.COLOR_NORMAL:
-                return Language.DISPLAY_COLOR_NORMAL;
+                return GFLTexts.DISPLAY_COLOR_NORMAL;
             case Setting.COLOR_COLORBLIND:
-                return Language.DISPLAY_COLOR_COLORBLIND;
+                return GFLTexts.DISPLAY_COLOR_COLORBLIND;
             default:
                 throw new AssertionError();
         }
@@ -113,7 +113,7 @@ public class AppSettingDialog extends JDialog {
     private void previewFont() {
         aLabel.setText("");
         aLabel.setFont(getSelectedFont());
-        String s = app.getText(Language.DISPLAY_LANGUAGE_PREVIEW);
+        String s = app.getText(GFLTexts.DISPLAY_LANGUAGE_PREVIEW);
         aLabel.setText(s);
     }
 
@@ -122,7 +122,7 @@ public class AppSettingDialog extends JDialog {
     }
 
     private Font getSelectedFont() {
-        return Resources.getDefaultFont().deriveFont(Float.valueOf(size.v));
+        return GFLResources.getDefaultFont().deriveFont(Float.valueOf(size.v));
     }
 
     /**

@@ -45,10 +45,11 @@ import main.puzzle.Stat;
 import main.puzzle.Tag;
 import main.puzzle.assembly.Assembler;
 import main.puzzle.assembly.AssemblyResult;
+import main.puzzle.assembly.CalcExtraSetting;
+import main.puzzle.assembly.CalcSetting;
 import main.puzzle.assembly.ChipFreq;
 import main.puzzle.assembly.Progress;
-import main.resource.Language;
-import main.resource.Resources;
+import main.puzzle.assembly.ProgressFile;
 import main.setting.BoardSetting;
 import main.setting.Filter;
 import main.setting.Setting;
@@ -68,6 +69,9 @@ import main.ui.renderer.ChipFreqListCellRenderer;
 import main.ui.renderer.ChipListCellRenderer;
 import main.ui.renderer.CombListCellRenderer;
 import main.ui.renderer.InvListCellRenderer;
+import main.ui.resource.GFLGraphics;
+import main.ui.resource.GFLResources;
+import main.ui.resource.GFLTexts;
 import main.ui.shortcut.ShortcutKeyAdapter;
 import main.ui.tip.TipMouseListener;
 import main.ui.transfer.InvListTransferHandler;
@@ -150,8 +154,27 @@ public class MainFrame extends JFrame {
     private boolean inv_order = DESCENDING;
 
     // Calculator
-    private final Assembler assembler;
-    private Progress progress;
+    private final Assembler assembler = new Assembler(new Assembler.Intermediate() {
+        @Override
+        public void stop() {
+            process_stop();
+        }
+
+        @Override
+        public void update(int nDone) {
+            process_prog(nDone);
+        }
+
+        @Override
+        public void set(int nDone, int nTotal) {
+            process_setProgBar(nDone, nTotal);
+        }
+
+        @Override
+        public void show(BoardTemplate template) {
+            process_showImage(template);
+        }
+    });
     private long time, pauseTime;
     private long prevDoneTime;
     private final List<Long> doneTimes = new LinkedList<>();
@@ -168,7 +191,6 @@ public class MainFrame extends JFrame {
     public MainFrame(App app) {
         this.app = app;
         initComponents();
-        assembler = new Assembler(app);
         blinkTimer = new Timer(500, (e) -> {
             blink.v = !blink.v;
             invList.repaint();
@@ -192,8 +214,8 @@ public class MainFrame extends JFrame {
         invStatPanels.add(invHitPanel);
         invStatPanels.add(invRldPanel);
 
-        combTabbedPane.add(app.getText(Language.COMB_TAB_RESULT), combResultPanel);
-        combTabbedPane.add(app.getText(Language.COMB_TAB_FREQ), combFreqPanel);
+        combTabbedPane.add(app.getText(GFLTexts.COMB_TAB_RESULT), combResultPanel);
+        combTabbedPane.add(app.getText(GFLTexts.COMB_TAB_FREQ), combFreqPanel);
 
         settingFile_load();
 
@@ -238,57 +260,57 @@ public class MainFrame extends JFrame {
     }
 
     private void initImages() {
-        this.setIconImage(Resources.FAVICON);
+        this.setIconImage(GFLResources.FAVICON);
 
-        donationButton.setIcon(Resources.DONATION);
+        donationButton.setIcon(GFLResources.DONATION);
 
-        helpButton.setIcon(Resources.QUESTION);
-        displaySettingButton.setIcon(Resources.FONT);
-        poolRotLButton.setIcon(Resources.ROTATE_LEFT);
-        poolRotRButton.setIcon(Resources.ROTATE_RIGHT);
-        poolSortButton.setIcon(Resources.DESCENDING);
+        helpButton.setIcon(GFLResources.QUESTION);
+        displaySettingButton.setIcon(GFLResources.FONT);
+        poolRotLButton.setIcon(GFLResources.ROTATE_LEFT);
+        poolRotRButton.setIcon(GFLResources.ROTATE_RIGHT);
+        poolSortButton.setIcon(GFLResources.DESCENDING);
 
-        imageButton.setIcon(Resources.PICTURE);
-        proxyButton.setIcon(Resources.PHONE);
+        imageButton.setIcon(GFLResources.PICTURE);
+        proxyButton.setIcon(GFLResources.PHONE);
 
-        poolWindowButton.setIcon(Resources.PANEL_CLOSE);
-        addButton.setIcon(Resources.ADD);
+        poolWindowButton.setIcon(GFLResources.PANEL_CLOSE);
+        addButton.setIcon(GFLResources.ADD);
 
-        invNewButton.setIcon(Resources.NEW);
-        invOpenButton.setIcon(Resources.OPEN);
-        invSaveButton.setIcon(Resources.SAVE);
-        invSaveAsButton.setIcon(Resources.SAVEAS);
+        invNewButton.setIcon(GFLResources.NEW);
+        invOpenButton.setIcon(GFLResources.OPEN);
+        invSaveButton.setIcon(GFLResources.SAVE);
+        invSaveAsButton.setIcon(GFLResources.SAVEAS);
 
-        invSortOrderButton.setIcon(Resources.DESCENDING);
-        filterButton.setIcon(Resources.FILTER);
-        displayTypeButton.setIcon(Resources.DISPLAY_STAT);
+        invSortOrderButton.setIcon(GFLResources.DESCENDING);
+        filterButton.setIcon(GFLResources.FILTER);
+        displayTypeButton.setIcon(GFLResources.DISPLAY_STAT);
 
-        invRotLButton.setIcon(Resources.ROTATE_LEFT);
-        invRotRButton.setIcon(Resources.ROTATE_RIGHT);
-        invDelButton.setIcon(Resources.DELETE);
-        invDmgTextLabel.setIcon(Resources.DMG);
-        invBrkTextLabel.setIcon(Resources.BRK);
-        invHitTextLabel.setIcon(Resources.HIT);
-        invRldTextLabel.setIcon(Resources.RLD);
+        invRotLButton.setIcon(GFLResources.ROTATE_LEFT);
+        invRotRButton.setIcon(GFLResources.ROTATE_RIGHT);
+        invDelButton.setIcon(GFLResources.DELETE);
+        invDmgTextLabel.setIcon(GFLResources.DMG);
+        invBrkTextLabel.setIcon(GFLResources.BRK);
+        invHitTextLabel.setIcon(GFLResources.HIT);
+        invRldTextLabel.setIcon(GFLResources.RLD);
 
-        combWarningButton.setIcon(Resources.getScaledIcon(Resources.UI_WARNING, 16, 16));
-        timeWarningButton.setIcon(Resources.getScaledIcon(Resources.UI_WARNING, 16, 16));
+        combWarningButton.setIcon(GFLResources.getScaledIcon(GFLResources.UI_WARNING, 16, 16));
+        timeWarningButton.setIcon(GFLResources.getScaledIcon(GFLResources.UI_WARNING, 16, 16));
 
-        settingButton.setIcon(Resources.SETTING);
-        combStopButton.setIcon(Resources.COMB_STOP);
-        combStartPauseButton.setIcon(Resources.COMB_START);
+        settingButton.setIcon(GFLResources.SETTING);
+        combStopButton.setIcon(GFLResources.COMB_STOP);
+        combStartPauseButton.setIcon(GFLResources.COMB_START);
 
-        combDmgTextLabel.setIcon(Resources.DMG);
-        combBrkTextLabel.setIcon(Resources.BRK);
-        combHitTextLabel.setIcon(Resources.HIT);
-        combRldTextLabel.setIcon(Resources.RLD);
+        combDmgTextLabel.setIcon(GFLResources.DMG);
+        combBrkTextLabel.setIcon(GFLResources.BRK);
+        combHitTextLabel.setIcon(GFLResources.HIT);
+        combRldTextLabel.setIcon(GFLResources.RLD);
 
-        combSaveButton.setIcon(Resources.SAVE);
-        combOpenButton.setIcon(Resources.OPEN);
-        ticketTextLabel.setIcon(Resources.TICKET);
+        combSaveButton.setIcon(GFLResources.SAVE);
+        combOpenButton.setIcon(GFLResources.OPEN);
+        ticketTextLabel.setIcon(GFLResources.TICKET);
 
-        legendEquippedLabel.setIcon(new ImageIcon(Resources.CHIP_EQUIPPED));
-        legendRotatedLabel.setIcon(new ImageIcon(Resources.CHIP_ROTATED));
+        legendEquippedLabel.setIcon(new ImageIcon(GFLResources.CHIP_EQUIPPED));
+        legendRotatedLabel.setIcon(new ImageIcon(GFLResources.CHIP_ROTATED));
     }
 
     private void initTables() {
@@ -305,8 +327,8 @@ public class MainFrame extends JFrame {
         }
 
         /* INVENTORY */
-        invList.setFixedCellHeight(Chip.getImageHeight(true) + 3);
-        invList.setFixedCellWidth(Chip.getImageWidth(true) + 3);
+        invList.setFixedCellHeight(GFLGraphics.chip_imageHeight(true) + 3);
+        invList.setFixedCellWidth(GFLGraphics.chip_imageWidth(true) + 3);
         Dimension invD = invListPanel.getSize();
         invD.width = invList.getFixedCellWidth() * 4 + BORDERSIZE * 2 + 10 + invListScrollPane.getVerticalScrollBar().getPreferredSize().width;
         invListPanel.setPreferredSize(invD);
@@ -329,8 +351,8 @@ public class MainFrame extends JFrame {
         combList.setCellRenderer(new CombListCellRenderer(app, combFreqList));
 
         /* RESULT */
-        int height = Chip.getImageHeight(true) + 3;
-        int width = Chip.getImageWidth(true) + 3;
+        int height = GFLGraphics.chip_imageHeight(true) + 3;
+        int width = GFLGraphics.chip_imageWidth(true) + 3;
 
         combChipList.setFixedCellHeight(height);
         combChipList.setFixedCellWidth(width);
@@ -503,8 +525,8 @@ public class MainFrame extends JFrame {
         boardNameComboBox.addActionListener((e) -> setting_resetBoard());
         boardStarComboBox.addActionListener((e) -> setting_resetBoard());
         settingButton.addActionListener((e) -> openDialog(CalcSettingDialog.getInstance(app)));
-        combWarningButton.addActionListener((e) -> Fn.popup(combWarningButton, app.getText(Language.WARNING_HOCMAX), app.getText(Language.WARNING_HOCMAX_DESC)));
-        timeWarningButton.addActionListener((e) -> Fn.popup(timeWarningButton, app.getText(Language.WARNING_TIME), app.getText(Language.WARNING_TIME_DESC)));
+        combWarningButton.addActionListener((e) -> Fn.popup(combWarningButton, app.getText(GFLTexts.WARNING_HOCMAX), app.getText(GFLTexts.WARNING_HOCMAX_DESC)));
+        timeWarningButton.addActionListener((e) -> Fn.popup(timeWarningButton, app.getText(GFLTexts.WARNING_TIME), app.getText(GFLTexts.WARNING_TIME_DESC)));
 
         showProgImageCheckBox.addItemListener((e) -> comb_setShowProgImage());
         combStartPauseButton.addActionListener((e) -> process_toggleStartPause());
@@ -688,51 +710,51 @@ public class MainFrame extends JFrame {
         };
         boardStarComboBox.setModel(new DefaultComboBoxModel<>(bStarCBList));
 
-        invDmgTextLabel.setText(app.getText(Language.CHIP_STAT_DMG));
-        invBrkTextLabel.setText(app.getText(Language.CHIP_STAT_BRK));
-        invHitTextLabel.setText(app.getText(Language.CHIP_STAT_HIT));
-        invRldTextLabel.setText(app.getText(Language.CHIP_STAT_RLD));
-        combDmgTextLabel.setText(app.getText(Language.CHIP_STAT_DMG));
-        combBrkTextLabel.setText(app.getText(Language.CHIP_STAT_BRK));
-        combHitTextLabel.setText(app.getText(Language.CHIP_STAT_HIT));
-        combRldTextLabel.setText(app.getText(Language.CHIP_STAT_RLD));
+        invDmgTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_DMG));
+        invBrkTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_BRK));
+        invHitTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_HIT));
+        invRldTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_RLD));
+        combDmgTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_DMG));
+        combBrkTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_BRK));
+        combHitTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_HIT));
+        combRldTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_RLD));
 
-        invApplyButton.setText(app.getText(Language.APPLY_TITLE));
-        enhancementTextLabel.setText(app.getText(Language.CHIP_LEVEL));
-        invMarkCheckBox.setText(app.getText(Language.CHIP_MARK));
+        invApplyButton.setText(app.getText(GFLTexts.APPLY_TITLE));
+        enhancementTextLabel.setText(app.getText(GFLTexts.CHIP_LEVEL));
+        invMarkCheckBox.setText(app.getText(GFLTexts.CHIP_MARK));
 
-        researchButton.setText(app.getText(Language.RESEARCH_TITLE));
-        statButton.setText(app.getText(Language.STAT_TITLE));
+        researchButton.setText(app.getText(GFLTexts.RESEARCH_TITLE));
+        statButton.setText(app.getText(GFLTexts.STAT_TITLE));
 
-        combTabbedPane.setTitleAt(0, app.getText(Language.COMB_TAB_RESULT));
-        combTabbedPane.setTitleAt(1, app.getText(Language.COMB_TAB_FREQ));
+        combTabbedPane.setTitleAt(0, app.getText(GFLTexts.COMB_TAB_RESULT));
+        combTabbedPane.setTitleAt(1, app.getText(GFLTexts.COMB_TAB_FREQ));
 
-        ticketTextLabel.setText(app.getText(Language.CHIP_TICKET));
-        xpTextLabel.setText(app.getText(Language.CHIP_XP));
-        combMarkButton.setText(app.getText(Language.CHIP_MARK));
-        combTagButton.setText(app.getText(Language.CHIP_TAG));
-        combFreqMarkButton.setText(app.getText(Language.CHIP_MARK));
-        combFreqTagButton.setText(app.getText(Language.CHIP_TAG));
+        ticketTextLabel.setText(app.getText(GFLTexts.CHIP_TICKET));
+        xpTextLabel.setText(app.getText(GFLTexts.CHIP_XP));
+        combMarkButton.setText(app.getText(GFLTexts.CHIP_MARK));
+        combTagButton.setText(app.getText(GFLTexts.CHIP_TAG));
+        combFreqMarkButton.setText(app.getText(GFLTexts.CHIP_MARK));
+        combFreqTagButton.setText(app.getText(GFLTexts.CHIP_TAG));
 
-        legendEquippedLabel.setText(app.getText(Language.LEGEND_EQUIPPED));
-        legendRotatedLabel.setText(app.getText(Language.LEGEND_ROTATED));
+        legendEquippedLabel.setText(app.getText(GFLTexts.LEGEND_EQUIPPED));
+        legendRotatedLabel.setText(app.getText(GFLTexts.LEGEND_ROTATED));
 
         iofc.resetChoosableFileFilters();
         isfc.resetChoosableFileFilters();
         cfc.resetChoosableFileFilters();
-        iofc.setFileFilter(new FileNameExtensionFilter(app.getText(Language.FILE_EXT_INV_OPEN, IO.EXT_INVENTORY), IO.EXT_INVENTORY, "json"));
-        isfc.setFileFilter(new FileNameExtensionFilter(app.getText(Language.FILE_EXT_INV_SAVE, IO.EXT_INVENTORY), IO.EXT_INVENTORY));
-        cfc.setFileFilter(new FileNameExtensionFilter(app.getText(Language.FILE_EXT_COMB, IO.EXT_COMBINATION), IO.EXT_COMBINATION));
+        iofc.setFileFilter(new FileNameExtensionFilter(app.getText(GFLTexts.FILE_EXT_INV_OPEN, IO.EXT_INVENTORY), IO.EXT_INVENTORY, "json"));
+        isfc.setFileFilter(new FileNameExtensionFilter(app.getText(GFLTexts.FILE_EXT_INV_SAVE, IO.EXT_INVENTORY), IO.EXT_INVENTORY));
+        cfc.setFileFilter(new FileNameExtensionFilter(app.getText(GFLTexts.FILE_EXT_COMB, IO.EXT_COMBINATION), IO.EXT_COMBINATION));
 
         invSortTypeComboBox.removeAllItems();
-        invSortTypeComboBox.addItem(app.getText(Language.SORT_CUSTOM));
-        invSortTypeComboBox.addItem(app.getText(Language.SORT_CELL));
-        invSortTypeComboBox.addItem(app.getText(Language.SORT_ENHANCEMENT));
-        invSortTypeComboBox.addItem(app.getText(Language.SORT_STAR));
-        invSortTypeComboBox.addItem(app.getText(Language.CHIP_STAT_DMG_LONG));
-        invSortTypeComboBox.addItem(app.getText(Language.CHIP_STAT_BRK_LONG));
-        invSortTypeComboBox.addItem(app.getText(Language.CHIP_STAT_HIT_LONG));
-        invSortTypeComboBox.addItem(app.getText(Language.CHIP_STAT_RLD_LONG));
+        invSortTypeComboBox.addItem(app.getText(GFLTexts.SORT_CUSTOM));
+        invSortTypeComboBox.addItem(app.getText(GFLTexts.SORT_CELL));
+        invSortTypeComboBox.addItem(app.getText(GFLTexts.SORT_ENHANCEMENT));
+        invSortTypeComboBox.addItem(app.getText(GFLTexts.SORT_STAR));
+        invSortTypeComboBox.addItem(app.getText(GFLTexts.CHIP_STAT_DMG_LONG));
+        invSortTypeComboBox.addItem(app.getText(GFLTexts.CHIP_STAT_BRK_LONG));
+        invSortTypeComboBox.addItem(app.getText(GFLTexts.CHIP_STAT_HIT_LONG));
+        invSortTypeComboBox.addItem(app.getText(GFLTexts.CHIP_STAT_RLD_LONG));
 
         pool_setColorText();
         invStat_setColorText();
@@ -747,78 +769,78 @@ public class MainFrame extends JFrame {
     private void refreshTips() {
         tml.clearTips();
 
-        addTip(displaySettingButton, app.getText(Language.TIP_DISPLAY));
-        addTip(helpButton, app.getText(Language.TIP_HELP));
-        addTip(imageButton, app.getText(Language.TIP_IMAGE));
-        addTip(proxyButton, app.getText(Language.TIP_PROXY));
+        addTip(displaySettingButton, app.getText(GFLTexts.TIP_DISPLAY));
+        addTip(helpButton, app.getText(GFLTexts.TIP_HELP));
+        addTip(imageButton, app.getText(GFLTexts.TIP_IMAGE));
+        addTip(proxyButton, app.getText(GFLTexts.TIP_PROXY));
 
-        addTip(poolList, app.getText(Language.TIP_POOL));
+        addTip(poolList, app.getText(GFLTexts.TIP_POOL));
 
-        addTip(poolRotLButton, app.getText(Language.TIP_POOL_ROTATE_LEFT));
-        addTip(poolRotRButton, app.getText(Language.TIP_POOL_ROTATE_RIGHT));
-        addTip(poolSortButton, app.getText(Language.TIP_POOL_SORT_ORDER));
-        addTip(poolStarComboBox, app.getText(Language.TIP_POOL_STAR));
-        addTip(poolColorButton, app.getText(Language.TIP_POOL_COLOR));
+        addTip(poolRotLButton, app.getText(GFLTexts.TIP_POOL_ROTATE_LEFT));
+        addTip(poolRotRButton, app.getText(GFLTexts.TIP_POOL_ROTATE_RIGHT));
+        addTip(poolSortButton, app.getText(GFLTexts.TIP_POOL_SORT_ORDER));
+        addTip(poolStarComboBox, app.getText(GFLTexts.TIP_POOL_STAR));
+        addTip(poolColorButton, app.getText(GFLTexts.TIP_POOL_COLOR));
 
-        addTip(poolWindowButton, app.getText(Language.TIP_POOLWINDOW));
-        addTip(addButton, app.getText(Language.TIP_ADD));
+        addTip(poolWindowButton, app.getText(GFLTexts.TIP_POOLWINDOW));
+        addTip(addButton, app.getText(GFLTexts.TIP_ADD));
 
-        addTip(invList, app.getText(Language.TIP_INV));
+        addTip(invList, app.getText(GFLTexts.TIP_INV));
 
-        addTip(invNewButton, app.getText(Language.TIP_INV_NEW));
-        addTip(invOpenButton, app.getText(Language.TIP_INV_OPEN));
-        addTip(invSaveButton, app.getText(Language.TIP_INV_SAVE));
-        addTip(invSaveAsButton, app.getText(Language.TIP_INV_SAVEAS));
+        addTip(invNewButton, app.getText(GFLTexts.TIP_INV_NEW));
+        addTip(invOpenButton, app.getText(GFLTexts.TIP_INV_OPEN));
+        addTip(invSaveButton, app.getText(GFLTexts.TIP_INV_SAVE));
+        addTip(invSaveAsButton, app.getText(GFLTexts.TIP_INV_SAVEAS));
 
-        addTip(invSortOrderButton, app.getText(Language.TIP_INV_SORT_ORDER));
-        addTip(invSortTypeComboBox, app.getText(Language.TIP_INV_SORT_TYPE));
-        addTip(filterButton, app.getText(Language.TIP_INV_FILTER));
-        addTip(displayTypeButton, app.getText(Language.TIP_INV_STAT));
+        addTip(invSortOrderButton, app.getText(GFLTexts.TIP_INV_SORT_ORDER));
+        addTip(invSortTypeComboBox, app.getText(GFLTexts.TIP_INV_SORT_TYPE));
+        addTip(filterButton, app.getText(GFLTexts.TIP_INV_FILTER));
+        addTip(displayTypeButton, app.getText(GFLTexts.TIP_INV_STAT));
 
-        addTip(invApplyButton, app.getText(Language.TIP_INV_APPLY));
-        addTip(invStarComboBox, app.getText(Language.TIP_INV_STAR));
-        addTip(invColorButton, app.getText(Language.TIP_INV_COLOR));
-        addTip(invLevelSlider, app.getText(Language.TIP_INV_ENHANCEMENT));
-        addTip(invRotLButton, app.getText(Language.TIP_INV_ROTATE_LEFT));
-        addTip(invRotRButton, app.getText(Language.TIP_INV_ROTATE_RIGHT));
-        addTip(invDelButton, app.getText(Language.TIP_INV_DELETE));
-        addTip(invMarkCheckBox, app.getText(Language.TIP_INV_MARK));
-        addTip(invTagButton, app.getText(Language.TIP_INV_TAG));
+        addTip(invApplyButton, app.getText(GFLTexts.TIP_INV_APPLY));
+        addTip(invStarComboBox, app.getText(GFLTexts.TIP_INV_STAR));
+        addTip(invColorButton, app.getText(GFLTexts.TIP_INV_COLOR));
+        addTip(invLevelSlider, app.getText(GFLTexts.TIP_INV_ENHANCEMENT));
+        addTip(invRotLButton, app.getText(GFLTexts.TIP_INV_ROTATE_LEFT));
+        addTip(invRotRButton, app.getText(GFLTexts.TIP_INV_ROTATE_RIGHT));
+        addTip(invDelButton, app.getText(GFLTexts.TIP_INV_DELETE));
+        addTip(invMarkCheckBox, app.getText(GFLTexts.TIP_INV_MARK));
+        addTip(invTagButton, app.getText(GFLTexts.TIP_INV_TAG));
 
-        addTip(invDmgTextLabel, app.getText(Language.CHIP_STAT_DMG_LONG));
-        addTip(invBrkTextLabel, app.getText(Language.CHIP_STAT_BRK_LONG));
-        addTip(invHitTextLabel, app.getText(Language.CHIP_STAT_HIT_LONG));
-        addTip(invRldTextLabel, app.getText(Language.CHIP_STAT_RLD_LONG));
+        addTip(invDmgTextLabel, app.getText(GFLTexts.CHIP_STAT_DMG_LONG));
+        addTip(invBrkTextLabel, app.getText(GFLTexts.CHIP_STAT_BRK_LONG));
+        addTip(invHitTextLabel, app.getText(GFLTexts.CHIP_STAT_HIT_LONG));
+        addTip(invRldTextLabel, app.getText(GFLTexts.CHIP_STAT_RLD_LONG));
 
-        addTip(boardNameComboBox, app.getText(Language.TIP_BOARD_NAME));
-        addTip(boardStarComboBox, app.getText(Language.TIP_BOARD_STAR));
+        addTip(boardNameComboBox, app.getText(GFLTexts.TIP_BOARD_NAME));
+        addTip(boardStarComboBox, app.getText(GFLTexts.TIP_BOARD_STAR));
 
-        addTip(combWarningButton, app.getText(Language.WARNING_HOCMAX));
-        addTip(timeWarningButton, app.getText(Language.WARNING_TIME));
+        addTip(combWarningButton, app.getText(GFLTexts.WARNING_HOCMAX));
+        addTip(timeWarningButton, app.getText(GFLTexts.WARNING_TIME));
 
         if (!researchButton.isEnabled()) {
-            addTip(researchButton, app.getText(Language.TIP_RESEARCH_OLD));
+            addTip(researchButton, app.getText(GFLTexts.TIP_RESEARCH_OLD));
         }
 
-        addTip(combList, app.getText(Language.TIP_COMB_LIST));
-        addTip(combChipList, app.getText(Language.TIP_COMB_CHIPLIST));
-        addTip(combFreqList, app.getText(Language.TIP_COMB_FREQLIST));
+        addTip(combList, app.getText(GFLTexts.TIP_COMB_LIST));
+        addTip(combChipList, app.getText(GFLTexts.TIP_COMB_CHIPLIST));
+        addTip(combFreqList, app.getText(GFLTexts.TIP_COMB_FREQLIST));
 
-        addTip(combDmgTextLabel, app.getText(Language.CHIP_STAT_DMG_LONG));
-        addTip(combBrkTextLabel, app.getText(Language.CHIP_STAT_BRK_LONG));
-        addTip(combHitTextLabel, app.getText(Language.CHIP_STAT_HIT_LONG));
-        addTip(combRldTextLabel, app.getText(Language.CHIP_STAT_RLD_LONG));
+        addTip(combDmgTextLabel, app.getText(GFLTexts.CHIP_STAT_DMG_LONG));
+        addTip(combBrkTextLabel, app.getText(GFLTexts.CHIP_STAT_BRK_LONG));
+        addTip(combHitTextLabel, app.getText(GFLTexts.CHIP_STAT_HIT_LONG));
+        addTip(combRldTextLabel, app.getText(GFLTexts.CHIP_STAT_RLD_LONG));
 
-        addTip(settingButton, app.getText(Language.TIP_COMB_SETTING));
-        addTip(showProgImageCheckBox, app.getText(Language.TIP_COMB_SHOWPROGIMAGE));
-        addTip(combStartPauseButton, app.getText(Language.TIP_COMB_START));
-        addTip(statButton, app.getText(Language.TIP_COMB_STAT));
-        addTip(combOpenButton, app.getText(Language.TIP_COMB_OPEN));
-        addTip(combSaveButton, app.getText(Language.TIP_COMB_SAVE));
-        addTip(combMarkButton, app.getText(Language.TIP_COMB_MARK));
-        addTip(combTagButton, app.getText(Language.TIP_COMB_TAG));
-        addTip(combFreqMarkButton, app.getText(Language.TIP_COMB_MARK));
-        addTip(combFreqTagButton, app.getText(Language.TIP_COMB_TAG));
+        addTip(settingButton, app.getText(GFLTexts.TIP_COMB_SETTING));
+        addTip(showProgImageCheckBox, app.getText(GFLTexts.TIP_COMB_SHOWPROGIMAGE));
+        addTip(combStartPauseButton, app.getText(GFLTexts.TIP_COMB_START));
+        addTip(statButton, app.getText(GFLTexts.TIP_COMB_STAT));
+        addTip(combOpenButton, app.getText(GFLTexts.TIP_COMB_OPEN));
+        addTip(combSaveButton, app.getText(GFLTexts.TIP_COMB_SAVE));
+        addTip(combMarkButton, app.getText(GFLTexts.TIP_COMB_MARK));
+        addTip(combTagButton, app.getText(GFLTexts.TIP_COMB_TAG));
+        addTip(combFreqMarkButton, app.getText(GFLTexts.TIP_COMB_MARK));
+        addTip(combFreqTagButton, app.getText(GFLTexts.TIP_COMB_TAG));
     }
 
     private void addTip(JComponent c, String s) {
@@ -827,7 +849,7 @@ public class MainFrame extends JFrame {
     }
 
     private void refreshFont() {
-        Font defaultFont = Resources.getDefaultFont().deriveFont((float) app.setting.fontSize);
+        Font defaultFont = GFLResources.getDefaultFont().deriveFont((float) app.setting.fontSize);
         // Font
         invTagButton.setText("");
         Fn.setUIFont(defaultFont);
@@ -845,11 +867,10 @@ public class MainFrame extends JFrame {
         }
         invLevelLabel.setPreferredSize(new Dimension(levelWidth + 10, height));
 
-        int textWidth = Fn.max(
-                Fn.getWidth(app.getText(Language.CHIP_STAT_DMG), defaultFont),
-                Fn.getWidth(app.getText(Language.CHIP_STAT_BRK), defaultFont),
-                Fn.getWidth(app.getText(Language.CHIP_STAT_HIT), defaultFont),
-                Fn.getWidth(app.getText(Language.CHIP_STAT_RLD), defaultFont)
+        int textWidth = Fn.max(Fn.getWidth(app.getText(GFLTexts.CHIP_STAT_DMG), defaultFont),
+                Fn.getWidth(app.getText(GFLTexts.CHIP_STAT_BRK), defaultFont),
+                Fn.getWidth(app.getText(GFLTexts.CHIP_STAT_HIT), defaultFont),
+                Fn.getWidth(app.getText(GFLTexts.CHIP_STAT_RLD), defaultFont)
         );
         Dimension textDim = new Dimension(textWidth + 30, height);
         invDmgTextLabel.setPreferredSize(textDim);
@@ -869,7 +890,7 @@ public class MainFrame extends JFrame {
         invRldPtLabel.setPreferredSize(ptDim);
 
         int colorWidth = 0;
-        for (String color : Chip.COLORSTRS.values()) {
+        for (String color : GFLTexts.TEXT_MAP_COLOR.values()) {
             colorWidth = Math.max(colorWidth, Fn.getWidth(app.getText(color), defaultFont));
         }
         invColorButton.setPreferredSize(new Dimension(colorWidth + 10, height));
@@ -884,10 +905,6 @@ public class MainFrame extends JFrame {
 
     private void refreshColor() {
         onBorder = new LineBorder(app.blue(), BORDERSIZE);
-        for (int i = 0; i < poolLM.size(); i++) {
-            Chip c = (Chip) poolLM.get(i);
-            c.repaint();
-        }
         comb_loadCombination();
     }
 
@@ -911,12 +928,12 @@ public class MainFrame extends JFrame {
             app.setting.poolOrder = b;
             Chip c = (Chip) poolLM.firstElement();
             if (b == ASCENDING) {
-                poolSortButton.setIcon(Resources.ASCNEDING);
+                poolSortButton.setIcon(GFLResources.ASCNEDING);
                 if (c.getSize() != 1) {
                     pool_reverseList();
                 }
             } else {
-                poolSortButton.setIcon(Resources.DESCENDING);
+                poolSortButton.setIcon(GFLResources.DESCENDING);
                 if (c.getSize() != 6) {
                     pool_reverseList();
                 }
@@ -949,12 +966,12 @@ public class MainFrame extends JFrame {
     }
 
     private void pool_setColorText() {
-        poolColorButton.setText(app.getText(Chip.COLORSTRS.get(app.setting.poolColor)));
-        poolColorButton.setForeground(Chip.COLORS.get(app.setting.poolColor));
+        poolColorButton.setText(app.getText(GFLTexts.TEXT_MAP_COLOR.get(app.setting.poolColor)));
+        poolColorButton.setForeground(GFLGraphics.COLORS_CHIP.get(app.setting.poolColor));
     }
 
     private void pool_cycleColor() {
-        pool_setColor((app.setting.poolColor + 1) % Chip.COLORSTRS.size());
+        pool_setColor((app.setting.poolColor + 1) % GFLTexts.TEXT_MAP_COLOR.size());
     }
 
     private void pool_starChanged() {
@@ -965,11 +982,11 @@ public class MainFrame extends JFrame {
     private void setPoolPanelVisible(boolean b) {
         if (b) {
             poolPanel.setVisible(true);
-            poolWindowButton.setIcon(Resources.PANEL_CLOSE);
+            poolWindowButton.setIcon(GFLResources.PANEL_CLOSE);
         } else {
             poolPanel.setVisible(false);
             poolList.clearSelection();
-            poolWindowButton.setIcon(Resources.PANEL_OPEN);
+            poolWindowButton.setIcon(GFLResources.PANEL_OPEN);
         }
         if (getSize().equals(initSize)) {
             packAndSetInitSize();
@@ -1085,7 +1102,7 @@ public class MainFrame extends JFrame {
     }
 
     private void invStat_setTagButtonText() {
-        String tagButtonText = app.getText(Language.TAG_NONE);
+        String tagButtonText = app.getText(GFLTexts.TAG_NONE);
         if (invList.getSelectedIndices().length >= 1) {
             Set<Tag> tags = new HashSet<>();
             invChips.forEach((c) -> tags.addAll(c.getTags()));
@@ -1134,7 +1151,6 @@ public class MainFrame extends JFrame {
                 c.setInitLevel(invLevelSlider.getValue());
                 c.setColor(invStat_color);
                 c.setMarked(invMarkCheckBox.isSelected());
-                c.repaint();
                 invStat_enableSave();
                 comb_updateMark();
             }
@@ -1211,14 +1227,14 @@ public class MainFrame extends JFrame {
         if (invStat_color < 0) {
             invColorButton.setText(" ");
         } else {
-            invColorButton.setText(app.getText(Chip.COLORSTRS.get(invStat_color)));
-            invColorButton.setForeground(Chip.COLORS.get(invStat_color));
+            invColorButton.setText(app.getText(GFLTexts.TEXT_MAP_COLOR.get(invStat_color)));
+            invColorButton.setForeground(GFLGraphics.COLORS_CHIP.get(invStat_color));
         }
     }
 
     private void invStat_cycleColor() {
         if (invList.getSelectedIndices().length == 1) {
-            invStat_setColor((invStat_color + 1) % Chip.COLORSTRS.size());
+            invStat_setColor((invStat_color + 1) % GFLTexts.TEXT_MAP_COLOR.size());
         }
     }
 
@@ -1355,9 +1371,9 @@ public class MainFrame extends JFrame {
         if (invSortOrderButton.isEnabled()) {
             inv_order = order;
             if (order == ASCENDING) {
-                invSortOrderButton.setIcon(Resources.ASCNEDING);
+                invSortOrderButton.setIcon(GFLResources.ASCNEDING);
             } else {
-                invSortOrderButton.setIcon(Resources.DESCENDING);
+                invSortOrderButton.setIcon(GFLResources.DESCENDING);
             }
             display_applyFilterSort();
         }
@@ -1487,16 +1503,15 @@ public class MainFrame extends JFrame {
         }
         addButton.setEnabled(chipEnabled && poolList.getSelectedIndex() != -1);
         invList.setDragEnabled(chipEnabled);
-        filterButton.setIcon(anyTrueAll ? Resources.FILTER_APPLY : Resources.FILTER);
+        filterButton.setIcon(anyTrueAll ? GFLResources.FILTER_APPLY : GFLResources.FILTER);
         display_refreshInvListCountText();
     }
 
     private void display_refreshInvListCountText() {
-        filterChipCountLabel.setText(
-                display_anyTrueFilter()
-                        ? app.getText(Language.FILTER_ENABLED, String.valueOf(invLM.size()), String.valueOf(invChips.size()))
-                        : app.getText(Language.FILTER_DISABLED, String.valueOf(invChips.size())
-                        )
+        filterChipCountLabel.setText(display_anyTrueFilter()
+                ? app.getText(GFLTexts.FILTER_ENABLED, String.valueOf(invLM.size()), String.valueOf(invChips.size()))
+                : app.getText(GFLTexts.FILTER_DISABLED, String.valueOf(invChips.size())
+                )
         );
     }
 
@@ -1504,9 +1519,9 @@ public class MainFrame extends JFrame {
         int iMod = type % Setting.NUM_DISPLAY;
         app.setting.displayType = iMod;
         if (iMod == DISPLAY_STAT) {
-            displayTypeButton.setIcon(Resources.DISPLAY_STAT);
+            displayTypeButton.setIcon(GFLResources.DISPLAY_STAT);
         } else {
-            displayTypeButton.setIcon(Resources.DISPLAY_PT);
+            displayTypeButton.setIcon(GFLResources.DISPLAY_PT);
         }
         invChips.forEach((t) -> t.setDisplayType(iMod));
         display_applyFilterSort();
@@ -1539,30 +1554,30 @@ public class MainFrame extends JFrame {
 
     public void setting_resetDisplay() {
         Icon settingIcon;
-        switch (app.setting.board.getMode(getBoardName(), getBoardStar())) {
+        switch (app.setting.board.getStatMode(getBoardName(), getBoardStar())) {
             case BoardSetting.MAX_STAT:
-                settingIcon = Resources.SETTING_STAT;
+                settingIcon = GFLResources.SETTING_STAT;
                 break;
             case BoardSetting.MAX_PT:
-                settingIcon = Resources.SETTING_PT;
+                settingIcon = GFLResources.SETTING_PT;
                 break;
             case BoardSetting.MAX_PRESET:
-                settingIcon = Resources.SETTING_PRESET;
+                settingIcon = GFLResources.SETTING_PRESET;
                 break;
             default:
-                settingIcon = Resources.SETTING;
+                settingIcon = GFLResources.SETTING;
         }
         settingButton.setIcon(settingIcon);
         BoardSetting board = app.setting.board;
         boolean maxWarning = getBoardStar() == 5
-                && board.getMode(getBoardName(), getBoardStar()) != BoardSetting.MAX_PRESET
+                && board.getStatMode(getBoardName(), getBoardStar()) != BoardSetting.MAX_PRESET
                 && !board.hasDefaultPreset(getBoardName(), getBoardStar());
         combWarningButton.setVisible(maxWarning);
     }
 
     private void setting_resetBoard() {
         setting_resetDisplay();
-        boardImageLabel.setIcon(Board.getImage(app, boardImageLabel.getWidth(), getBoardName(), getBoardStar()));
+        boardImageLabel.setIcon(GFLGraphics.board(app, boardImageLabel.getWidth(), getBoardName(), getBoardStar()));
         boardImageLabel.repaint();
     }
 
@@ -1572,7 +1587,7 @@ public class MainFrame extends JFrame {
         int presetIndex = app.setting.board.getPresetIndex(name, star);
         boolean[] stars = new boolean[]{true, false, false, false};
 
-        StatPresetMap presetMap = BoardSetting.PRESET;
+        StatPresetMap presetMap = StatPresetMap.PRESET;
         boolean[] types = presetMap.getTypeFilter(name, star, presetIndex);
 
         Stat ptMin = presetMap.get(name, star, presetIndex).ptMin;
@@ -1593,7 +1608,7 @@ public class MainFrame extends JFrame {
             colors[c] = true;
         }
 
-        StatPresetMap presetMap = BoardSetting.PRESET;
+        StatPresetMap presetMap = StatPresetMap.PRESET;
         boolean[] types = presetMap.getTypeFilter(name, star, presetIndex);
 
         Stat ptMin = presetMap.get(name, star, presetIndex).ptMin;
@@ -1623,7 +1638,7 @@ public class MainFrame extends JFrame {
     private void comb_setShowProgImage() {
         app.setting.showProgImage = showProgImageCheckBox.isSelected();
         if (!app.setting.showProgImage) {
-            boardImageLabel.setIcon(Board.getImage(app, boardImageLabel.getWidth(), getBoardName(), getBoardStar()));
+            boardImageLabel.setIcon(GFLGraphics.board(app, boardImageLabel.getWidth(), getBoardName(), getBoardStar()));
             boardImageLabel.repaint();
         }
     }
@@ -1636,7 +1651,8 @@ public class MainFrame extends JFrame {
         combTagButton.setEnabled(selected);
         if (selected) {
             Board board = combList.getSelectedValue();
-            combImageLabel.setIcon(board.getImage(app, Math.min(combImageLabel.getHeight(), combImageLabel.getWidth()) - 1));
+            int size = Math.min(combImageLabel.getHeight(), combImageLabel.getWidth()) - 1;
+            combImageLabel.setIcon(GFLGraphics.board(app, size, board));
             combImageLabel.setText("");
 
             board.forEachChip((c) -> {
@@ -1677,10 +1693,11 @@ public class MainFrame extends JFrame {
                             ? ""
                             : " (" + Fn.iPercStr(Board.getStatPerc(Stat.RLD, stat, oMax)) + ")"));
 
-            combDmgPtLabel.setText(app.getText(Language.UNIT_PT, String.valueOf(pt.dmg)));
-            combBrkPtLabel.setText(app.getText(Language.UNIT_PT, String.valueOf(pt.brk)));
-            combHitPtLabel.setText(app.getText(Language.UNIT_PT, String.valueOf(pt.hit)));
-            combRldPtLabel.setText(app.getText(Language.UNIT_PT, String.valueOf(pt.rld)));
+            combDmgPtLabel.setText(app.getText(GFLTexts.UNIT_PT, String.valueOf(pt.dmg)));
+            combBrkPtLabel.setText(app.getText(GFLTexts.UNIT_PT, String.valueOf(pt.brk)));
+            combHitPtLabel.setText(app.getText(GFLTexts.UNIT_PT, String.valueOf(pt.hit)));
+            combRldPtLabel.setText(app.getText(GFLTexts.UNIT_PT, String.valueOf(pt.rld)));
+
             combDmgPtLabel.setForeground(Color.BLACK);
             combBrkPtLabel.setForeground(Color.BLACK);
             combHitPtLabel.setForeground(Color.BLACK);
@@ -1690,16 +1707,18 @@ public class MainFrame extends JFrame {
             combBrkResonanceStatLabel.setText("+" + resonance.brk);
             combHitResonanceStatLabel.setText("+" + resonance.hit);
             combRldResonanceStatLabel.setText("+" + resonance.rld);
-            combDmgResonanceStatLabel.setForeground(Chip.COLORS.get(board.getColor()));
-            combBrkResonanceStatLabel.setForeground(Chip.COLORS.get(board.getColor()));
-            combHitResonanceStatLabel.setForeground(Chip.COLORS.get(board.getColor()));
-            combRldResonanceStatLabel.setForeground(Chip.COLORS.get(board.getColor()));
+
+            Color chipColor = GFLGraphics.COLORS_CHIP.get(board.getColor());
+            combDmgResonanceStatLabel.setForeground(chipColor);
+            combBrkResonanceStatLabel.setForeground(chipColor);
+            combHitResonanceStatLabel.setForeground(chipColor);
+            combRldResonanceStatLabel.setForeground(chipColor);
 
             ticketLabel.setText(String.valueOf(board.getTicketCount()));
             xpLabel.setText(Fn.thousandComma(board.getXP()));
         } else {
             combImageLabel.setIcon(null);
-            combImageLabel.setText(app.getText(Language.COMB_DESC));
+            combImageLabel.setText(app.getText(GFLTexts.COMB_DESC));
 
             combDmgStatLabel.setForeground(Color.BLACK);
             combDmgStatLabel.setText("");
@@ -1795,12 +1814,12 @@ public class MainFrame extends JFrame {
             List<Chip> chipList = comb_result_getChipsFromInv();
             // Continue
             int retval = JOptionPane.showConfirmDialog(this,
-                    app.getText(Language.COMB_MARK_CONTINUE_BODY), app.getText(Language.COMB_MARK_CONTINUE_TITLE),
+                    app.getText(GFLTexts.COMB_MARK_CONTINUE_BODY), app.getText(GFLTexts.COMB_MARK_CONTINUE_TITLE),
                     JOptionPane.YES_NO_OPTION);
             // If some chips are missing in the inventory
             if (retval == JOptionPane.YES_OPTION && combChipLM.size() != chipList.size()) {
                 retval = JOptionPane.showConfirmDialog(this,
-                        app.getText(Language.COMB_DNE_BODY), app.getText(Language.COMB_DNE_TITLE),
+                        app.getText(GFLTexts.COMB_DNE_BODY), app.getText(GFLTexts.COMB_DNE_TITLE),
                         JOptionPane.YES_NO_OPTION);
             }
             // Mark
@@ -1818,12 +1837,12 @@ public class MainFrame extends JFrame {
             List<Chip> chipList = comb_freq_getChipsFromInv();
             // Continue
             int retval = JOptionPane.showConfirmDialog(this,
-                    app.getText(Language.COMB_MARK_CONTINUE_BODY), app.getText(Language.COMB_MARK_CONTINUE_TITLE),
+                    app.getText(GFLTexts.COMB_MARK_CONTINUE_BODY), app.getText(GFLTexts.COMB_MARK_CONTINUE_TITLE),
                     JOptionPane.YES_NO_OPTION);
             // Some chips are missing in the inventory
             if (retval == JOptionPane.YES_OPTION && combFreqLM.size() != chipList.size()) {
                 retval = JOptionPane.showConfirmDialog(this,
-                        app.getText(Language.COMB_DNE_BODY), app.getText(Language.COMB_DNE_TITLE),
+                        app.getText(GFLTexts.COMB_DNE_BODY), app.getText(GFLTexts.COMB_DNE_TITLE),
                         JOptionPane.YES_NO_OPTION);
             }
             // Mark
@@ -1842,7 +1861,7 @@ public class MainFrame extends JFrame {
             int retval = JOptionPane.YES_OPTION;
             if (combChipLM.size() != chipList.size()) {
                 retval = JOptionPane.showConfirmDialog(this,
-                        app.getText(Language.COMB_DNE_BODY), app.getText(Language.COMB_DNE_TITLE),
+                        app.getText(GFLTexts.COMB_DNE_BODY), app.getText(GFLTexts.COMB_DNE_TITLE),
                         JOptionPane.YES_NO_OPTION);
             }
             if (retval == JOptionPane.YES_OPTION) {
@@ -1857,7 +1876,7 @@ public class MainFrame extends JFrame {
             int retval = JOptionPane.YES_OPTION;
             if (combFreqLM.size() != chipList.size()) {
                 retval = JOptionPane.showConfirmDialog(this,
-                        app.getText(Language.COMB_DNE_BODY), app.getText(Language.COMB_DNE_TITLE),
+                        app.getText(GFLTexts.COMB_DNE_BODY), app.getText(GFLTexts.COMB_DNE_TITLE),
                         JOptionPane.YES_NO_OPTION);
             }
             if (retval == JOptionPane.YES_OPTION) {
@@ -1895,7 +1914,7 @@ public class MainFrame extends JFrame {
     private void comb_updateFreqLabel() {
         if (!combFreqList.isSelectionEmpty()) {
             ChipFreq selected = combFreqList.getSelectedValue();
-            combFreqLabel.setText(Fn.fPercStr(selected.freq) + " (" + app.getText(Language.UNIT_COUNT, selected.count) + ")");
+            combFreqLabel.setText(Fn.fPercStr(selected.freq) + " (" + app.getText(GFLTexts.UNIT_COUNT, selected.count) + ")");
         } else {
             combFreqLabel.setText("-");
         }
@@ -1920,81 +1939,85 @@ public class MainFrame extends JFrame {
         }
     }
 
+    private CalcSetting calcSetting;
+    private CalcExtraSetting calcExtraSetting;
+    private Progress progress;
+
     private void process_start() {
         // Check for the validity of all inventory chips
         for (Enumeration<Chip> elements = invLM.elements(); elements.hasMoreElements();) {
             Chip chip = elements.nextElement();
             if (!chip.isPtValid()) {
                 JOptionPane.showMessageDialog(this,
-                        app.getText(Language.COMB_ERROR_STAT_BODY),
-                        app.getText(Language.COMB_ERROR_STAT_TITLE),
+                        app.getText(GFLTexts.COMB_ERROR_STAT_BODY),
+                        app.getText(GFLTexts.COMB_ERROR_STAT_TITLE),
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
         }
 
-        String name = getBoardName();
-        int star = getBoardStar();
+        String boardName = getBoardName();
+        int boardStar = getBoardStar();
 
         // init
         boolean start = true;
-        int status = Progress.DICTIONARY;
+        int calcMode = CalcExtraSetting.CALCMODE_DICTIONARY;
         boolean alt = false;
-        Shape.Type minType = assembler.getMinType(name, star, false);
+        Shape.Type minType = assembler.getMinType(boardName, boardStar, false);
 
         if (app.setting.advancedSetting) {
             // Partial option
-            if (assembler.hasPartial(name, star)) {
+            if (assembler.hasPartial(boardName, boardStar)) {
                 // Query
                 String[] options = {
-                    app.getText(Language.COMB_OPTION_M2_0),
-                    app.getText(Language.COMB_OPTION_M2_1),
-                    app.getText(Language.COMB_OPTION_M2_2),
-                    app.getText(Language.ACTION_CANCEL)
+                    app.getText(GFLTexts.COMB_OPTION_M2_0),
+                    app.getText(GFLTexts.COMB_OPTION_M2_1),
+                    app.getText(GFLTexts.COMB_OPTION_M2_2),
+                    app.getText(GFLTexts.ACTION_CANCEL)
                 };
                 int response = JOptionPane.showOptionDialog(this,
-                        app.getText(Language.COMB_OPTION_M2_DESC, options[0], options[1]),
-                        app.getText(Language.COMB_OPTION_TITLE),
+                        app.getText(GFLTexts.COMB_OPTION_M2_DESC, options[0], options[1]),
+                        app.getText(GFLTexts.COMB_OPTION_TITLE),
                         JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]
                 );
                 // Response
                 start = response != JOptionPane.CLOSED_OPTION && response <= 2;
-                status = response <= 1 ? Progress.DICTIONARY : Progress.ALGX;
+                calcMode = response <= 1 ? CalcExtraSetting.CALCMODE_DICTIONARY : CalcExtraSetting.CALCMODE_ALGX;
                 alt = response == 0;
             } //
             // Full option
             else {
                 // Check if any chip size is smaller than dictionary chip size
                 Enumeration<Chip> elements = invLM.elements();
-                while (elements.hasMoreElements() && status == Progress.DICTIONARY) {
+                while (elements.hasMoreElements() && calcMode == CalcExtraSetting.CALCMODE_DICTIONARY) {
                     Chip c = elements.nextElement();
                     if (!c.typeGeq(minType)) {
-                        status = Progress.ALGX;
+                        calcMode = CalcExtraSetting.CALCMODE_ALGX;
                         break;
                     }
                 }
                 // Query
-                if (status == Progress.ALGX) {
-                    String combOption0Text = minType.toString(app);
+                if (calcMode == CalcExtraSetting.CALCMODE_ALGX) {
+                    String combOption0Text = GFLTexts.text_type(app, minType);
                     String[] options = {
-                        app.getText(Language.COMB_OPTION_DEFAULT_0, combOption0Text),
-                        app.getText(Language.COMB_OPTION_DEFAULT_1),
-                        app.getText(Language.ACTION_CANCEL)
+                        app.getText(GFLTexts.COMB_OPTION_DEFAULT_0, combOption0Text),
+                        app.getText(GFLTexts.COMB_OPTION_DEFAULT_1),
+                        app.getText(GFLTexts.ACTION_CANCEL)
                     };
                     int response = JOptionPane.showOptionDialog(this,
-                            app.getText(Language.COMB_OPTION_DEFAULT_DESC, options[0], combOption0Text),
-                            app.getText(Language.COMB_OPTION_TITLE),
+                            app.getText(GFLTexts.COMB_OPTION_DEFAULT_DESC, options[0], combOption0Text),
+                            app.getText(GFLTexts.COMB_OPTION_TITLE),
                             JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]
                     );
                     // Response
                     start = response != JOptionPane.CLOSED_OPTION && response <= 1;
-                    status = response == 0 ? Progress.DICTIONARY : Progress.ALGX;
+                    calcMode = response == 0 ? CalcExtraSetting.CALCMODE_DICTIONARY : CalcExtraSetting.CALCMODE_ALGX;
                 }
             }
         } else if (getBoardStar() == 5 && !setting_isPresetFilter()) {
             int retval = JOptionPane.showOptionDialog(this,
-                    app.getText(Language.COMB_OPTION_FILTER_DESC),
-                    app.getText(Language.COMB_OPTION_TITLE),
+                    app.getText(GFLTexts.COMB_OPTION_FILTER_DESC),
+                    app.getText(GFLTexts.COMB_OPTION_TITLE),
                     JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
             start = retval != JOptionPane.CLOSED_OPTION && retval != JOptionPane.CANCEL_OPTION;
             if (retval == JOptionPane.YES_OPTION) {
@@ -2003,8 +2026,8 @@ public class MainFrame extends JFrame {
         }
 
         // If preset DNE
-        if (!assembler.btExists(name, star, alt)) {
-            status = Progress.ALGX;
+        if (!assembler.btExists(boardName, boardStar, alt)) {
+            calcMode = CalcExtraSetting.CALCMODE_ALGX;
         }
 
         if (start) {
@@ -2012,26 +2035,50 @@ public class MainFrame extends JFrame {
             List<Chip> candidates = new ArrayList<>();
             for (Enumeration<Chip> elements = invLM.elements(); elements.hasMoreElements();) {
                 Chip chip = elements.nextElement();
-                boolean colorMatch = !app.setting.colorMatch || Board.getColor(name) == chip.getColor();
-                boolean sizeMatch = status == Progress.ALGX || chip.typeGeq(minType);
+                boolean colorMatch = !app.setting.colorMatch || Board.getColor(boardName) == chip.getColor();
+                boolean sizeMatch = calcMode == CalcExtraSetting.CALCMODE_ALGX || chip.typeGeq(minType);
                 boolean markMatchNeg = 0 < app.setting.boardMarkMax || !chip.isMarked();
-                boolean markMatchPos = app.setting.boardMarkMin < Board.getCellCount(name, star) || chip.isMarked();
+                boolean markMatchPos = app.setting.boardMarkMin < Board.getCellCount(boardName, boardStar) || chip.isMarked();
                 if (colorMatch && sizeMatch && markMatchNeg && markMatchPos) {
                     candidates.add(new Chip(chip));
                 }
             }
-            if (app.setting.levelMax) {
+
+            if (app.setting.maxLevel) {
                 candidates.forEach((c) -> c.setMaxLevel());
             }
 
-            progress = new Progress(status, name, star, candidates, app.setting, alt ? 1 : 0);
+            BoardSetting bs = app.setting.board;
+            Stat stat, pt;
+
+            switch (bs.getStatMode(boardName, boardStar)) {
+                case BoardSetting.MAX_PRESET:
+                    int presetIndex = bs.getPresetIndex(boardName, boardStar);
+                    stat = BoardSetting.getPreset(boardName, boardStar, presetIndex).stat;
+                    pt = BoardSetting.getPreset(boardName, boardStar, presetIndex).pt;
+                    break;
+                case BoardSetting.MAX_STAT:
+                    stat = bs.getStat(boardName, boardStar);
+                    pt = bs.getPt(boardName, boardStar);
+                    break;
+                default:
+                    stat = Board.getMaxStat(boardName, boardStar);
+                    pt = Board.getMaxPt(boardName, boardStar);
+            }
+
+            calcSetting = new CalcSetting(boardName, boardStar, app.setting.maxLevel, app.setting.rotation, app.setting.symmetry, stat, pt);
+            calcExtraSetting = new CalcExtraSetting(calcMode, alt ? 1 : 0,
+                    app.setting.colorMatch,
+                    app.setting.boardMarkMin, app.setting.boardMarkMax,
+                    app.setting.boardMarkType, app.setting.boardSortType, candidates);
+            progress = new Progress(app.setting.boardSortType);
             process_init();
             process_resume();
         }
     }
 
     private void process_init() {
-        assembler.set(progress);
+        assembler.set(calcSetting, calcExtraSetting, progress);
 
         time = System.currentTimeMillis();
         pauseTime = 0;
@@ -2045,10 +2092,10 @@ public class MainFrame extends JFrame {
     private void process_setUI(Assembler.Status status) {
         switch (status) {
             case RUNNING:
-                loadingLabel.setIcon(Resources.LOADING);
+                loadingLabel.setIcon(GFLResources.LOADING);
                 break;
             case PAUSED:
-                loadingLabel.setIcon(Resources.PAUSED);
+                loadingLabel.setIcon(GFLResources.PAUSED);
                 break;
             case STOPPED:
                 loadingLabel.setIcon(null);
@@ -2063,7 +2110,7 @@ public class MainFrame extends JFrame {
             doneTimes.clear();
         }
 
-        combStartPauseButton.setIcon(status == Assembler.Status.RUNNING ? Resources.COMB_PAUSE : Resources.COMB_START);
+        combStartPauseButton.setIcon(status == Assembler.Status.RUNNING ? GFLResources.COMB_PAUSE : GFLResources.COMB_START);
         combStopButton.setVisible(status != Assembler.Status.STOPPED);
 
         boardNameComboBox.setEnabled(status == Assembler.Status.STOPPED);
@@ -2101,7 +2148,7 @@ public class MainFrame extends JFrame {
         assembler.resume();
     }
 
-    public void process_stop() {
+    private void process_stop() {
         if (0 < pauseTime) {
             time += System.currentTimeMillis() - pauseTime;
         }
@@ -2109,7 +2156,7 @@ public class MainFrame extends JFrame {
         calcTimer.stop();
 
         if (progress != null) {
-            progress.status = Progress.FINISHED;
+            calcExtraSetting.calcMode = CalcExtraSetting.CALCMODE_FINISHED;
         }
         process_setUI(Assembler.Status.STOPPED);
         assembler.stop();
@@ -2122,8 +2169,8 @@ public class MainFrame extends JFrame {
     }
 
     private void process_setCombLabelText() {
-        if (progress != null && progress.status == Progress.FINISHED && 0 == progress.nComb) {
-            combLabel.setText(app.getText(Language.COMB_NONEFOUND));
+        if (progress != null && calcExtraSetting.calcMode == CalcExtraSetting.CALCMODE_FINISHED && 0 == progress.nComb) {
+            combLabel.setText(app.getText(GFLTexts.COMB_NONEFOUND));
         } else if (progress != null && 0 <= progress.nComb) {
             combLabel.setText(Fn.thousandComma(progress.nComb));
         } else {
@@ -2142,7 +2189,7 @@ public class MainFrame extends JFrame {
             long avg = doneTimes.stream().mapToLong((v) -> v).sum() / doneTimes.size();
             long remaining = avg * (progress.nTotal - progress.nDone) / 1000;
             warn = 60 * 60 < remaining;
-            sb.append(" (").append(app.getText(Language.COMB_REMAINING, Fn.getTime(remaining))).append(")");
+            sb.append(" (").append(app.getText(GFLTexts.COMB_REMAINING, Fn.getTime(remaining))).append(")");
         }
 
         timeWarningButton.setVisible(app.setting.advancedSetting && warn);
@@ -2198,21 +2245,21 @@ public class MainFrame extends JFrame {
     }
 
     // From Combinator
-    public void process_setProgBar(int n, int max) {
+    private void process_setProgBar(int n, int max) {
         combProgressBar.setMaximum(max);
         combProgressBar.setValue(n);
     }
 
-    public void process_showImage(BoardTemplate template) {
+    private void process_showImage(BoardTemplate template) {
         SwingUtilities.invokeLater(() -> {
             if (app.setting.showProgImage && assembler.getStatus() == Assembler.Status.RUNNING) {
-                boardImageLabel.setIcon(template.getImage(app, boardImageLabel.getWidth()));
+                boardImageLabel.setIcon(GFLGraphics.board(app, boardImageLabel.getWidth(), template.getMatrix()));
                 boardImageLabel.repaint();
             }
         });
     }
 
-    public void process_prog(int prog) {
+    private void process_prog(int prog) {
         SwingUtilities.invokeLater(() -> {
             long doneTime = System.currentTimeMillis();
             if (prevDoneTime != 0) {
@@ -2258,7 +2305,7 @@ public class MainFrame extends JFrame {
     private boolean invFile_confirmSave() {
         if (invSaveButton.isEnabled()) {
             int retval = JOptionPane.showConfirmDialog(this,
-                    app.getText(Language.FILE_SAVE_BODY), app.getText(Language.FILE_SAVE_TITLE),
+                    app.getText(GFLTexts.FILE_SAVE_BODY), app.getText(GFLTexts.FILE_SAVE_TITLE),
                     JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
             if (retval == JOptionPane.CANCEL_OPTION) {
                 return false;
@@ -2324,7 +2371,7 @@ public class MainFrame extends JFrame {
             boolean confirmed = true;
             if (isfc.getSelectedFile().exists()) {
                 int option = JOptionPane.showConfirmDialog(this,
-                        app.getText(Language.FILE_OVERWRITE_BODY), app.getText(Language.FILE_OVERWRITE_TITLE),
+                        app.getText(GFLTexts.FILE_OVERWRITE_BODY), app.getText(GFLTexts.FILE_OVERWRITE_TITLE),
                         JOptionPane.YES_NO_OPTION);
                 if (option != JOptionPane.YES_OPTION) {
                     confirmed = false;
@@ -2362,26 +2409,29 @@ public class MainFrame extends JFrame {
         int retval = cfc.showOpenDialog(this);
         if (retval == JFileChooser.APPROVE_OPTION) {
             String path = cfc.getSelectedFile().getPath();
-            progress = IO.loadProgress(path, invChips);
+            ProgressFile pf = IO.loadProgressFile(path, invChips);
+            calcSetting = pf.cs;
+            calcExtraSetting = pf.ces;
+            progress = pf.p;
             combSaveButton.setEnabled(false);
 
-            boardNameComboBox.setSelectedItem(progress.name);
-            boardStarComboBox.setSelectedIndex(5 - progress.star);
+            boardNameComboBox.setSelectedItem(calcSetting.boardName);
+            boardStarComboBox.setSelectedIndex(5 - calcSetting.boardStar);
 
-            if (progress.status != Progress.FINISHED) {
+            if (calcExtraSetting.calcMode != CalcExtraSetting.CALCMODE_FINISHED) {
                 Setting setting = app.setting;
 
-                setting.levelMax = progress.settingLevelMax;
-                setting.colorMatch = progress.settingColorMatch;
-                setting.rotation = progress.settingRotation;
+                setting.maxLevel = calcSetting.maxLevel;
+                setting.rotation = calcSetting.rotation;
+                setting.colorMatch = calcExtraSetting.matchColor;
 
-                setting.boardMarkMin = progress.markMin;
-                setting.boardMarkMax = progress.markMax;
-                setting.boardMarkType = progress.markType;
-                setting.boardSortType = progress.sortType;
+                setting.boardMarkMin = calcExtraSetting.markMin;
+                setting.boardMarkMax = calcExtraSetting.markMax;
+                setting.boardMarkType = calcExtraSetting.markType;
+                setting.boardSortType = calcExtraSetting.sortType;
             }
             process_init();
-            if (progress.status != Progress.FINISHED) {
+            if (calcExtraSetting.calcMode != CalcExtraSetting.CALCMODE_FINISHED) {
                 process_pause();
             }
         }
@@ -2399,7 +2449,7 @@ public class MainFrame extends JFrame {
                 }
 
                 // Save
-                IO.saveProgress(path, progress);
+                IO.saveProgressFile(path, new ProgressFile(calcSetting, calcExtraSetting, progress));
                 combSaveButton.setEnabled(false);
             }
         }

@@ -10,10 +10,10 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import main.resource.Language;
 import main.setting.Filter;
 import main.setting.Setting;
 import main.ui.MainFrame;
+import main.ui.resource.GFLTexts;
 import main.util.IO;
 import main.util.Version3;
 
@@ -25,7 +25,7 @@ public class App {
 
     public static final String NAME_KR = "소녀전선 칩셋 조합기";
     public static final String NAME_EN = "Girls' Frontline HOC Chip Calculator";
-    public static final Version3 VERSION = new Version3(7, 1, 0);
+    public static final Version3 VERSION = new Version3(7, 2, 0);
 
     // <editor-fold defaultstate="collapsed" desc="Colors">
     private static final Color[] COLORS_DEFAULT = { // <editor-fold defaultstate="collapsed">
@@ -125,7 +125,7 @@ public class App {
     public final MainFrame mf;
     public final Setting setting = IO.loadSettings();
     public final Filter filter = new Filter();
-    private final Language language = new Language();
+    private final GFLTexts language = new GFLTexts();
 
     /**
      * @param args the command line arguments

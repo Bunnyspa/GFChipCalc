@@ -621,3 +621,8 @@
 
 ### Added
 - 5-star Mk 153 fast calculation with 5B-6 chips
+
+## 7.2.0 (10/7/2020)
+
+### Added
+- 5-star Mk 153 stat presets and filters

@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -80,11 +79,23 @@ public class PuzzleMatrix<E> implements Serializable {
     }
 
     public int getNumContaining(E e) {
-        return (int) list.stream().filter((cell) -> (cell.equals(e))).count();
+        int count = 0;
+        for (E cell : list) {
+            if (cell.equals(e)) {
+                count++;
+            }
+        }
+        return count;
     }
 
-    public int getNumNotContaining(E e) {
-        return (int) list.stream().filter((cell) -> (!cell.equals(e))).count();
+    int getNumNotContaining(E e) {
+        int count = 0;
+        for (E cell : list) {
+            if (!cell.equals(e)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public Point getPivot(E e) {
@@ -98,7 +109,7 @@ public class PuzzleMatrix<E> implements Serializable {
         return null;
     }
 
-    public Set<Point> getCoords(E e) {
+    public Set<Point> getPoints(E e) {
         Set<Point> ps = new HashSet<>();
         for (int row = 0; row < nRow; row++) {
             for (int col = 0; col < nCol; col++) {
@@ -363,7 +374,7 @@ public class PuzzleMatrix<E> implements Serializable {
         int hash = 5;
         hash = 83 * hash + this.nCol;
         hash = 83 * hash + this.nRow;
-        hash = 83 * hash + Objects.hashCode(this.list);
+        hash = 83 * hash + this.list.hashCode();
         return hash;
     }
 }

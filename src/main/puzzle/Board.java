@@ -1,9 +1,7 @@
 package main.puzzle;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.image.BufferedImage;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,8 +11,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-import javax.swing.ImageIcon;
-import main.App;
+import main.ui.resource.GFLGraphics;
+import main.ui.resource.GFLTexts;
 import main.util.DoubleKeyHashMap;
 import main.util.Fn;
 import main.util.IO;
@@ -24,7 +22,7 @@ import main.util.Rational;
  *
  * @author Bunnyspa
  */
-public class Board implements Comparable<Board> {
+public class Board implements Comparable<Board>, Serializable {
 
     public static int UNUSED = -2;
     public static int EMPTY = -1;
@@ -49,12 +47,6 @@ public class Board implements Comparable<Board> {
         }
         return "";
     }
-
-    public static final String STR_STAR_FULL = "★";
-    public static final String STR_STAR_EMPTY = "☆";
-
-    public static final Color COLOR_STAR_YELLOW = Chip.COLOR_STAR;
-    public static final Color COLOR_STAR_RED = Color.RED;
 
     private static final Map<String, Integer[][]> MAP_MATRIX = new HashMap<String, Integer[][]>() // <editor-fold defaultstate="collapsed">
     {
@@ -143,7 +135,7 @@ public class Board implements Comparable<Board> {
             put(NAME_MK153, Chip.COLOR_BLUE);
         }
     }; // </editor-fold>
-    private static final Map<String, Stat> MAP_INNATEMAX = new HashMap<String, Stat>() // <editor-fold defaultstate="collapsed"> 
+    private static final Map<String, Stat> MAP_STAT_UNIT = new HashMap<String, Stat>() // <editor-fold defaultstate="collapsed"> 
     {
         {
             put(NAME_BGM71, new Stat(155, 402, 349, 83));
@@ -155,7 +147,7 @@ public class Board implements Comparable<Board> {
             put(NAME_MK153, new Stat(107, 224, 233, 107));
         }
     }; // </editor-fold>
-    private static final Map<String, Stat[]> MAP_MAX = new HashMap<String, Stat[]>() // <editor-fold defaultstate="collapsed"> 
+    private static final Map<String, Stat[]> MAP_STAT_CHIP = new HashMap<String, Stat[]>() // <editor-fold defaultstate="collapsed"> 
     {
         {
             put(NAME_BGM71, new Stat[]{
@@ -209,7 +201,7 @@ public class Board implements Comparable<Board> {
             });
         }
     }; // </editor-fold>
-    public static final DoubleKeyHashMap<String, Integer, Stat> MAP_RESONANCE = new DoubleKeyHashMap<String, Integer, Stat>() // <editor-fold defaultstate="collapsed">
+    public static final DoubleKeyHashMap<String, Integer, Stat> MAP_STAT_RESONANCE = new DoubleKeyHashMap<String, Integer, Stat>() // <editor-fold defaultstate="collapsed">
     {
         {
             put(NAME_BGM71, new HashMap<Integer, Stat>() {
@@ -291,7 +283,7 @@ public class Board implements Comparable<Board> {
             });
         }
     }; // </editor-fold>
-    private static final Map<String, Stat[]> MAP_ITERATION = new HashMap<String, Stat[]>() // <editor-fold defaultstate="collapsed">
+    private static final Map<String, Stat[]> MAP_STAT_ITERATION = new HashMap<String, Stat[]>() // <editor-fold defaultstate="collapsed">
     {
         {
             put(NAME_BGM71, new Stat[]{
@@ -384,41 +376,41 @@ public class Board implements Comparable<Board> {
     {
         {
             // generateRotationStep();
-            put("BGM-71", 1, 1);
-            put("BGM-71", 2, 2);
-            put("BGM-71", 3, 2);
-            put("BGM-71", 4, 4);
-            put("BGM-71", 5, 1);
-            put("AGS-30", 1, 1);
-            put("AGS-30", 2, 1);
-            put("AGS-30", 3, 2);
-            put("AGS-30", 4, 2);
-            put("AGS-30", 5, 2);
-            put("2B14", 1, 1);
-            put("2B14", 2, 2);
-            put("2B14", 3, 2);
-            put("2B14", 4, 2);
-            put("2B14", 5, 2);
-            put("M2", 1, 2);
-            put("M2", 2, 2);
-            put("M2", 3, 2);
-            put("M2", 4, 2);
-            put("M2", 5, 2);
-            put("AT4", 1, 4);
-            put("AT4", 2, 4);
-            put("AT4", 3, 4);
-            put("AT4", 4, 4);
-            put("AT4", 5, 1);
-            put("QLZ-04", 1, 4);
-            put("QLZ-04", 2, 4);
-            put("QLZ-04", 3, 4);
-            put("QLZ-04", 4, 4);
-            put("QLZ-04", 5, 4);
-            put("Mk 153", 1, 4);
-            put("Mk 153", 2, 4);
-            put("Mk 153", 3, 4);
-            put("Mk 153", 4, 4);
-            put("Mk 153", 5, 4);
+            put(NAME_BGM71, 1, 1);
+            put(NAME_BGM71, 2, 2);
+            put(NAME_BGM71, 3, 2);
+            put(NAME_BGM71, 4, 4);
+            put(NAME_BGM71, 5, 1);
+            put(NAME_AGS30, 1, 1);
+            put(NAME_AGS30, 2, 1);
+            put(NAME_AGS30, 3, 2);
+            put(NAME_AGS30, 4, 2);
+            put(NAME_AGS30, 5, 2);
+            put(NAME_2B14, 1, 1);
+            put(NAME_2B14, 2, 2);
+            put(NAME_2B14, 3, 2);
+            put(NAME_2B14, 4, 2);
+            put(NAME_2B14, 5, 2);
+            put(NAME_M2, 1, 2);
+            put(NAME_M2, 2, 2);
+            put(NAME_M2, 3, 2);
+            put(NAME_M2, 4, 2);
+            put(NAME_M2, 5, 2);
+            put(NAME_AT4, 1, 4);
+            put(NAME_AT4, 2, 4);
+            put(NAME_AT4, 3, 4);
+            put(NAME_AT4, 4, 4);
+            put(NAME_AT4, 5, 1);
+            put(NAME_QLZ04, 1, 4);
+            put(NAME_QLZ04, 2, 4);
+            put(NAME_QLZ04, 3, 4);
+            put(NAME_QLZ04, 4, 4);
+            put(NAME_QLZ04, 5, 4);
+            put(NAME_MK153, 1, 4);
+            put(NAME_MK153, 2, 4);
+            put(NAME_MK153, 3, 4);
+            put(NAME_MK153, 4, 4);
+            put(NAME_MK153, 5, 4);
         }
     };
 
@@ -470,7 +462,9 @@ public class Board implements Comparable<Board> {
         this.star = board.star;
 
         this.chips = new ArrayList<>();
-        board.chips.forEach((c) -> this.chips.add(new Chip(c)));
+        for (Chip c : board.chips) {
+            this.chips.add(new Chip(c));
+        }
         colorChips();
 
         this.matrix = new PuzzleMatrix<>(board.matrix);
@@ -493,12 +487,16 @@ public class Board implements Comparable<Board> {
         this.matrix = toPlacement(name, star, chips, chipLocs);
         this.maxStat = maxStat;
 
-        this.stat = new Stat(chips.stream().map(c -> c.getStat()));
-        this.pt = new Stat(chips.stream().map(c -> c.getPt()));
+        this.stat = Stat.chipStatSum(chips);
+        this.pt = Stat.chipPtSum(chips);
 
         statPerc = getStatPerc(this.stat, this.maxStat);
 
-        xp = chips.stream().mapToInt((c) -> c.getCumulXP()).sum();
+        int xpSum = 0;
+        for (Chip chip : chips) {
+            xpSum += chip.getCumulXP();
+        }
+        xp = xpSum;
     }
 
     // <editor-fold defaultstate="collapsed" desc="Name">
@@ -515,32 +513,31 @@ public class Board implements Comparable<Board> {
     public static String getStarHTML_star(int star) {
         String starStr = "";
         for (int i = 0; i < star; i++) {
-            starStr += Board.STR_STAR_FULL;
+            starStr += GFLTexts.TEXT_STAR_FULL;
         }
-        return Fn.toHTML(Fn.htmlColor(starStr, Board.COLOR_STAR_YELLOW));
+        return Fn.toHTML(Fn.htmlColor(starStr, GFLGraphics.COLOR_STAR_YELLOW));
     }
 
     public static String getStarHTML_version(int version) {
         int nFullRed = version / 2;
         String fullRedStr = "";
         for (int i = 0; i < nFullRed; i++) {
-            fullRedStr += Board.STR_STAR_FULL;
+            fullRedStr += GFLTexts.TEXT_STAR_FULL;
         }
 
         int nHalfRed = version % 2;
         String halfRedStr = "";
         for (int i = 0; i < nHalfRed; i++) {
-            halfRedStr += Board.STR_STAR_EMPTY;
+            halfRedStr += GFLTexts.TEXT_STAR_EMPTY;
         }
 
         String yellowStr = "";
         for (int i = fullRedStr.length() + halfRedStr.length(); i < 5; i++) {
-            yellowStr += Board.STR_STAR_FULL;
+            yellowStr += GFLTexts.TEXT_STAR_FULL;
         }
 
-        return Fn.toHTML(
-                Fn.htmlColor(fullRedStr + halfRedStr, Board.COLOR_STAR_RED)
-                + Fn.htmlColor(yellowStr, Board.COLOR_STAR_YELLOW)
+        return Fn.toHTML(Fn.htmlColor(fullRedStr + halfRedStr, GFLGraphics.COLOR_STAR_RED)
+                + Fn.htmlColor(yellowStr, GFLGraphics.COLOR_STAR_YELLOW)
         );
     }
     // </editor-fold>
@@ -561,11 +558,17 @@ public class Board implements Comparable<Board> {
     // <editor-fold defaultstate="collapsed" desc="Rotation and Ticket">
     private void rotate(int i) {
         matrix.rotateContent(i, UNUSED);
-        chips.forEach((c) -> c.rotate(i));
+        for (Chip chip : chips) {
+            chip.rotate(i);
+        }
     }
 
     public int getTicketCount() {
-        return chips.stream().mapToInt((c) -> c.getNumTicket()).sum();
+        int sum = 0;
+        for (Chip chip : chips) {
+            sum += chip.getNumTicket();
+        }
+        return sum;
     }
 
     public void minimizeTicket() {
@@ -577,10 +580,12 @@ public class Board implements Comparable<Board> {
             // Rotate board
             b.rotate(rotation);
 
-            b.chips.forEach((c) -> cShapes.add(c.getShape()));
+            for (Chip chip : b.chips) {
+                cShapes.add(chip.getShape());
+            }
 
-            cShapes.forEach((cs) -> {
-                // Get indicies and candidates
+            // Get indicies and candidates
+            for (Shape cs : cShapes) {
                 Set<Integer> cIndices = new HashSet<>();
                 List<Chip> cCandidates = new ArrayList<>();
                 for (int i = 0; i < b.chips.size(); i++) {
@@ -591,17 +596,17 @@ public class Board implements Comparable<Board> {
                     }
                 }
                 // Put matching initial rotation
-                cIndices.forEach((ci) -> {
-                    int r = b.chips.get(ci).getRotation();
+                for (Integer cIndex : cIndices) {
+                    int r = b.chips.get(cIndex).getRotation();
                     for (Chip c : cCandidates) {
                         if (c.getInitRotation() == r) {
                             c.setRotation(c.getInitRotation());
-                            newUsedChips[ci] = c;
+                            newUsedChips[cIndex] = c;
                             cCandidates.remove(c);
                             break;
                         }
                     }
-                });
+                }
                 // Put remaining
                 if (!cCandidates.isEmpty()) {
                     int i = 0;
@@ -615,7 +620,7 @@ public class Board implements Comparable<Board> {
                         }
                     }
                 }
-            });
+            }
             b.chips = Arrays.asList(newUsedChips);
             // Replace if better
             if (getTicketCount() > b.getTicketCount()) {
@@ -643,7 +648,7 @@ public class Board implements Comparable<Board> {
         int[] statArray = stat.toArray();
         int[] optimalPtArray = new int[4];
 
-        get56ChipCount(name, star).forEach((nChip) -> {
+        for (Integer nChip : get56ChipCount(name, star)) {
             for (int i = 0; i < 4; i++) {
                 int[] dist = getPtDistribution(Chip.RATES[i], nChip, statArray[i]);
                 int total = 0;
@@ -654,7 +659,7 @@ public class Board implements Comparable<Board> {
                     optimalPtArray[i] = total;
                 }
             }
-        });
+        }
 
         int residue = getCellCount(name, star)
                 - (optimalPtArray[0]
@@ -679,7 +684,7 @@ public class Board implements Comparable<Board> {
     }
 
     public Stat getOldStat() {
-        return new Stat(chips.stream().map(c -> c.getOldStat()));
+        return Stat.chipOldStatSum(chips);
     }
 
     public Stat getCustomMaxStat() {
@@ -691,7 +696,7 @@ public class Board implements Comparable<Board> {
     }
 
     public static Stat getMaxStat(String name, int star) {
-        return MAP_MAX.get(name)[Fn.limit(star - 1, 0, MAP_MAX.get(name).length)];
+        return MAP_STAT_CHIP.get(name)[Fn.limit(star - 1, 0, MAP_STAT_CHIP.get(name).length)];
     }
     // </editor-fold>
 
@@ -734,29 +739,37 @@ public class Board implements Comparable<Board> {
         if (m == 0) {
             return 1.0;
         }
-        double d = (double) Math.min(s, m) / m;
-        return d;
+        return (double) Math.min(s, m) / m;
     }
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="HOC, Resonance, and Version">
     public static Stat getHOCStat(String name) {
-        return MAP_INNATEMAX.get(name);
+        return MAP_STAT_UNIT.get(name);
     }
 
     public Stat getResonance() {
-        int numCell = chips.stream()
-                .filter((c) -> (c.getColor() == getColor()))
-                .mapToInt((c) -> c.getSize())
-                .sum();
+        int numCell = 0;
+        for (Chip chip : chips) {
+            if (chip.getColor() == getColor()) {
+                numCell += chip.getSize();
+            }
+        }
 
-        return new Stat(MAP_RESONANCE.keySet(name).stream()
-                .filter((i) -> (i <= numCell))
-                .map(i -> MAP_RESONANCE.get(name, i)));
+        List<Stat> stats = new ArrayList<>();
+        for (int key : MAP_STAT_RESONANCE.keySet(name)) {
+            if (key <= numCell) {
+                stats.add(MAP_STAT_RESONANCE.get(name, key));
+            }
+        }
+        return new Stat(stats);
     }
 
     public static Stat getVersionStat(String name, int v) {
-        return new Stat(Arrays.stream(MAP_ITERATION.get(name)).limit(v));
+        List<Stat> stats = new ArrayList<>(v);
+        Stat[] array = MAP_STAT_ITERATION.get(name);
+        stats.addAll(Arrays.asList(array).subList(0, v));
+        return new Stat(stats);
     }
     // </editor-fold>
 
@@ -809,14 +822,23 @@ public class Board implements Comparable<Board> {
 
     // <editor-fold defaultstate="collapsed" desc="Mark">
     public int getMarkedCellCount() {
-        return chips.stream()
-                .filter((c) -> c.isMarked())
-                .mapToInt((c) -> c.getSize())
-                .sum();
+        int sum = 0;
+        for (Chip c : chips) {
+            if (c.isMarked()) {
+                sum += c.getSize();
+            }
+        }
+        return sum;
     }
 
     public int getMarkedChipCount() {
-        return (int) chips.stream().filter((c) -> c.isMarked()).count();
+        int count = 0;
+        for (Chip c : chips) {
+            if (c.isMarked()) {
+                count++;
+            }
+        }
+        return count;
     }
     // </editor-fold>
 
@@ -827,7 +849,9 @@ public class Board implements Comparable<Board> {
 
     public List<String> getChipIDs() {
         List<String> IDs = new ArrayList<>();
-        chips.forEach((c) -> IDs.add(c.getID()));
+        for (Chip c : chips) {
+            IDs.add(c.getID());
+        }
         return IDs;
     }
 
@@ -844,11 +868,21 @@ public class Board implements Comparable<Board> {
         return null;
     }
 
+    public List<Chip> getChips() {
+        List<Chip> out = new ArrayList<>();
+        for (Chip chip : chips) {
+            out.add(new Chip(chip));
+        }
+        return out;
+    }
+
     public static boolean isChipPlaceable(PuzzleMatrix<Integer> matrix, Set<Point> cps) {
-        return cps.stream().allMatch((cp)
-                -> matrix.get(cp.x, cp.y) != null
-                && matrix.get(cp.x, cp.y) == EMPTY
-        );
+        for (Point cp : cps) {
+            if (matrix.get(cp.x, cp.y) == null || matrix.get(cp.x, cp.y) != EMPTY) {
+                return false;
+            }
+        }
+        return true;
     }
     // </editor-fold>
 
@@ -860,6 +894,10 @@ public class Board implements Comparable<Board> {
                 matrix.set(r, c, matrix.get(r, c) <= star ? EMPTY : UNUSED);
             }
         }
+        return matrix;
+    }
+
+    public PuzzleMatrix<Integer> getMatrix() {
         return matrix;
     }
 
@@ -923,7 +961,7 @@ public class Board implements Comparable<Board> {
     private static Set<Point> rs_getPts(Shape shape, int rotation, Point location) {
         PuzzleMatrix<Boolean> cm = new PuzzleMatrix<>(Chip.generateMatrix(shape, rotation));
         Point pivot = cm.getPivot(true);
-        Set<Point> pts = cm.getCoords(true);
+        Set<Point> pts = cm.getPoints(true);
         pts.forEach((p) -> p.translate(location.x - pivot.x, location.y - pivot.y));
         return pts;
     }
@@ -933,57 +971,8 @@ public class Board implements Comparable<Board> {
     public final void colorChips() {
         for (int i = 0; i < chips.size(); i++) {
             Chip c = chips.get(i);
-            c.setResultIndex(i);
+            c.setBoardIndex(i);
         }
-    }
-
-    public static ImageIcon getImage(App app, int size, String name, int star) {
-        return new ImageIcon(generateImage(app, size, initMatrix(name, star)));
-    }
-
-    public ImageIcon getImage(App app, int size) {
-        return new ImageIcon(generateImage(app, size, matrix));
-    }
-
-    private static BufferedImage generateImage(App app, int size, PuzzleMatrix<Integer> matrix) {
-        int tileSize = size / 8;
-        int h = HEIGHT;
-        int w = WIDTH;
-        BufferedImage i = new BufferedImage(
-                h * tileSize + 1,
-                w * tileSize + 1,
-                BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = (Graphics2D) i.getGraphics();
-
-        for (int row = 0; row < h; row++) {
-            for (int col = 0; col < w; col++) {
-                int s = matrix.get(row, col);
-                int x = col * tileSize;
-                int y = row * tileSize;
-
-                // Tiles
-                g.setColor(s == UNUSED ? Color.BLACK : s == EMPTY ? Color.WHITE : app.colors()[s % app.colors().length]);
-                g.fillRect(x, y, tileSize, tileSize);
-
-                // Horizontal Border
-                g.setColor(Color.BLACK);
-                if (0 < row && matrix.get(row - 1, col) != s) {
-                    g.drawLine(x, y, x + tileSize, y);
-                }
-                // Vertical Border
-                if (0 < col && matrix.get(row, col - 1) != s) {
-                    g.drawLine(x, y, x, y + tileSize);
-                }
-            }
-        }
-
-        // Border
-        g.setColor(Color.BLACK);
-        g.drawLine(0, 0, tileSize * w, 0);
-        g.drawLine(0, 0, 0, tileSize * h);
-        g.drawLine(0, tileSize * h, tileSize * w, tileSize * h);
-        g.drawLine(tileSize * w, 0, tileSize * w, tileSize * h);
-        return i;
     }
     // </editor-fold>
 
@@ -1006,7 +995,7 @@ public class Board implements Comparable<Board> {
         PuzzleMatrix<Integer> placement = initMatrix(name, star);
         for (int i = 0; i < puzzles.size(); i++) {
             PuzzleMatrix<Boolean> matrix = Chip.generateMatrix(puzzles.get(i).shape, puzzles.get(i).rotation);
-            Set<Point> pts = matrix.getCoords(true);
+            Set<Point> pts = matrix.getPoints(true);
             Point fp = matrix.getPivot(true);
             Point bp = puzzles.get(i).location;
             for (Point p : pts) {

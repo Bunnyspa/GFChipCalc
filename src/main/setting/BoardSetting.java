@@ -17,8 +17,6 @@ public class BoardSetting {
     public static final int MAX_PT = 2;
     public static final int MAX_PRESET = 3;
 
-    public static final StatPresetMap PRESET = StatPresetMap.PRESET;
-
     private final DoubleKeyHashMap<String, Integer, Stat> statMap, ptMap;
     private final DoubleKeyHashMap<String, Integer, Integer> modeMap, presetIndexMap;
 
@@ -45,7 +43,7 @@ public class BoardSetting {
                 String ss = String.join(";",
                         name,
                         String.valueOf(star),
-                        String.valueOf(getMode(name, star)),
+                        String.valueOf(getStatMode(name, star)),
                         getStat(name, star).toData(),
                         getPt(name, star).toData(),
                         String.valueOf(getPresetIndex(name, star))
@@ -86,7 +84,7 @@ public class BoardSetting {
         return new Stat();
     }
 
-    public int getMode(String name, int star) {
+    public int getStatMode(String name, int star) {
         if (modeMap.containsKey(name, star)) {
             return modeMap.get(name, star);
         }
@@ -101,16 +99,16 @@ public class BoardSetting {
     }
 
     public boolean hasDefaultPreset(String name, int star) {
-        if (!PRESET.containsKey(name, star)) {
+        if (!StatPresetMap.PRESET.containsKey(name, star)) {
             return false;
         }
-        if (PRESET.size(name, star) != 1) {
+        if (StatPresetMap.PRESET.size(name, star) != 1) {
             return false;
         }
-        return PRESET.get(name, star, 0).stat.equals(Board.getMaxStat(name, star));
+        return StatPresetMap.PRESET.get(name, star, 0).stat.equals(Board.getMaxStat(name, star));
     }
 
     public static StatPreset getPreset(String name, int star, int index) {
-        return PRESET.get(name, star, index);
+        return StatPresetMap.PRESET.get(name, star, index);
     }
 }

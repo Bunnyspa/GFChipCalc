@@ -5,10 +5,11 @@
  */
 package main.puzzle;
 
+import java.awt.Point;
 import java.util.HashMap;
 import java.util.Map;
-import main.App;
-import main.resource.Language;
+import java.util.Set;
+import main.util.DoubleKeyHashMap;
 import main.util.Fn;
 
 /**
@@ -32,6 +33,8 @@ public enum Shape {
     _5B_W(21), _5B_Nm(22), _5B_N(23), _5B_Ym(24), _5B_Y(25), _5B_X(26), _5B_T(27), _5B_F(28), _5B_Fm(29),
     // 6 = G
     _6_O(30), _6_A(31), _6_D(32), _6_Z(33), _6_Zm(34), _6_Y(35), _6_T(36), _6_I(37), _6_C(38), _6_R(39);
+
+    public static final Shape DEFAULT = Shape._1;
 
     public enum Type {
         NONE(0), _1(1), _2(2), _3(3), _4(4), _5A(5), _5B(6), _6(7);
@@ -99,23 +102,6 @@ public enum Shape {
                 case 2:
                 case 1:
                     return String.valueOf(id);
-                default:
-                    return "";
-            }
-        }
-
-        public String toString(App app) {
-            switch (id) {
-                case 6:
-                    return app.getText(Language.UNIT_CELLTYPE, "5", "B");
-                case 5:
-                    return app.getText(Language.UNIT_CELLTYPE, "5", "A");
-                case 7:
-                case 4:
-                case 3:
-                case 2:
-                case 1:
-                    return app.getText(Language.UNIT_CELL, id);
                 default:
                     return "";
             }
@@ -329,6 +315,270 @@ public enum Shape {
                 return new Shape[0];
         }
     }
+
+    public int getMaxRotation() {
+        return MAX_ROTATIONS.get(this);
+    }
+
+    public Point getPivot(int rotation) {
+        return PIVOTS.get(this, rotation);
+    }
+
+    public Set<Point> getPoints(int rotation) {
+        return POINTS.get(this, rotation);
+    }
+
+    private static final boolean O = true;
+    private static final boolean X = false;
+    public static final Map<Shape, Boolean[][]> MATRIX_MAP = new HashMap<Shape, Boolean[][]>() // <editor-fold defaultstate="collapsed">
+    {
+        {
+            // 1
+            put(Shape._1, new Boolean[][]{
+                {O}
+            });
+
+            // 2
+            put(Shape._2, new Boolean[][]{
+                {O},
+                {O}
+            });
+
+            // 3
+            put(Shape._3_I, new Boolean[][]{
+                {O},
+                {O},
+                {O}
+            });
+            put(Shape._3_L, new Boolean[][]{
+                {O, X},
+                {O, O}
+            });
+
+            // 4
+            put(Shape._4_I, new Boolean[][]{
+                {O, O, O, O}
+            });
+            put(Shape._4_L, new Boolean[][]{
+                {O, X},
+                {O, X},
+                {O, O}
+            });
+            put(Shape._4_Lm, new Boolean[][]{
+                {O, X, X},
+                {O, O, O}
+            });
+            put(Shape._4_O, new Boolean[][]{
+                {O, O},
+                {O, O}
+            });
+            put(Shape._4_T, new Boolean[][]{
+                {X, O, X},
+                {O, O, O}
+            });
+            put(Shape._4_Z, new Boolean[][]{
+                {O, O, X},
+                {X, O, O}
+            });
+            put(Shape._4_Zm, new Boolean[][]{
+                {X, O, O},
+                {O, O, X}
+            });
+
+            // 5A
+            put(Shape._5A_C, new Boolean[][]{
+                {O, O, O},
+                {O, X, O}
+            });
+            put(Shape._5A_I, new Boolean[][]{
+                {O, O, O, O, O}
+            });
+            put(Shape._5A_L, new Boolean[][]{
+                {O, X},
+                {O, X},
+                {O, X},
+                {O, O}
+            });
+            put(Shape._5A_Lm, new Boolean[][]{
+                {X, O},
+                {X, O},
+                {X, O},
+                {O, O}
+            });
+            put(Shape._5A_P, new Boolean[][]{
+                {X, O},
+                {O, O},
+                {O, O}
+            });
+            put(Shape._5A_Pm, new Boolean[][]{
+                {O, X},
+                {O, O},
+                {O, O}
+            });
+            put(Shape._5A_V, new Boolean[][]{
+                {O, X, X},
+                {O, X, X},
+                {O, O, O}
+            });
+            put(Shape._5A_Z, new Boolean[][]{
+                {X, X, O},
+                {O, O, O},
+                {O, X, X}
+            });
+            put(Shape._5A_Zm, new Boolean[][]{
+                {O, X, X},
+                {O, O, O},
+                {X, X, O}
+            });
+
+            // 5B
+            put(Shape._5B_F, new Boolean[][]{
+                {O, X, X},
+                {O, O, O},
+                {X, O, X}
+            });
+            put(Shape._5B_Fm, new Boolean[][]{
+                {X, X, O},
+                {O, O, O},
+                {X, O, X}
+            });
+            put(Shape._5B_N, new Boolean[][]{
+                {X, O},
+                {O, O},
+                {O, X},
+                {O, X}
+            });
+            put(Shape._5B_Nm, new Boolean[][]{
+                {O, X},
+                {O, O},
+                {X, O},
+                {X, O}
+            });
+            put(Shape._5B_T, new Boolean[][]{
+                {X, O, X},
+                {X, O, X},
+                {O, O, O}
+            });
+            put(Shape._5B_W, new Boolean[][]{
+                {X, O, O},
+                {O, O, X},
+                {O, X, X}
+            });
+            put(Shape._5B_X, new Boolean[][]{
+                {X, O, X},
+                {O, O, O},
+                {X, O, X}
+            });
+            put(Shape._5B_Y, new Boolean[][]{
+                {X, O},
+                {O, O},
+                {X, O},
+                {X, O}
+            });
+            put(Shape._5B_Ym, new Boolean[][]{
+                {O, X},
+                {O, O},
+                {O, X},
+                {O, X}
+            });
+
+            // 6
+            put(Shape._6_A, new Boolean[][]{
+                {O, X, X},
+                {O, O, X},
+                {O, O, O}
+            });
+            put(Shape._6_C, new Boolean[][]{
+                {O, X, X, O},
+                {O, O, O, O}
+            });
+            put(Shape._6_D, new Boolean[][]{
+                {X, O, O, X},
+                {O, O, O, O}
+            });
+            put(Shape._6_I, new Boolean[][]{
+                {O, O, O, O, O, O}
+            });
+            put(Shape._6_O, new Boolean[][]{
+                {O, O},
+                {O, O},
+                {O, O}
+            });
+            put(Shape._6_R, new Boolean[][]{
+                {X, O, X},
+                {O, O, O},
+                {O, O, X}
+            });
+            put(Shape._6_T, new Boolean[][]{
+                {X, X, O, X},
+                {O, O, O, O},
+                {X, X, O, X}
+            });
+            put(Shape._6_Y, new Boolean[][]{
+                {X, O, X},
+                {O, O, O},
+                {O, X, O}
+            });
+            put(Shape._6_Z, new Boolean[][]{
+                {O, O, O, X},
+                {X, O, O, O}
+            });
+            put(Shape._6_Zm, new Boolean[][]{
+                {X, O, O, O},
+                {O, O, O, X}
+            });
+        }
+    }; // </editor-fold>
+
+    private static final Map<Shape, Integer> MAX_ROTATIONS = new HashMap<Shape, Integer>() // <editor-fold defaultstate="collapsed">
+    {
+        {
+            for (Shape shape : Shape.values()) {
+                if (shape == Shape.NONE) {
+                    continue;
+                }
+                PuzzleMatrix<Boolean> a = new PuzzleMatrix<>(MATRIX_MAP.get(shape));
+                for (int i = 1; i <= 4; i++) {
+                    PuzzleMatrix<Boolean> b = new PuzzleMatrix<>(MATRIX_MAP.get(shape));
+                    b.rotate(i);
+                    if (a.equals(b)) {
+                        put(shape, i);
+                        break;
+                    }
+                }
+            }
+        }
+    }; // </editor-fold>
+    public static final DoubleKeyHashMap<Shape, Integer, Point> PIVOTS = new DoubleKeyHashMap<Shape, Integer, Point>() // <editor-fold defaultstate="collapsed">
+    {
+        {
+            for (Shape shape : Shape.values()) {
+                if (shape == Shape.NONE) {
+                    continue;
+                }
+                PuzzleMatrix<Boolean> matrix = new PuzzleMatrix<>(MATRIX_MAP.get(shape));
+                for (int i = 0; i < shape.getMaxRotation(); i++) {
+                    Point pivot = matrix.getPivot(true);
+                    put(shape, i, pivot);
+                }
+            }
+        }
+    }; // </editor-fold>
+    public static final DoubleKeyHashMap<Shape, Integer, Set<Point>> POINTS = new DoubleKeyHashMap<Shape, Integer, Set<Point>>() // <editor-fold defaultstate="collapsed">
+    {
+        {
+            for (Shape shape : Shape.values()) {
+                if (shape == Shape.NONE) {
+                    continue;
+                }
+                PuzzleMatrix<Boolean> matrix = new PuzzleMatrix<>(MATRIX_MAP.get(shape));
+                for (int i = 0; i < shape.getMaxRotation(); i++) {
+                    Set<Point> pts = matrix.getPoints(true);
+                    put(shape, i, pts);
+                }
+            }
+        }
+    }; // </editor-fold>
 
     public static int compare(Shape o1, Shape o2) {
         return Integer.compare(o1.id, o2.id);

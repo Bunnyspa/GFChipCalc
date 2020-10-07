@@ -1,12 +1,13 @@
 package main.puzzle;
 
-import java.util.stream.Stream;
+import java.io.Serializable;
+import java.util.Collection;
 
 /**
  *
  * @author Bunnyspa
  */
-public class Stat implements Comparable<Stat> {
+public class Stat implements Comparable<Stat>, Serializable {
 
     public static final int DMG = 0;
     public static final int BRK = 1;
@@ -14,29 +15,51 @@ public class Stat implements Comparable<Stat> {
     public static final int RLD = 3;
     public final int dmg, brk, hit, rld;
 
-//    public static Stat getStat(Collection<Chip> chips) {
-//        int dmg = chips.stream().mapToInt(c -> c.getDmg()).sum();
-//        int brk = chips.stream().mapToInt(c -> c.getBrk()).sum();
-//        int hit = chips.stream().mapToInt(c -> c.getHit()).sum();
-//        int rld = chips.stream().mapToInt(c -> c.getRld()).sum();
-//        return new Stat(dmg, brk, hit, rld);
-//    }
-//
-//    public static Stat getPt(Collection<Chip> chips) {
-//        int dmg = chips.stream().mapToInt(c -> c.getPt().dmg).sum();
-//        int brk = chips.stream().mapToInt(c -> c.getPt().brk).sum();
-//        int hit = chips.stream().mapToInt(c -> c.getPt().hit).sum();
-//        int rld = chips.stream().mapToInt(c -> c.getPt().rld).sum();
-//        return new Stat(dmg, brk, hit, rld);
-//    }
-//
-//    public static Stat getOldStat(Collection<Chip> chips) {
-//        int dmg = chips.stream().mapToInt(c -> c.getOldStat().dmg).sum();
-//        int brk = chips.stream().mapToInt(c -> c.getOldStat().brk).sum();
-//        int hit = chips.stream().mapToInt(c -> c.getOldStat().hit).sum();
-//        int rld = chips.stream().mapToInt(c -> c.getOldStat().rld).sum();
-//        return new Stat(dmg, brk, hit, rld);
-//    }
+    public static Stat chipStatSum(Collection<Chip> chips) {
+        int dmg = 0;
+        int brk = 0;
+        int hit = 0;
+        int rld = 0;
+        for (Chip chip : chips) {
+            Stat s = chip.getStat();
+            dmg += s.dmg;
+            brk += s.brk;
+            hit += s.hit;
+            rld += s.rld;
+        }
+        return new Stat(dmg, brk, hit, rld);
+    }
+
+    public static Stat chipPtSum(Collection<Chip> chips) {
+        int dmg = 0;
+        int brk = 0;
+        int hit = 0;
+        int rld = 0;
+        for (Chip chip : chips) {
+            Stat s = chip.getPt();
+            dmg += s.dmg;
+            brk += s.brk;
+            hit += s.hit;
+            rld += s.rld;
+        }
+        return new Stat(dmg, brk, hit, rld);
+    }
+
+    public static Stat chipOldStatSum(Collection<Chip> chips) {
+        int dmg = 0;
+        int brk = 0;
+        int hit = 0;
+        int rld = 0;
+        for (Chip chip : chips) {
+            Stat s = chip.getOldStat();
+            dmg += s.dmg;
+            brk += s.brk;
+            hit += s.hit;
+            rld += s.rld;
+        }
+        return new Stat(dmg, brk, hit, rld);
+    }
+
     public Stat() {
         this.dmg = 0;
         this.brk = 0;
@@ -65,14 +88,14 @@ public class Stat implements Comparable<Stat> {
         this.rld = v[3];
     }
 
-    public Stat(Stream<Stat> stream) {
+    public Stat(Collection<Stat> stats) {
         int[] s = new int[4];
-        stream.forEach(stat -> {
+        for (Stat stat : stats) {
             int[] array = stat.toArray();
             for (int i = 0; i < 4; i++) {
                 s[i] += array[i];
             }
-        });
+        }
 
         this.dmg = s[0];
         this.brk = s[1];
@@ -80,23 +103,6 @@ public class Stat implements Comparable<Stat> {
         this.rld = s[3];
     }
 
-//    public Stat add(Stat stat) {
-//        return new Stat(
-//                dmg + stat.dmg,
-//                brk + stat.brk,
-//                hit + stat.hit,
-//                rld + stat.rld
-//        );
-//    }
-//
-//    public Stat add(int i) {
-//        return new Stat(
-//                dmg + i,
-//                brk + i,
-//                hit + i,
-//                rld + i
-//        );
-//    }
     public boolean allGeq(Stat s) {
         return s.dmg <= dmg
                 && s.brk <= brk

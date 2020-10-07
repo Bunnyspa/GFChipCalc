@@ -2,8 +2,8 @@ package main.ui.help;
 
 import javax.swing.JDialog;
 import main.App;
-import main.resource.Language;
-import main.resource.Resources;
+import main.ui.resource.GFLResources;
+import main.ui.resource.GFLTexts;
 import main.util.Fn;
 
 /**
@@ -21,10 +21,10 @@ public class HelpProxyDialog extends JDialog {
     }
 
     private void init() {
-        setTitle(app.getText(Language.HELP_PROXY));
-        jLabel1.setIcon(Resources.HELP_PROXY);
-        descLabel.setText(app.getText(Language.HELP_PROXY_DESC));
-        closeButton.setText(app.getText(Language.ACTION_CLOSE));
+        setTitle(app.getText(GFLTexts.HELP_PROXY));
+        jLabel1.setIcon(GFLResources.HELP_PROXY);
+        descLabel.setText(app.getText(GFLTexts.HELP_PROXY_DESC));
+        closeButton.setText(app.getText(GFLTexts.ACTION_CLOSE));
         addListeners();
         pack();
     }

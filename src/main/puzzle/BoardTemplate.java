@@ -1,16 +1,12 @@
 package main.puzzle;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.swing.ImageIcon;
-import main.App;
 import main.util.IO;
 
 /**
@@ -79,12 +75,13 @@ public class BoardTemplate implements Comparable<BoardTemplate> {
     }
 
     private void init() {
-        puzzles.stream().map(p -> p.shape).forEach(shape -> {
+        for (Puzzle p : puzzles) {
+            Shape shape = p.shape;
             if (!shapeCountMap.containsKey(shape)) {
                 shapeCountMap.put(shape, 0);
             }
             shapeCountMap.put(shape, shapeCountMap.get(shape) + 1);
-        });
+        }
     }
 
     public PuzzleMatrix<Integer> getMatrix() {
@@ -112,11 +109,21 @@ public class BoardTemplate implements Comparable<BoardTemplate> {
     }
 
     public List<Integer> getChipRotations() {
-        return puzzles.stream().map(p -> p.rotation).collect(Collectors.toList());
+        List<Integer> list = new ArrayList<>();
+        for (Puzzle p : puzzles) {
+            Integer rotation = p.rotation;
+            list.add(rotation);
+        }
+        return list;
     }
 
     public List<Point> getChipLocations() {
-        return puzzles.stream().map(p -> p.location).collect(Collectors.toList());
+        List<Point> list = new ArrayList<>();
+        for (Puzzle p : puzzles) {
+            Point location = p.location;
+            list.add(location);
+        }
+        return list;
     }
 
     public String toData() {
@@ -137,51 +144,6 @@ public class BoardTemplate implements Comparable<BoardTemplate> {
         sb.append(IO.data(calcSymmetry()));
 
         return sb.toString();
-    }
-
-    public ImageIcon getImage(App app, int size) {
-        return new ImageIcon(generateImage(app, size, placement));
-    }
-
-    private static BufferedImage generateImage(App app, int size, PuzzleMatrix<Integer> status) {
-        int tileSize = size / 8;
-        int h = Board.HEIGHT;
-        int w = Board.WIDTH;
-        BufferedImage i = new BufferedImage(
-                h * tileSize + 1,
-                w * tileSize + 1,
-                BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = (Graphics2D) i.getGraphics();
-
-        for (int row = 0; row < h; row++) {
-            for (int col = 0; col < w; col++) {
-                int s = status.get(row, col);
-                int x = col * tileSize;
-                int y = row * tileSize;
-
-                // Tiles
-                g.setColor(s == Board.UNUSED ? Color.BLACK : s == Board.EMPTY ? Color.WHITE : app.colors()[s % app.colors().length]);
-                g.fillRect(x, y, tileSize, tileSize);
-
-                // Horizontal Border
-                g.setColor(Color.BLACK);
-                if (0 < row && status.get(row - 1, col) != s) {
-                    g.drawLine(x, y, x + tileSize, y);
-                }
-                // Vertical Border
-                if (0 < col && status.get(row, col - 1) != s) {
-                    g.drawLine(x, y, x, y + tileSize);
-                }
-            }
-        }
-
-        // Border
-        g.setColor(Color.BLACK);
-        g.drawLine(0, 0, tileSize * w, 0);
-        g.drawLine(0, 0, 0, tileSize * h);
-        g.drawLine(0, tileSize * h, tileSize * w, tileSize * h);
-        g.drawLine(tileSize * w, 0, tileSize * w, tileSize * h);
-        return i;
     }
 
     public void sortPuzzle() {

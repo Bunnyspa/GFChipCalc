@@ -8,6 +8,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JList;
 import main.App;
 import main.puzzle.Chip;
+import main.ui.resource.GFLGraphics;
 
 /**
  *
@@ -42,10 +43,10 @@ public class ChipListCellRenderer extends DefaultListCellRenderer {
 
         Chip c = (Chip) value;
         if (value != null) {
+            ImageIcon icon = GFLGraphics.chip(app, c);
             if (!factored) {
-                cr.setIcon(c.getImage(app));
+                cr.setIcon(icon);
             } else {
-                ImageIcon icon = c.getImage(app);
                 Image image = icon.getImage().getScaledInstance((int) (icon.getIconWidth() * factor), (int) (icon.getIconHeight() * factor), Image.SCALE_SMOOTH);
                 cr.setIcon(new ImageIcon(image));
             }

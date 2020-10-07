@@ -6,6 +6,7 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import main.App;
 import main.puzzle.assembly.ChipFreq;
+import main.ui.resource.GFLGraphics;
 import main.util.Fn;
 import main.util.Ref;
 
@@ -33,7 +34,7 @@ public class ChipFreqListCellRenderer extends DefaultListCellRenderer {
 
         ChipFreq cf = (ChipFreq) value;
         if (value != null) {
-            cr.setIcon(cf.chip.getImage(app));
+            cr.setIcon(GFLGraphics.chip(app, cf.chip));
             cr.setBackground(isSelected && blink.v ? Color.LIGHT_GRAY : Fn.percColor(app.orange(), app.green(), app.blue(), cf.freq, 0.0, 1.0));
         } else {
             cr.setIcon(null);

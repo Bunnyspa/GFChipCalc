@@ -1,21 +1,53 @@
-package main.resource;
+package main.ui.resource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import main.App;
+import main.puzzle.Chip;
+import main.puzzle.Shape;
 import main.util.IO;
 
 /**
  *
  * @author Bunnyspa
  */
-public class Language {
+public class GFLTexts {
 
+    public static final Map<Integer, String> TEXT_MAP_COLOR = new HashMap<Integer, String>() // <editor-fold defaultstate="collapsed">
+    {
+        {
+            put(Chip.COLOR_ORANGE, GFLTexts.CHIP_COLOR_ORANGE);
+            put(Chip.COLOR_BLUE, GFLTexts.CHIP_COLOR_BLUE);
+        }
+    }; // </editor-fold>
+
+    public static String text_type(App app, Shape.Type type) {
+        switch (type.id) {
+            case 6:
+                return app.getText(UNIT_CELLTYPE, "5", "B");
+            case 5:
+                return app.getText(UNIT_CELLTYPE, "5", "A");
+            case 7:
+            case 4:
+            case 3:
+            case 2:
+            case 1:
+                return app.getText(UNIT_CELL, type.id);
+            default:
+                return "";
+        }
+    }
+
+    public static final String TEXT_STAR_FULL = "★";
+    public static final String TEXT_STAR_EMPTY = "☆";
+    
+    // <editor-fold defaultstate="collapsed" desc="Resources">
     private Properties prop;
     private String propTag = "";
 
@@ -24,7 +56,7 @@ public class Language {
     public static final Locale JA_JP = Locale.forLanguageTag("ja-JP");
     public static final Locale[] LOCALES = {KO_KR, EN_US, JA_JP};
 
-    private static final Map<Locale, Properties> LANGMAP = Resources.readInternalProp();
+    private static final Map<Locale, Properties> LANGMAP = GFLResources.readInternalProp();
 
     // <editor-fold defaultstate="collapsed" desc="Map">
     // ACTION
@@ -425,4 +457,5 @@ public class Language {
         }
         return sb.toString();
     }
+    // </editor-fold>
 }

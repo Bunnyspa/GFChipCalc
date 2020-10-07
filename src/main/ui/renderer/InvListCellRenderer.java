@@ -9,6 +9,7 @@ import main.App;
 import main.puzzle.Board;
 import main.puzzle.Chip;
 import main.puzzle.assembly.ChipFreq;
+import main.ui.resource.GFLGraphics;
 import main.util.Ref;
 
 /**
@@ -30,6 +31,10 @@ public class InvListCellRenderer extends DefaultListCellRenderer {
         this.combChipList = combChipList;
         this.combChipFreqList = combChipFreqList;
         this.blink = blink;
+    }
+
+    public void refresh() {
+
     }
 
     @Override
@@ -67,7 +72,7 @@ public class InvListCellRenderer extends DefaultListCellRenderer {
             }
         }
 
-        cr.setIcon(c.getImage(app));
+        cr.setIcon(GFLGraphics.chip(app, c));
         boolean selBlink = isSelected && blink.v;
         Color selColor = app.orange();
         if (resultSelected) {
@@ -80,7 +85,7 @@ public class InvListCellRenderer extends DefaultListCellRenderer {
             cr.setBackground(isSelected ? selColor : Color.WHITE);
         }
 
-        //cr.setToolTipText(c.getID().toString()); //DEBUG
+        cr.setToolTipText(c.getID().toString()); //DEBUG
         return cr;
     }
 }

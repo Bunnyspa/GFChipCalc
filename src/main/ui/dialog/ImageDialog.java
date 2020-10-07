@@ -35,7 +35,8 @@ import main.App;
 import main.image.ImageProcessor;
 import main.puzzle.Chip;
 import main.puzzle.Shape;
-import main.resource.Language;
+import main.ui.resource.GFLGraphics;
+import main.ui.resource.GFLTexts;
 import main.util.Fn;
 
 /**
@@ -96,16 +97,16 @@ public class ImageDialog extends JDialog {
     }
 
     private void init() {
-        setTitle(app.getText(Language.IMAGE_TITLE));
+        setTitle(app.getText(GFLTexts.IMAGE_TITLE));
         fileChooser.setFileFilter(new FileNameExtensionFilter(
-                app.getText(Language.IMAGE_OPEN_EXT) + " (.png, .jpg, .gif, .bmp)",
+                app.getText(GFLTexts.IMAGE_OPEN_EXT) + " (.png, .jpg, .gif, .bmp)",
                 "png", "jpg", "gif", "bmp")
         );
-        openButton.setText(app.getText(Language.IMAGE_OPEN));
-        addToggleButton.setText(app.getText(Language.ACTION_ADD));
-        deleteToggleButton.setText(app.getText(Language.ACTION_DEL));
-        okButton.setText(app.getText(Language.ACTION_OK));
-        cancelButton.setText(app.getText(Language.ACTION_CANCEL));
+        openButton.setText(app.getText(GFLTexts.IMAGE_OPEN));
+        addToggleButton.setText(app.getText(GFLTexts.ACTION_ADD));
+        deleteToggleButton.setText(app.getText(GFLTexts.ACTION_DEL));
+        okButton.setText(app.getText(GFLTexts.ACTION_OK));
+        cancelButton.setText(app.getText(GFLTexts.ACTION_CANCEL));
 
         initLabel();
         aScrollPane.setViewportView(imageLabel);
@@ -298,8 +299,8 @@ public class ImageDialog extends JDialog {
             refresh();
         } else if (addedByUser) {
             JOptionPane.showMessageDialog(this,
-                    app.getText(Language.IMAGE_OVERLAPPED_BODY),
-                    app.getText(Language.IMAGE_OVERLAPPED_TITLE),
+                    app.getText(GFLTexts.IMAGE_OVERLAPPED_BODY),
+                    app.getText(GFLTexts.IMAGE_OVERLAPPED_TITLE),
                     JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -377,7 +378,7 @@ public class ImageDialog extends JDialog {
         if (b) {
             Chip chip = rcs.get(i).chip;
             Rectangle rect = rcs.get(i).rect;
-            ImageIcon icon = chip.getImage(app);
+            ImageIcon icon = GFLGraphics.chip(app, chip);
             JLabel label = genChipLabel(icon, zoomRect(rect, zoom));
             chipImagePoppedup.put(i, label);
             imageLabel.add(label);

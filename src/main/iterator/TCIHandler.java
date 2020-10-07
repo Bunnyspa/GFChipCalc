@@ -1,11 +1,11 @@
-package main.puzzle.assembly;
+package main.iterator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 import main.puzzle.Chip;
 import main.puzzle.Shape;
 
@@ -21,16 +21,26 @@ public class TCIHandler {
     private int iteratorIndex = 0;
 
     public TCIHandler(String name, int star, List<Chip> chips) {
-        Map<Shape.Type, Integer> typeCandidateCountMap = getTypeCount(chips.stream().map((c) -> c.getType()));
-        chipNameCountMap = getShapeCount(chips.stream().map((c) -> c.getShape()));
+        List<Shape.Type> chipTypes = new ArrayList<>();
+        List<Shape> chipShapes = new ArrayList<>();
+        for (Chip c : chips) {
+            chipTypes.add(c.getType());
+            chipShapes.add(c.getShape());
+        }
+        Map<Shape.Type, Integer> typeCandidateCountMap = getTypeCount(chipTypes);
+        chipNameCountMap = getShapeCount(chipShapes);
 
         List<Map<Shape.Type, Integer>> typeCountMaps = new ArrayList<>();
         Set<Shape.Type> types = typeCandidateCountMap.keySet();
-        TypeCombinationIterator.getTypeCountMaps(name, star, types).stream()
-                .filter((typeCountMap) -> allTypeEnough(typeCountMap, typeCandidateCountMap))
-                .forEach((typeCountMap) -> typeCountMaps.add(typeCountMap));
+        for (Map<Shape.Type, Integer> typeCountMap : TypeCombinationIterator.getTypeCountMaps(name, star, types)) {
+            if (allTypeEnough(typeCountMap, typeCandidateCountMap)) {
+                typeCountMaps.add(typeCountMap);
+            }
+        }
 
-        typeCountMaps.forEach((map) -> iterators.add(new TypeCombinationIterator(map)));
+        for (Map<Shape.Type, Integer> map : typeCountMaps) {
+            iterators.add(new TypeCombinationIterator(map));
+        }
 
         limited = true;
     }
@@ -39,7 +49,9 @@ public class TCIHandler {
         chipNameCountMap = new HashMap<>();
 
         List<Map<Shape.Type, Integer>> typeCountMaps = TypeCombinationIterator.getTypeCountMaps(name, star, types);
-        typeCountMaps.forEach((map) -> iterators.add(new TypeCombinationIterator(map)));
+        for (Map<Shape.Type, Integer> map : typeCountMaps) {
+            iterators.add(new TypeCombinationIterator(map));
+        }
 
         limited = false;
     }
@@ -49,7 +61,12 @@ public class TCIHandler {
     }
 
     public int total() {
-        return iterators.stream().mapToInt((it) -> it.total()).sum();
+        int sum = 0;
+        for (TypeCombinationIterator it : iterators) {
+            int total = it.total();
+            sum += total;
+        }
+        return sum;
     }
 
     public void skip() {
@@ -96,47 +113,51 @@ public class TCIHandler {
         if (next.isEmpty() && hasNext()) {
             next = iterators.get(iteratorIndex + 1).peek();
         }
-        Map<Shape, Integer> nameCount = getShapeCount(next.stream());
+        Map<Shape, Integer> nameCount = getShapeCount(next);
         return allShapeEnough(nameCount, chipNameCountMap);
     }
 
-    private static Map<Shape.Type, Integer> getTypeCount(Stream<Shape.Type> types) {
+    private static Map<Shape.Type, Integer> getTypeCount(Collection<Shape.Type> types) {
         Map<Shape.Type, Integer> out = new HashMap<>();
-        types.forEach((s) -> {
-            if (!out.containsKey(s)) {
-                out.put(s, 0);
+        for (Shape.Type t : types) {
+            if (!out.containsKey(t)) {
+                out.put(t, 0);
             }
-            int nc = out.get(s);
+            int nc = out.get(t);
             nc++;
-            out.put(s, nc);
-        });
+            out.put(t, nc);
+        }
         return out;
     }
 
-    private static Map<Shape, Integer> getShapeCount(Stream<Shape> shapes) {
+    private static Map<Shape, Integer> getShapeCount(Collection<Shape> shapes) {
         Map<Shape, Integer> out = new HashMap<>();
-        shapes.forEach((s) -> {
+        for (Shape s : shapes) {
             if (!out.containsKey(s)) {
                 out.put(s, 0);
             }
             int nc = out.get(s);
             nc++;
             out.put(s, nc);
-        });
+        }
         return out;
     }
 
     private static boolean allTypeEnough(Map<Shape.Type, Integer> required, Map<Shape.Type, Integer> candidates) {
-        return required.keySet().stream().allMatch((type)
-                -> candidates.containsKey(type)
-                && required.get(type) <= candidates.get(type)
-        );
+        for (Shape.Type type : required.keySet()) {
+            if (!candidates.containsKey(type) || required.get(type) > candidates.get(type)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static boolean allShapeEnough(Map<Shape, Integer> required, Map<Shape, Integer> candidates) {
-        return required.keySet().stream().allMatch((type)
-                -> candidates.containsKey(type)
-                && required.get(type) <= candidates.get(type)
-        );
+        for (Shape type : required.keySet()) {
+            if (!candidates.containsKey(type) || required.get(type) > candidates.get(type)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -9,7 +9,7 @@ import java.util.Set;
 import javax.swing.JDialog;
 import main.App;
 import main.puzzle.Chip;
-import main.resource.Language;
+import main.ui.resource.GFLTexts;
 import main.util.Fn;
 
 /**
@@ -37,18 +37,18 @@ public class JsonFilterDialog extends JDialog {
     }
 
     private void init() {
-        setTitle(app.getText(Language.JSON_TITLE));
+        setTitle(app.getText(GFLTexts.JSON_TITLE));
 
-        star5CheckBox.setText(app.getText(Language.JSON_FILTER_STAR, "5"));
+        star5CheckBox.setText(app.getText(GFLTexts.JSON_FILTER_STAR, "5"));
 
-        cell16RadioButton.setText(app.getText(Language.JSON_FILTER_SIZE, "1", "6"));
-        cell46RadioButton.setText(app.getText(Language.JSON_FILTER_SIZE, "4", "6"));
-        cell56RadioButton.setText(app.getText(Language.JSON_FILTER_SIZE, "5", "6"));
+        cell16RadioButton.setText(app.getText(GFLTexts.JSON_FILTER_SIZE, "1", "6"));
+        cell46RadioButton.setText(app.getText(GFLTexts.JSON_FILTER_SIZE, "4", "6"));
+        cell56RadioButton.setText(app.getText(GFLTexts.JSON_FILTER_SIZE, "5", "6"));
 
-        markCheckBox.setText(app.getText(Language.JSON_MARK));
+        markCheckBox.setText(app.getText(GFLTexts.JSON_MARK));
 
-        okButton.setText(app.getText(Language.ACTION_OK));
-        cancelButton.setText(app.getText(Language.ACTION_CANCEL));
+        okButton.setText(app.getText(GFLTexts.ACTION_OK));
+        cancelButton.setText(app.getText(GFLTexts.ACTION_CANCEL));
 
         addListeners();
         getMarkNames();
@@ -59,7 +59,7 @@ public class JsonFilterDialog extends JDialog {
     private void getMarkNames() {
         Set<String> tagStrs = new HashSet<>();
         chipsInput.stream().map((c) -> c.getTags()).forEach((ts) -> ts.forEach((t) -> tagStrs.add(t.getName())));
-        markListLabel.setText(app.getText(Language.CHIP_TAG) + ": " + String.join(", ", tagStrs));
+        markListLabel.setText(app.getText(GFLTexts.CHIP_TAG) + ": " + String.join(", ", tagStrs));
     }
 
     private void count() {
@@ -67,7 +67,7 @@ public class JsonFilterDialog extends JDialog {
                 .filter((c) -> !star5CheckBox.isSelected() || 5 <= c.getStar())
                 .filter((c) -> !cell56RadioButton.isSelected() || 5 <= c.getSize())
                 .filter((c) -> !cell46RadioButton.isSelected() || 4 <= c.getSize()).count();
-        countLabel.setText(app.getText(Language.UNIT_COUNT, count) + "/" + app.getText(Language.UNIT_COUNT, chipsInput.size()));
+        countLabel.setText(app.getText(GFLTexts.UNIT_COUNT, count) + "/" + app.getText(GFLTexts.UNIT_COUNT, chipsInput.size()));
     }
 
     private void addListeners() {

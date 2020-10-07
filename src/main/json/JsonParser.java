@@ -26,6 +26,7 @@ public class JsonParser {
     private static final String SIGNKEY = "sign";
     private static final String CHIPKEY_SQUAD = "squad_with_user_info";
     private static final String CHIPKEY_CHIP = "chip_with_user_info";
+    private static final String UNKNOWN_HOC = "Unknown HOC";
 
     public static List<Chip> readFile(String filePath) {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
@@ -80,8 +81,8 @@ public class JsonParser {
     private static void parseChip_squad(Map<Integer, Tag> squadMap, Stream<ObjectJson> stream) {
         stream.forEach((squadJ) -> {
             int squadID = Integer.valueOf(Json.getText(squadJ.getValue("id")));
-            int squadIndex = Integer.valueOf(Json.getText(squadJ.getValue("squad_id")));
-            squadMap.put(squadID, boardTag(squadIndex - 1));
+            int squadIndex = Integer.valueOf(Json.getText(squadJ.getValue("squad_id"))) - 1;
+            squadMap.put(squadID, boardTag(squadIndex));
         });
     }
 
@@ -115,6 +116,9 @@ public class JsonParser {
     }
 
     private static Tag boardTag(int index) {
-        return new Tag(Color.GRAY, Board.NAMES[index]);
+        if (index < Board.NAMES.length) {
+            return new Tag(Color.GRAY, Board.NAMES[index]);
+        }
+        return new Tag(Color.GRAY, UNKNOWN_HOC);
     }
 }

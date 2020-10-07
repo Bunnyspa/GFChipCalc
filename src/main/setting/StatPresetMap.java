@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import main.App;
 import main.puzzle.Board;
-import main.puzzle.Chip;
 import main.puzzle.Shape;
 import main.puzzle.Stat;
-import main.resource.Language;
+import main.ui.resource.GFLTexts;
 import main.util.DoubleKeyHashMap;
 
 /**
@@ -73,8 +72,12 @@ public class StatPresetMap {
 
             // Mk 153
             put(Board.NAME_MK153, 5, Shape.Type._5B,
-                    Board.getMaxStat(Board.NAME_MK153, 5), Board.getMaxPt(Board.NAME_MK153, 5),
-                    new Stat(), new Stat(Chip.PT_MAX)
+                    new Stat(195, 273, 140, 75), new Stat(17, 9, 7, 5),
+                    new Stat(0, 0, 1, 0), new Stat(4, 5, 2, 3)
+            );
+            put(Board.NAME_MK153, 5, Shape.Type._5B,
+                    new Stat(189, 263, 176, 75), new Stat(17, 9, 7, 5),
+                    new Stat(0, 0, 1, 0), new Stat(4, 5, 2, 3)
             );
         }
     }; // </editor-fold>
@@ -111,7 +114,10 @@ public class StatPresetMap {
     }
 
     public int size(String name, int star) {
-        return data.get(name, star).size();
+        if (containsKey(name, star)) {
+            return data.get(name, star).size();
+        }
+        return 0;
     }
 
     public List<String> getStrings(App app, String name, int star) {
@@ -121,7 +127,7 @@ public class StatPresetMap {
             Stat pt = bps.get(i).pt;
             String item;
             if (pt == null) {
-                item = app.getText(Language.CSET_PRESET_OPTION, String.valueOf(i + 1));
+                item = app.getText(GFLTexts.CSET_PRESET_OPTION, String.valueOf(i + 1));
             } else {
                 item = pt.toStringSlash();
             }

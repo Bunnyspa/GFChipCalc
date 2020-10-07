@@ -9,7 +9,8 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.BooleanSupplier;
-import main.App;
+import main.iterator.ChipCombinationIterator;
+import main.iterator.TCIHandler;
 import main.puzzle.Board;
 import main.puzzle.BoardTemplate;
 import main.puzzle.BoardTemplateMap;
@@ -30,23 +31,26 @@ import main.util.IO;
  */
 public class Assembler {
 
+    public interface Intermediate {
+
+        void stop();
+
+        void update(int nDone);
+
+        void set(int nDone, int nTotal);
+
+        void show(BoardTemplate template);
+    }
+
     public enum Status {
         STOPPED, RUNNING, PAUSED
     }
 
     private static final int RESULT_LIMIT = 100;
 
-    private final App app;
-    private final BoardTemplateMap fullBTM, partialBTM;
+    private static final BoardTemplateMap fullBTM, partialBTM;
 
-    private Progress progress;
-    private boolean boardsChanged;
-
-    private volatile Status status = Status.STOPPED;
-    private final BooleanSupplier checkPause = () -> checkPause();
-
-    public Assembler(App app) {
-        this.app = app;
+    static {
         // Full BoardTemplate
         fullBTM = new BoardTemplateMap();
         for (String name : Board.NAMES) {
@@ -68,6 +72,20 @@ public class Assembler {
         partialBTM.put(Board.NAME_M2, 5, templates, Shape.Type._5B);
     }
 
+    private final Intermediate intermediate;
+
+    private CalcSetting cs;
+    private CalcExtraSetting ces;
+    private Progress progress;
+    private boolean boardsChanged;
+
+    private volatile Status status = Status.STOPPED;
+    private final BooleanSupplier checkPause = () -> checkPause();
+
+    public Assembler(Intermediate i) {
+        this.intermediate = i;
+    }
+
     public boolean btExists(String name, int star, boolean alt) {
         return getBT(name, star, alt) != null;
     }
@@ -84,25 +102,27 @@ public class Assembler {
         return partialBTM.containsKey(name, star);
     }
 
-    public void set(Progress p) {
-        progress = p;
+    public void set(CalcSetting cs, CalcExtraSetting ces, Progress p) {
+        this.cs = cs;
+        this.ces = ces;
+        this.progress = p;
         new Thread(() -> {
             if (status == Status.STOPPED) {
                 status = Status.PAUSED;
             }
-            if (p.status != Progress.FINISHED) {
+            if (ces.calcMode != CalcExtraSetting.CALCMODE_FINISHED) {
                 combine();
             } else {
                 setProgBar();
             }
             status = Status.STOPPED;
-            app.mf.process_stop();
+            intermediate.stop();
         }).start();
     }
 
     private void prog_inc() {
         progress.nDone++;
-        app.mf.process_prog(progress.nDone);
+        intermediate.update(progress.nDone);
     }
 
     public void pause() {
@@ -125,24 +145,28 @@ public class Assembler {
         return boardsChanged;
     }
 
+    public boolean resultEmpty() {
+        return progress.getBoardSize() == 0;
+    }
+
     public AssemblyResult getResult() {
         boardsChanged = false;
         return new AssemblyResult(progress.getBoards(), progress.getChipFreqs());
     }
 
     private void setProgBar() {
-        app.mf.process_setProgBar(progress.nDone, progress.nTotal);
+        intermediate.set(progress.nDone, progress.nTotal);
     }
 
     public synchronized void publishBoard(Board board) {
-        switch (progress.markType) {
+        switch (ces.markType) {
             case Setting.BOARD_MARKTYPE_CELL:
-                if (board.getMarkedCellCount() < progress.markMin || progress.markMax < board.getMarkedCellCount()) {
+                if (board.getMarkedCellCount() < ces.markMin || ces.markMax < board.getMarkedCellCount()) {
                     return;
                 }
                 break;
             case Setting.BOARD_MARKTYPE_CHIP:
-                if (board.getMarkedChipCount() < progress.markMin || progress.markMax < board.getMarkedChipCount()) {
+                if (board.getMarkedChipCount() < ces.markMin || ces.markMax < board.getMarkedChipCount()) {
                     return;
                 }
                 break;
@@ -153,7 +177,7 @@ public class Assembler {
         board.minimizeTicket();
         board.colorChips();
 
-        if (progress.settingRotation || board.getTicketCount() == 0) {
+        if (cs.rotation || board.getTicketCount() == 0) {
             progress.addBoard(board);
             if (RESULT_LIMIT > 0 && progress.getBoardSize() > RESULT_LIMIT) {
                 progress.removeLastBoard();
@@ -170,14 +194,14 @@ public class Assembler {
     private static BoardTemplate generateBT_DXZ(String boardName, int boardStar, List<Shape> shapes, BooleanSupplier checkPause) {
         PuzzleMatrix<Integer> puzzle = Board.initMatrix(boardName, boardStar);
 
-        Set<Point> emptyCoords = puzzle.getCoords(Board.EMPTY);
+        Set<Point> emptyCoords = puzzle.getPoints(Board.EMPTY);
 
         int nCol_name = shapes.size();
         int nCol_cell = puzzle.getNumContaining(Board.EMPTY);
         int nCol = nCol_name + nCol_cell;
 
         List<Point> cols_pt = new ArrayList<>(nCol_cell);
-        puzzle.getCoords(Board.EMPTY).forEach((p) -> cols_pt.add(p));
+        puzzle.getPoints(Board.EMPTY).forEach((p) -> cols_pt.add(p));
 
         List<Shape> rows_shape = new ArrayList<>();
         List<Integer> rows_rotation = new ArrayList<>();
@@ -186,11 +210,11 @@ public class Assembler {
         List<boolean[]> rows = new ArrayList<>();
         for (int i = 0; i < nCol_name; i++) {
             Shape shape = shapes.get(i);
-            Chip c = new Chip(shape);
-            for (int rot = 0; rot < c.getMaxRotation(); rot++) {
-                c.setRotation(rot);
+            // Chip c = new Chip(shape);
+            for (int rot = 0; rot < shape.getMaxRotation(); rot++) {
+                //  c.setRotation(rot);
                 for (Point bp : emptyCoords) {
-                    Set<Point> tps = translate(c, bp);
+                    Set<Point> tps = translate(shape, rot, bp);
                     if (Board.isChipPlaceable(puzzle, tps)) {
                         boolean[] row = new boolean[nCol];
                         row[i] = true;
@@ -233,10 +257,12 @@ public class Assembler {
         return BoardTemplate.empty();
     }
 
-    private static Set<Point> translate(Chip c, Point bp) {
-        Point cfp = c.getPivot();
-        Set<Point> cps = c.getAllCoords();
-        cps.forEach((cp) -> cp.translate(bp.x - cfp.x, bp.y - cfp.y));
+    private static Set<Point> translate(Shape shape, int rotation, Point bp) {
+        Point cfp = shape.getPivot(rotation);
+        Set<Point> cps = shape.getPoints(rotation);
+        for (Point cp : cps) {
+            cp.translate(bp.x - cfp.x, bp.y - cfp.y);
+        }
         return cps;
     }
 
@@ -292,7 +318,7 @@ public class Assembler {
 
     private void combine() {
         BlockingQueue<BoardTemplate> q = new ArrayBlockingQueue<>(5);
-        ChipCombinationIterator cIt = new ChipCombinationIterator(progress.chips);
+        ChipCombinationIterator cIt = new ChipCombinationIterator(ces.chips);
 
         Thread templateThread = new Thread(() -> combine_template(q, cIt));
         Thread assembleThread = new Thread(() -> combine_assemble(q, cIt));
@@ -308,28 +334,33 @@ public class Assembler {
 
     private void combine_template(BlockingQueue<BoardTemplate> q, ChipCombinationIterator cIt) {
         // Dictionary
-        if (progress.status == Progress.DICTIONARY) {
-            List<BoardTemplate> templates = getBT(progress.name, progress.star, progress.tag == 1);
+        if (ces.calcMode == CalcExtraSetting.CALCMODE_DICTIONARY) {
+            List<BoardTemplate> templates = getBT(cs.boardName, cs.boardStar, ces.calcModeTag == 1);
 
-            progress.nTotal = (int) templates.stream()
-                    .filter((p) -> cIt.hasEnoughChips(p))
-                    .filter((p) -> !progress.settingSymmetry || p.isSymmetric())
-                    .count();
+            int count = 0;
+            for (BoardTemplate boardTemplate : templates) {
+                if (cIt.hasEnoughChips(boardTemplate)) {
+                    if (!cs.symmetry || boardTemplate.isSymmetric()) {
+                        count++;
+                    }
+                }
+            }
+            progress.nTotal = count;
 
             setProgBar();
 
-            Iterator<BoardTemplate> pIt = templates.stream().skip(progress.nDone)
-                    .filter((p) -> cIt.hasEnoughChips(p))
-                    .filter((p) -> !progress.settingSymmetry || p.isSymmetric())
-                    .iterator();
+            Iterator<BoardTemplate> pIt = templates.subList(progress.nDone, templates.size()).iterator();
             while (checkPause() && pIt.hasNext()) {
                 BoardTemplate template = pIt.next();
-                offer(q, template);
+                if ((!cs.symmetry || template.isSymmetric())
+                        && cIt.hasEnoughChips(template)) {
+                    offer(q, template);
+                }
             }
         } //
         // Algorithm X
         else {
-            TCIHandler it = new TCIHandler(progress.name, progress.star, progress.chips);
+            TCIHandler it = new TCIHandler(cs.boardName, cs.boardStar, ces.chips);
             progress.nTotal = it.total();
             setProgBar();
 
@@ -348,11 +379,10 @@ public class Assembler {
             return BoardTemplate.empty();
         }
         List<Shape> shapes = iterator.next();
-        return generateBT(progress.name, progress.star, shapes, checkPause);
+        return generateBT(cs.boardName, cs.boardStar, shapes, checkPause);
     }
 
     private void combine_assemble(BlockingQueue<BoardTemplate> q, ChipCombinationIterator cIt) {
-        progress.setComparator();
         while (checkPause()) {
             BoardTemplate template = poll(q);
             if (template == null || template.isEnd()) {
@@ -360,14 +390,14 @@ public class Assembler {
             }
             if (!template.isEmpty()) {
                 // Show progress
-                app.mf.process_showImage(template);
+                intermediate.show(template);
                 cIt.init(template);
                 // For all combinations
                 while (checkPause() && cIt.hasNext()) {
                     List<Chip> candidates = cIt.next();
                     // Check PT
                     boolean addable = true;
-                    int[] pt = progress.pt.toArray();
+                    int[] pt = cs.pt.toArray();
                     for (Chip c : candidates) {
                         int[] cpt = c.getPt().toArray();
                         for (int i = 0; i < 4; i++) {
@@ -388,7 +418,7 @@ public class Assembler {
                             c.setRotation(template.getChipRotations().get(i));
                             chips.add(c);
                         }
-                        publishBoard(new Board(progress.name, progress.star, progress.stat, chips, template.getChipLocations()));
+                        publishBoard(new Board(cs.boardName, cs.boardStar, cs.stat, chips, template.getChipLocations()));
                     }
                 }
             }
@@ -423,17 +453,4 @@ public class Assembler {
         } catch (InterruptedException ex) {
         }
     }
-//
-//    private static class BMLabel {
-//
-//        final List<String> rows_name;
-//        final List<Integer> rows_rot;
-//        final List<Point> rows_loc;
-//
-//        public BMLabel(List<String> rows_name, List<Integer> rows_rot, List<Point> rows_loc) {
-//            this.rows_name = rows_name;
-//            this.rows_rot = rows_rot;
-//            this.rows_loc = rows_loc;
-//        }
-//    }
 }
