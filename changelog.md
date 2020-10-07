@@ -636,3 +636,8 @@
 
 ### Fixed
 - Fixed the 2nd stat preset for 5-star Mk 153
+
+## 7.2.3 (10/7/2020)
+
+### Changed
+- Raised the piercing stat PT upper bound for the 2nd stat preset for 5-star Mk 153 from 2 to 3
