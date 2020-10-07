@@ -76,8 +76,8 @@ public class StatPresetMap {
                     new Stat(0, 0, 1, 0), new Stat(4, 5, 2, 3)
             );
             put(Board.NAME_MK153, 5, Shape.Type._5B,
-                    new Stat(189, 263, 176, 75), new Stat(17, 9, 7, 5),
-                    new Stat(0, 0, 1, 0), new Stat(4, 5, 2, 3)
+                    new Stat(189, 263, 176, 75), new Stat(16, 8, 9, 5),
+                    new Stat(1, 1, 1, 0), new Stat(4, 2, 2, 3)
             );
         }
     }; // </editor-fold>

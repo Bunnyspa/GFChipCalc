@@ -631,3 +631,8 @@
 
 ### Fixed
 - A bug that caused the stat preset selector not working properly
+
+## 7.2.2 (10/7/2020)
+
+### Fixed
+- Fixed the 2nd stat preset for 5-star Mk 153
