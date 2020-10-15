@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import main.ui.resource.GFLTexts;
+import main.ui.resource.AppText;
 import main.util.Fn;
 import main.util.IO;
 import main.util.Rational;
@@ -134,7 +134,7 @@ public class Chip implements Serializable {
                 initLevel = level;
             }
 
-            color = data.length > i ? Fn.limit(Integer.parseInt(data[i]), 0, GFLTexts.TEXT_MAP_COLOR.size()) : 0;
+            color = data.length > i ? Fn.limit(Integer.parseInt(data[i]), 0, AppText.TEXT_MAP_COLOR.size()) : 0;
             i++;
 
             tags = new HashSet<>();
@@ -158,7 +158,7 @@ public class Chip implements Serializable {
 
                 star = data.length > 6 ? Fn.limit(Integer.parseInt(data[6]), 2, 5) : 5;
                 level = data.length > 7 ? Fn.limit(Integer.parseInt(data[7]), 0, LEVEL_MAX) : 0;
-                color = data.length > 8 ? Fn.limit(Integer.parseInt(data[8]), 0, GFLTexts.TEXT_MAP_COLOR.size()) : 0;
+                color = data.length > 8 ? Fn.limit(Integer.parseInt(data[8]), 0, AppText.TEXT_MAP_COLOR.size()) : 0;
 
                 marked = data.length > 9 && "1".equals(data[9]);
 
@@ -168,7 +168,7 @@ public class Chip implements Serializable {
 
                 star = data.length > 3 ? Fn.limit(Integer.parseInt(data[3]), 2, 5) : 5;
                 level = data.length > 4 ? Fn.limit(Integer.parseInt(data[4]), 0, LEVEL_MAX) : 0;
-                color = data.length > 5 ? Fn.limit(Integer.parseInt(data[5]), 0, GFLTexts.TEXT_MAP_COLOR.size()) : 0;
+                color = data.length > 5 ? Fn.limit(Integer.parseInt(data[5]), 0, AppText.TEXT_MAP_COLOR.size()) : 0;
 
                 int dmgPt = data.length > 6 ? Fn.limit(Integer.parseInt(data[6]), 0, getMaxPt()) : 0;
                 int brkPt = data.length > 7 ? Fn.limit(Integer.parseInt(data[7]), 0, getMaxPt()) : 0;

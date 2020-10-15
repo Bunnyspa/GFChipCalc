@@ -12,8 +12,8 @@ import main.puzzle.Board;
 import main.puzzle.BoardTemplate;
 import main.puzzle.Shape;
 import main.puzzle.assembly.Assembler;
-import main.ui.resource.GFLResources;
-import main.ui.resource.GFLTexts;
+import main.ui.resource.AppImage;
+import main.ui.resource.AppText;
 import main.util.Fn;
 
 /**
@@ -42,19 +42,19 @@ public class ResearchFrame extends javax.swing.JFrame {
                 String task = ResearchConnection.getTask();
 //                System.out.println(task);
                 if (task == null || task.isEmpty()) {
-                    currentLabel.setText(app.getText(GFLTexts.RESEARCH_EMPTY));
+                    currentLabel.setText(app.getText(AppText.RESEARCH_EMPTY));
                     wait_(10000);
                 } else {
                     String[] split = task.split(";");
                     String boardName = Board.getTrueName(split[0]);
                     int boardStar = Integer.valueOf(split[1]);
                     if (split.length == 2) {
-                        currentLabel.setText(app.getText(GFLTexts.RESEARCH_WAITING, boardName, String.valueOf(boardStar)));
+                        currentLabel.setText(app.getText(AppText.RESEARCH_WAITING, boardName, String.valueOf(boardStar)));
                         wait_(5000);
                     } else {
                         String shapeStrs = split[2];
 
-                        currentLabel.setText(app.getText(GFLTexts.RESEARCH_WORKING, boardName, String.valueOf(boardStar)));
+                        currentLabel.setText(app.getText(AppText.RESEARCH_WORKING, boardName, String.valueOf(boardStar)));
 
                         // Run task
                         List<Shape> shapes = new ArrayList<>();
@@ -86,11 +86,11 @@ public class ResearchFrame extends javax.swing.JFrame {
     }
 
     private void init() {
-        setIconImage(GFLResources.FAVICON);
-        setTitle(app.getText(GFLTexts.RESEARCH_TITLE));
-        wtfLabel.setText(app.getText(GFLTexts.RESEARCH_WTF));
-        threadLabel.setText(app.getText(GFLTexts.RESEARCH_THREAD));
-        closeButton.setText(app.getText(GFLTexts.ACTION_CLOSE));
+        setIconImage(AppImage.FAVICON);
+        setTitle(app.getText(AppText.RESEARCH_TITLE));
+        wtfLabel.setText(app.getText(AppText.RESEARCH_WTF));
+        threadLabel.setText(app.getText(AppText.RESEARCH_THREAD));
+        closeButton.setText(app.getText(AppText.ACTION_CLOSE));
         int max = Runtime.getRuntime().availableProcessors();
         aSpinner.setModel(new SpinnerNumberModel(1, 1, max, 1));
         stop();
@@ -123,7 +123,7 @@ public class ResearchFrame extends javax.swing.JFrame {
             threads.add(thread);
         }
 
-        startStopButton.setText(app.getText(GFLTexts.RESEARCH_STOP));
+        startStopButton.setText(app.getText(AppText.RESEARCH_STOP));
     }
 
     private void stop() {
@@ -141,11 +141,11 @@ public class ResearchFrame extends javax.swing.JFrame {
         threads.clear();
 
         aSpinner.setEnabled(true);
-        currentLabel.setText(app.getText(GFLTexts.RESEARCH_READY));
+        currentLabel.setText(app.getText(AppText.RESEARCH_READY));
         progressLabel.setText(" ");
         aProgressBar.setMaximum(1);
         aProgressBar.setValue(0);
-        startStopButton.setText(app.getText(GFLTexts.RESEARCH_START));
+        startStopButton.setText(app.getText(AppText.RESEARCH_START));
     }
 
     private void terminate() {

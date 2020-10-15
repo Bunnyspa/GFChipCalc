@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-import main.ui.resource.GFLGraphics;
-import main.ui.resource.GFLTexts;
+import main.ui.resource.AppColor;
+import main.ui.resource.AppText;
 import main.util.DoubleKeyHashMap;
 import main.util.Fn;
 import main.util.IO;
@@ -513,31 +513,31 @@ public class Board implements Comparable<Board>, Serializable {
     public static String getStarHTML_star(int star) {
         String starStr = "";
         for (int i = 0; i < star; i++) {
-            starStr += GFLTexts.TEXT_STAR_FULL;
+            starStr += AppText.TEXT_STAR_FULL;
         }
-        return Fn.toHTML(Fn.htmlColor(starStr, GFLGraphics.COLOR_STAR_YELLOW));
+        return Fn.toHTML(Fn.htmlColor(starStr, AppColor.YELLOW_STAR));
     }
 
     public static String getStarHTML_version(int version) {
         int nFullRed = version / 2;
         String fullRedStr = "";
         for (int i = 0; i < nFullRed; i++) {
-            fullRedStr += GFLTexts.TEXT_STAR_FULL;
+            fullRedStr += AppText.TEXT_STAR_FULL;
         }
 
         int nHalfRed = version % 2;
         String halfRedStr = "";
         for (int i = 0; i < nHalfRed; i++) {
-            halfRedStr += GFLTexts.TEXT_STAR_EMPTY;
+            halfRedStr += AppText.TEXT_STAR_EMPTY;
         }
 
         String yellowStr = "";
         for (int i = fullRedStr.length() + halfRedStr.length(); i < 5; i++) {
-            yellowStr += GFLTexts.TEXT_STAR_FULL;
+            yellowStr += AppText.TEXT_STAR_FULL;
         }
 
-        return Fn.toHTML(Fn.htmlColor(fullRedStr + halfRedStr, GFLGraphics.COLOR_STAR_RED)
-                + Fn.htmlColor(yellowStr, GFLGraphics.COLOR_STAR_YELLOW)
+        return Fn.toHTML(Fn.htmlColor(fullRedStr + halfRedStr, AppColor.RED_STAR)
+                + Fn.htmlColor(yellowStr, AppColor.YELLOW_STAR)
         );
     }
     // </editor-fold>

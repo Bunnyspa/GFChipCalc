@@ -18,8 +18,8 @@ import main.puzzle.Chip;
 import main.puzzle.PuzzleMatrix;
 import main.puzzle.Shape;
 import main.puzzle.Stat;
-import main.ui.resource.GFLGraphics;
-import main.ui.resource.GFLResources;
+import main.ui.resource.AppColor;
+import main.ui.resource.AppImage;
 import main.util.DoubleKeyHashMap;
 import main.util.Fn;
 
@@ -29,8 +29,8 @@ import main.util.Fn;
  */
 public class ImageProcessor {
 
-    private static final Color STAR = GFLGraphics.COLOR_STAR_YELLOW;
-    private static final Color LEVEL = GFLGraphics.COLOR_LEVEL;
+    private static final Color STAR = AppColor.YELLOW_STAR;
+    private static final Color LEVEL = AppColor.LEVEL;
     private static final Color GRAY = new Color(66, 66, 66);
     private static final Color WHITE = Color.WHITE;
     private static final Color BLACK = Color.BLACK;
@@ -103,8 +103,8 @@ public class ImageProcessor {
         // System.out.println("Used: " + used);
 
         // Color
-        Color orange = used ? used(GFLGraphics.COLORS_CHIP.get(Chip.COLOR_ORANGE)) : GFLGraphics.COLORS_CHIP.get(Chip.COLOR_ORANGE);
-        Color blue = used ? used(GFLGraphics.COLORS_CHIP.get(Chip.COLOR_BLUE)) : GFLGraphics.COLORS_CHIP.get(Chip.COLOR_BLUE);
+        Color orange = used ? used(AppColor.CHIPS.get(Chip.COLOR_ORANGE)) : AppColor.CHIPS.get(Chip.COLOR_ORANGE);
+        Color blue = used ? used(AppColor.CHIPS.get(Chip.COLOR_BLUE)) : AppColor.CHIPS.get(Chip.COLOR_BLUE);
         int colorNOrange = matrix.monochromeCount(orange, THRESHOLD_COLOR);
         int colorNBlue = matrix.monochromeCount(blue, THRESHOLD_COLOR);
         int color = colorNBlue > colorNOrange ? Chip.COLOR_BLUE : Chip.COLOR_ORANGE;
@@ -144,7 +144,7 @@ public class ImageProcessor {
         int shapeY1 = (int) (getMaxY(starRects, (int) (10 * factor)) + 8 * factor);
         int shapeY2 = (int) (getMinY(statIconAreaRects, (int) (56 * factor)) + 4 * factor);
         Rectangle shapeAreaRect = new Rectangle(0, shapeY1, cm.getWidth(), shapeY2 - shapeY1);
-        ColorMatrix shapeAreaCM = cm.crop(shapeAreaRect).monochrome(GFLGraphics.COLORS_CHIP.get(color));
+        ColorMatrix shapeAreaCM = cm.crop(shapeAreaRect).monochrome(AppColor.CHIPS.get(color));
         Rectangle shapeRect = filterRect_shape(shapeAreaCM.findRects(), factor);
 
         ShapeRot shapeRot = new ShapeRot(Shape.DEFAULT, 0);
@@ -263,7 +263,7 @@ public class ImageProcessor {
     }
 
     private static ColorMatrix simplify(ColorMatrix matrix, boolean used, int color) {
-        return matrix.simplify(used, STAR, LEVEL, WHITE, GRAY, BLACK, GFLGraphics.COLORS_CHIP.get(color));
+        return matrix.simplify(used, STAR, LEVEL, WHITE, GRAY, BLACK, AppColor.CHIPS.get(color));
     }
 
     private static ColorMatrix simplify_statDigits(ColorMatrix matrix, boolean used, boolean leveled) {
@@ -325,10 +325,10 @@ public class ImageProcessor {
     }
 
     private static final ColorMatrix[] CM_STATS = new ColorMatrix[]{
-        new ColorMatrix(GFLResources.IP_DMG),
-        new ColorMatrix(GFLResources.IP_BRK),
-        new ColorMatrix(GFLResources.IP_HIT),
-        new ColorMatrix(GFLResources.IP_RLD)
+        new ColorMatrix(AppImage.IP_DMG),
+        new ColorMatrix(AppImage.IP_BRK),
+        new ColorMatrix(AppImage.IP_HIT),
+        new ColorMatrix(AppImage.IP_RLD)
     };
 
     private static int idStatType(ColorMatrix matrix) {
@@ -350,16 +350,16 @@ public class ImageProcessor {
     }
 
     private static final ColorMatrix[] CM_DIGITS = new ColorMatrix[]{
-        new ColorMatrix(GFLResources.IP_DIGITS[0]),
-        new ColorMatrix(GFLResources.IP_DIGITS[1]),
-        new ColorMatrix(GFLResources.IP_DIGITS[2]),
-        new ColorMatrix(GFLResources.IP_DIGITS[3]),
-        new ColorMatrix(GFLResources.IP_DIGITS[4]),
-        new ColorMatrix(GFLResources.IP_DIGITS[5]),
-        new ColorMatrix(GFLResources.IP_DIGITS[6]),
-        new ColorMatrix(GFLResources.IP_DIGITS[7]),
-        new ColorMatrix(GFLResources.IP_DIGITS[8]),
-        new ColorMatrix(GFLResources.IP_DIGITS[9])
+        new ColorMatrix(AppImage.IP_DIGITS[0]),
+        new ColorMatrix(AppImage.IP_DIGITS[1]),
+        new ColorMatrix(AppImage.IP_DIGITS[2]),
+        new ColorMatrix(AppImage.IP_DIGITS[3]),
+        new ColorMatrix(AppImage.IP_DIGITS[4]),
+        new ColorMatrix(AppImage.IP_DIGITS[5]),
+        new ColorMatrix(AppImage.IP_DIGITS[6]),
+        new ColorMatrix(AppImage.IP_DIGITS[7]),
+        new ColorMatrix(AppImage.IP_DIGITS[8]),
+        new ColorMatrix(AppImage.IP_DIGITS[9])
     };
 
     private static int idDigits(ColorMatrix monochromed, Set<Rectangle> rects) {

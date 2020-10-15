@@ -50,8 +50,7 @@ import main.puzzle.assembly.Progress;
 import main.puzzle.assembly.ProgressFile;
 import main.setting.BoardSetting;
 import main.setting.Setting;
-import main.ui.resource.GFLResources;
-import main.ui.resource.GFLTexts;
+import main.ui.resource.AppText;
 
 /**
  *
@@ -352,7 +351,7 @@ public class IO {
         List<BoardTemplate> out = new ArrayList<>();
 
         String fileName = "template_" + toFileName(name) + "_" + star + (isPartial ? "_p" : "") + ".dat";
-        URL url = App.class.getResource(GFLResources.RESOURCE_PATH + "template/" + fileName);
+        URL url = App.getResource("template/" + fileName);
         try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))) {
             Iterator<String> bri = br.lines().iterator();
             while (bri.hasNext()) {
@@ -404,7 +403,7 @@ public class IO {
     // <editor-fold defaultstate="collapsed" desc="Locales and Properties">
     public static List<Locale> getInternalLocales() {
         List<Locale> locales = new ArrayList<>();
-        locales.addAll(Arrays.asList(GFLTexts.LOCALES));
+        locales.addAll(Arrays.asList(AppText.LOCALES));
         return locales;
     }
 
@@ -435,19 +434,19 @@ public class IO {
         File folder = new File(PATH_EX_LANG);
         if (!folder.exists()) {
             if (!folder.mkdir()) {
-                JOptionPane.showMessageDialog(component, app.getText(GFLTexts.DISPLAY_EXPORT_FAIL_BODY), app.getText(GFLTexts.DISPLAY_EXPORT_FAIL_TITLE), JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(component, app.getText(AppText.DISPLAY_EXPORT_FAIL_BODY), app.getText(AppText.DISPLAY_EXPORT_FAIL_TITLE), JOptionPane.ERROR_MESSAGE);
             }
         }
 
         try {
             for (Locale locale : getInternalLocales()) {
                 String filePath = PATH_EX_LANG + "/" + locale.toLanguageTag() + ".properties";
-                String fileContent = GFLTexts.getFileContent(locale);
+                String fileContent = AppText.getFileContent(locale);
                 write(filePath, fileContent);
             }
-            JOptionPane.showMessageDialog(component, app.getText(GFLTexts.DISPLAY_EXPORT_DONE_BODY, PATH_EX_LANG), app.getText(GFLTexts.DISPLAY_EXPORT_DONE_TITLE), JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(component, app.getText(AppText.DISPLAY_EXPORT_DONE_BODY, PATH_EX_LANG), app.getText(AppText.DISPLAY_EXPORT_DONE_TITLE), JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(component, GFLTexts.DISPLAY_EXPORT_FAIL_BODY, GFLTexts.DISPLAY_EXPORT_FAIL_TITLE, JOptionPane.ERROR);
+            JOptionPane.showMessageDialog(component, AppText.DISPLAY_EXPORT_FAIL_BODY, AppText.DISPLAY_EXPORT_FAIL_TITLE, JOptionPane.ERROR);
         }
     }
 
@@ -509,8 +508,8 @@ public class IO {
         String mainLatest = getVersion(URL_GITHUB_MAIN, App.VERSION.toData());
         if (!App.VERSION.isCurrent(mainLatest)) {
             int retval = JOptionPane.showConfirmDialog(app.mf,
-                    app.getText(GFLTexts.NEWVER_CONFIRM_BODY, mainLatest),
-                    app.getText(GFLTexts.NEWVER_CONFIRM_TITLE),
+                    app.getText(AppText.NEWVER_CONFIRM_BODY, mainLatest),
+                    app.getText(AppText.NEWVER_CONFIRM_TITLE),
                     JOptionPane.YES_NO_OPTION);
             if (retval == JOptionPane.YES_OPTION) {
                 if (!runUpdate(app)) {
@@ -574,7 +573,7 @@ public class IO {
         try {
             Desktop.getDesktop().browse(new URI(link));
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(c, app.getText(GFLTexts.NEWVER_ERROR_BODY), app.getText(GFLTexts.NEWVER_ERROR_TITLE), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(c, app.getText(AppText.NEWVER_ERROR_BODY), app.getText(AppText.NEWVER_ERROR_TITLE), JOptionPane.ERROR_MESSAGE);
         }
     }
 

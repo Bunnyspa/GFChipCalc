@@ -12,8 +12,8 @@ import javax.swing.JSeparator;
 import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 import main.App;
-import main.ui.resource.GFLResources;
-import main.ui.resource.GFLTexts;
+import main.ui.resource.AppImage;
+import main.ui.resource.AppText;
 import main.util.Fn;
 
 /**
@@ -71,8 +71,8 @@ public class HelpAppDialog extends JDialog {
     }
 
     private void init() {
-        setTitle(app.getText(GFLTexts.HELP_PROGRAM));
-        closeButton.setText(app.getText(GFLTexts.ACTION_CLOSE));
+        setTitle(app.getText(AppText.HELP_PROGRAM));
+        closeButton.setText(app.getText(AppText.ACTION_CLOSE));
         addTabs();
         addListeners();
         pack();
@@ -83,13 +83,13 @@ public class HelpAppDialog extends JDialog {
     }
 
     private void addTabs() {
-        aTabbedPane.addTab(app.getText(GFLTexts.HELP_APP_IMPORT), generatePanels(new IconText(app.getText(GFLTexts.HELP_APP_IMPORT_PROXY), GFLResources.PHONE),
-                new IconText(app.getText(GFLTexts.HELP_APP_IMPORT_IMAGESCAN), GFLResources.PICTURE),
-                new IconText(app.getText(GFLTexts.HELP_APP_IMPORT_OPEN), GFLResources.OPEN)
+        aTabbedPane.addTab(app.getText(AppText.HELP_APP_IMPORT), generatePanels(new IconText(app.getText(AppText.HELP_APP_IMPORT_PROXY), AppImage.PHONE),
+                new IconText(app.getText(AppText.HELP_APP_IMPORT_IMAGESCAN), AppImage.PICTURE),
+                new IconText(app.getText(AppText.HELP_APP_IMPORT_OPEN), AppImage.OPEN)
         ));
-        aTabbedPane.addTab(app.getText(GFLTexts.HELP_APP_OPTIMIZE), generatePanels(new IconText(app.getText(GFLTexts.HELP_APP_OPTIMIZE_FILTER), GFLResources.FILTER, GFLResources.FILTER_APPLY),
-                new IconText(app.getText(GFLTexts.HELP_APP_OPTIMIZE_SETTING), GFLResources.SETTING, GFLResources.SETTING_PRESET, GFLResources.SETTING_STAT, GFLResources.SETTING_PT),
-                new IconText(app.getText(GFLTexts.HELP_APP_OPTIMIZE_MARK), GFLResources.UNCHECKED, GFLResources.CHECKED)
+        aTabbedPane.addTab(app.getText(AppText.HELP_APP_OPTIMIZE), generatePanels(new IconText(app.getText(AppText.HELP_APP_OPTIMIZE_FILTER), AppImage.FILTER, AppImage.FILTER_APPLY),
+                new IconText(app.getText(AppText.HELP_APP_OPTIMIZE_SETTING), AppImage.SETTING, AppImage.SETTING_PRESET, AppImage.SETTING_STAT, AppImage.SETTING_PT),
+                new IconText(app.getText(AppText.HELP_APP_OPTIMIZE_MARK), AppImage.UNCHECKED, AppImage.CHECKED)
         ));
     }
 

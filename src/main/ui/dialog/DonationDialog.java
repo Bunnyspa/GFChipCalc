@@ -2,8 +2,8 @@ package main.ui.dialog;
 
 import javax.swing.JDialog;
 import main.App;
-import main.ui.resource.GFLResources;
-import main.ui.resource.GFLTexts;
+import main.ui.resource.AppImage;
+import main.ui.resource.AppText;
 import main.util.Fn;
 import main.util.IO;
 
@@ -28,10 +28,10 @@ public class DonationDialog extends JDialog {
     private void init() {
         setTitle("Donation");
 
-        paypalQRLabel.setIcon(GFLResources.PAYPALQR);
+        paypalQRLabel.setIcon(AppImage.PAYPALQR);
         paypalQRLabel.setText("");
-        paypalQRDescLabel.setIcon(GFLResources.PAYPAL);
-        closeButton.setText(app.getText(GFLTexts.ACTION_CLOSE));
+        paypalQRDescLabel.setIcon(AppImage.PAYPAL);
+        closeButton.setText(app.getText(AppText.ACTION_CLOSE));
 
         addListeners();
 

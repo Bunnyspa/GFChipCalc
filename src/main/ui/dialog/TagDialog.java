@@ -7,7 +7,7 @@ import main.App;
 import main.puzzle.Chip;
 import main.puzzle.Tag;
 import main.ui.component.TagPanel;
-import main.ui.resource.GFLTexts;
+import main.ui.resource.AppText;
 import main.util.Fn;
 
 /**
@@ -33,11 +33,11 @@ public class TagDialog extends JDialog {
     }
 
     private void init() {
-        String tag = app.getText(GFLTexts.TAG_TITLE);
-        String count = app.getText(GFLTexts.UNIT_COUNT, String.valueOf(chips.size()));
+        String tag = app.getText(AppText.TAG_TITLE);
+        String count = app.getText(AppText.UNIT_COUNT, String.valueOf(chips.size()));
         this.setTitle(chips.size() == 1 ? tag : tag + " - " + count);
-        closeButton.setText(app.getText(GFLTexts.ACTION_CLOSE));
-        descLabel.setText(app.getText(GFLTexts.TAG_DESC));
+        closeButton.setText(app.getText(AppText.ACTION_CLOSE));
+        descLabel.setText(app.getText(AppText.TAG_DESC));
 
         tagPanel.add(tp);
 

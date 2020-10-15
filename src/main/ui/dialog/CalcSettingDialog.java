@@ -12,8 +12,8 @@ import main.puzzle.Stat;
 import main.setting.BoardSetting;
 import main.setting.Setting;
 import main.setting.StatPresetMap;
-import main.ui.resource.GFLResources;
-import main.ui.resource.GFLTexts;
+import main.ui.resource.AppImage;
+import main.ui.resource.AppText;
 import main.util.Fn;
 
 /**
@@ -50,45 +50,45 @@ public class CalcSettingDialog extends JDialog {
     }
 
     private void loadResources() {
-        setTitle(app.getText(GFLTexts.CSET_TITLE));
+        setTitle(app.getText(AppText.CSET_TITLE));
 
-        okButton.setText(app.getText(GFLTexts.ACTION_OK));
-        cancelButton.setText(app.getText(GFLTexts.ACTION_CANCEL));
+        okButton.setText(app.getText(AppText.ACTION_OK));
+        cancelButton.setText(app.getText(AppText.ACTION_CANCEL));
 
-        dmgTextLabel.setIcon(GFLResources.DMG);
-        brkTextLabel.setIcon(GFLResources.BRK);
-        hitTextLabel.setIcon(GFLResources.HIT);
-        rldTextLabel.setIcon(GFLResources.RLD);
+        dmgTextLabel.setIcon(AppImage.DMG);
+        brkTextLabel.setIcon(AppImage.BRK);
+        hitTextLabel.setIcon(AppImage.HIT);
+        rldTextLabel.setIcon(AppImage.RLD);
 
         // Group
-        statPanel.setBorder(new TitledBorder(app.getText(GFLTexts.CSET_GROUP_STAT)));
-        markPanel.setBorder(new TitledBorder(app.getText(GFLTexts.CSET_GROUP_MARK)));
-        sortPanel.setBorder(new TitledBorder(app.getText(GFLTexts.CSET_GROUP_SORT)));
-        miscPanel.setBorder(new TitledBorder(app.getText(GFLTexts.CSET_GROUP_MISC)));
+        statPanel.setBorder(new TitledBorder(app.getText(AppText.CSET_GROUP_STAT)));
+        markPanel.setBorder(new TitledBorder(app.getText(AppText.CSET_GROUP_MARK)));
+        sortPanel.setBorder(new TitledBorder(app.getText(AppText.CSET_GROUP_SORT)));
+        miscPanel.setBorder(new TitledBorder(app.getText(AppText.CSET_GROUP_MISC)));
 
         // Stat
-        maxNormalRadioButton.setText(app.getText(GFLTexts.CSET_DEFAULT_STAT));
-        maxStatRadioButton.setText(app.getText(GFLTexts.CSET_STAT));
-        maxPtRadioButton.setText(app.getText(GFLTexts.CSET_PT));
-        maxPresetRadioButton.setText(app.getText(GFLTexts.CSET_PRESET));
+        maxNormalRadioButton.setText(app.getText(AppText.CSET_DEFAULT_STAT));
+        maxStatRadioButton.setText(app.getText(AppText.CSET_STAT));
+        maxPtRadioButton.setText(app.getText(AppText.CSET_PT));
+        maxPresetRadioButton.setText(app.getText(AppText.CSET_PRESET));
 
-        dmgTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_DMG));
-        brkTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_BRK));
-        hitTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_HIT));
-        rldTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_RLD));
+        dmgTextLabel.setText(app.getText(AppText.CHIP_STAT_DMG));
+        brkTextLabel.setText(app.getText(AppText.CHIP_STAT_BRK));
+        hitTextLabel.setText(app.getText(AppText.CHIP_STAT_HIT));
+        rldTextLabel.setText(app.getText(AppText.CHIP_STAT_RLD));
 
         // Mark
-        markDescLabel.setText(app.getText(GFLTexts.CSET_MARK_DESC));
+        markDescLabel.setText(app.getText(AppText.CSET_MARK_DESC));
 
         // Sort
-        sortTicketRadioButton.setText(app.getText(GFLTexts.CSET_SORT_TICKET));
-        sortXPRadioButton.setText(app.getText(GFLTexts.CSET_SORT_XP));
+        sortTicketRadioButton.setText(app.getText(AppText.CSET_SORT_TICKET));
+        sortXPRadioButton.setText(app.getText(AppText.CSET_SORT_XP));
 
         // Misc.
-        maxLevelCheckBox.setText(app.getText(GFLTexts.CSET_MAXLEVEL_DESC));
-        colorCheckBox.setText(app.getText(GFLTexts.CSET_COLOR_DESC));
-        rotationCheckBox.setText(app.getText(GFLTexts.CSET_ROTATION_DESC));
-        symmetryCheckBox.setText(app.getText(GFLTexts.CSET_SYMMETRY_DESC));
+        maxLevelCheckBox.setText(app.getText(AppText.CSET_MAXLEVEL_DESC));
+        colorCheckBox.setText(app.getText(AppText.CSET_COLOR_DESC));
+        rotationCheckBox.setText(app.getText(AppText.CSET_ROTATION_DESC));
+        symmetryCheckBox.setText(app.getText(AppText.CSET_SYMMETRY_DESC));
     }
 
     private void loadSettings() {
@@ -257,9 +257,9 @@ public class CalcSettingDialog extends JDialog {
 
             int total = Board.getCellCount(getBoardName(), getBoardStar());
             if (maxPtRadioButton.isSelected()) {
-                ptSumLabel.setText(app.getText(GFLTexts.UNIT_PT, String.valueOf(pt.sum() + "/" + total)));
+                ptSumLabel.setText(app.getText(AppText.UNIT_PT, String.valueOf(pt.sum() + "/" + total)));
             } else {
-                ptSumLabel.setText(app.getText(GFLTexts.UNIT_PT, String.valueOf(total)));
+                ptSumLabel.setText(app.getText(AppText.UNIT_PT, String.valueOf(total)));
             }
         }
     }
@@ -279,7 +279,7 @@ public class CalcSettingDialog extends JDialog {
     private void setAdvandedSetting(boolean b) {
         advancedSetting = b;
 
-        advancedButton.setText(app.getText(GFLTexts.CSET_ADVANCED_MODE) + ": " + (advancedSetting ? "ON" : "OFF"));
+        advancedButton.setText(app.getText(AppText.CSET_ADVANCED_MODE) + ": " + (advancedSetting ? "ON" : "OFF"));
         advancedButton.setFont(getFont().deriveFont(advancedSetting ? Font.BOLD : Font.PLAIN));
 
         maxNormalRadioButton.setVisible(advancedSetting);
@@ -294,10 +294,10 @@ public class CalcSettingDialog extends JDialog {
         this.markType = t % Setting.NUM_BOARD_MARKTYPE;
         switch (markType) {
             case Setting.BOARD_MARKTYPE_CHIP:
-                markTypeButton.setText(app.getText(GFLTexts.CSET_MARK_CHIP));
+                markTypeButton.setText(app.getText(AppText.CSET_MARK_CHIP));
                 break;
             default:
-                markTypeButton.setText(app.getText(GFLTexts.CSET_MARK_CELL));
+                markTypeButton.setText(app.getText(AppText.CSET_MARK_CELL));
         }
     }
 
@@ -729,7 +729,7 @@ public class CalcSettingDialog extends JDialog {
         // Preset - Apply Filter
         if (advancedSetting && mode == BoardSetting.MAX_PRESET && !app.mf.setting_isPresetFilter()) {
             int retval = JOptionPane.showConfirmDialog(this,
-                    app.getText(GFLTexts.CSET_CONFIRM_FILTER_BODY), app.getText(GFLTexts.CSET_CONFIRM_FILTER_TITLE),
+                    app.getText(AppText.CSET_CONFIRM_FILTER_BODY), app.getText(AppText.CSET_CONFIRM_FILTER_TITLE),
                     JOptionPane.YES_NO_OPTION);
             if (retval == JOptionPane.YES_OPTION) {
                 app.mf.setting_applyPresetFilter();

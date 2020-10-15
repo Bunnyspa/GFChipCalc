@@ -10,7 +10,7 @@ import main.json.JsonParser;
 import main.puzzle.Chip;
 import main.puzzle.Tag;
 import main.ui.help.HelpProxyDialog;
-import main.ui.resource.GFLTexts;
+import main.ui.resource.AppText;
 import main.util.Fn;
 
 /**
@@ -50,11 +50,11 @@ public class ProxyDialog extends JDialog {
     }
 
     private void init() {
-        setTitle(app.getText(GFLTexts.PROXY_TITLE));
-        warningLabel.setText(app.getText(GFLTexts.PROXY_WARNING));
-        okButton.setText(app.getText(GFLTexts.ACTION_OK));
-        cancelButton.setText(app.getText(GFLTexts.ACTION_CANCEL));
-        helpButton.setText(app.getText(GFLTexts.HELP_TITLE));
+        setTitle(app.getText(AppText.PROXY_TITLE));
+        warningLabel.setText(app.getText(AppText.PROXY_WARNING));
+        okButton.setText(app.getText(AppText.ACTION_OK));
+        cancelButton.setText(app.getText(AppText.ACTION_CANCEL));
+        helpButton.setText(app.getText(AppText.HELP_TITLE));
         setStage(Stage.START);
         addListeners();
         pack();
@@ -67,8 +67,8 @@ public class ProxyDialog extends JDialog {
     private void setStage(Stage stage) {
         switch (stage) {
             case START:
-                instructionLabel.setText(app.getText(GFLTexts.PROXY_STAGE1_INST));
-                infoLabel.setText(app.getText(GFLTexts.PROXY_STAGE1_INFO, proxy.getAddress(), String.valueOf(proxy.getPort())));
+                instructionLabel.setText(app.getText(AppText.PROXY_STAGE1_INST));
+                infoLabel.setText(app.getText(AppText.PROXY_STAGE1_INFO, proxy.getAddress(), String.valueOf(proxy.getPort())));
 
                 proxy.start();
                 break;
@@ -77,8 +77,8 @@ public class ProxyDialog extends JDialog {
                 List<String> tagStrs = new ArrayList<>();
                 Tag.getTags(chips).forEach((t) -> tagStrs.add(t.getName()));
                 String tagLine = String.join(", ", tagStrs);
-                instructionLabel.setText(app.getText(GFLTexts.PROXY_STAGE2_INST));
-                infoLabel.setText(app.getText(GFLTexts.PROXY_STAGE2_INFO, String.valueOf(size), tagLine));
+                instructionLabel.setText(app.getText(AppText.PROXY_STAGE2_INST));
+                infoLabel.setText(app.getText(AppText.PROXY_STAGE2_INFO, String.valueOf(size), tagLine));
 
                 okButton.setEnabled(true);
                 break;
@@ -87,8 +87,8 @@ public class ProxyDialog extends JDialog {
                 terminate();
                 break;
             case ERROR:
-                instructionLabel.setText(app.getText(GFLTexts.PROXY_ERROR_INST));
-                infoLabel.setText(app.getText(GFLTexts.PROXY_ERROR_INFO, String.valueOf(Proxy.PORT)));
+                instructionLabel.setText(app.getText(AppText.PROXY_ERROR_INST));
+                infoLabel.setText(app.getText(AppText.PROXY_ERROR_INFO, String.valueOf(Proxy.PORT)));
                 break;
             default:
         }

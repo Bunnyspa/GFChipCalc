@@ -35,8 +35,8 @@ import main.App;
 import main.image.ImageProcessor;
 import main.puzzle.Chip;
 import main.puzzle.Shape;
-import main.ui.resource.GFLGraphics;
-import main.ui.resource.GFLTexts;
+import main.ui.resource.AppImage;
+import main.ui.resource.AppText;
 import main.util.Fn;
 
 /**
@@ -97,16 +97,16 @@ public class ImageDialog extends JDialog {
     }
 
     private void init() {
-        setTitle(app.getText(GFLTexts.IMAGE_TITLE));
+        setTitle(app.getText(AppText.IMAGE_TITLE));
         fileChooser.setFileFilter(new FileNameExtensionFilter(
-                app.getText(GFLTexts.IMAGE_OPEN_EXT) + " (.png, .jpg, .gif, .bmp)",
+                app.getText(AppText.IMAGE_OPEN_EXT) + " (.png, .jpg, .gif, .bmp)",
                 "png", "jpg", "gif", "bmp")
         );
-        openButton.setText(app.getText(GFLTexts.IMAGE_OPEN));
-        addToggleButton.setText(app.getText(GFLTexts.ACTION_ADD));
-        deleteToggleButton.setText(app.getText(GFLTexts.ACTION_DEL));
-        okButton.setText(app.getText(GFLTexts.ACTION_OK));
-        cancelButton.setText(app.getText(GFLTexts.ACTION_CANCEL));
+        openButton.setText(app.getText(AppText.IMAGE_OPEN));
+        addToggleButton.setText(app.getText(AppText.ACTION_ADD));
+        deleteToggleButton.setText(app.getText(AppText.ACTION_DEL));
+        okButton.setText(app.getText(AppText.ACTION_OK));
+        cancelButton.setText(app.getText(AppText.ACTION_CANCEL));
 
         initLabel();
         aScrollPane.setViewportView(imageLabel);
@@ -299,8 +299,8 @@ public class ImageDialog extends JDialog {
             refresh();
         } else if (addedByUser) {
             JOptionPane.showMessageDialog(this,
-                    app.getText(GFLTexts.IMAGE_OVERLAPPED_BODY),
-                    app.getText(GFLTexts.IMAGE_OVERLAPPED_TITLE),
+                    app.getText(AppText.IMAGE_OVERLAPPED_BODY),
+                    app.getText(AppText.IMAGE_OVERLAPPED_TITLE),
                     JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -378,7 +378,7 @@ public class ImageDialog extends JDialog {
         if (b) {
             Chip chip = rcs.get(i).chip;
             Rectangle rect = rcs.get(i).rect;
-            ImageIcon icon = GFLGraphics.chip(app, chip);
+            ImageIcon icon = AppImage.Chip.get(app, chip);
             JLabel label = genChipLabel(icon, zoomRect(rect, zoom));
             chipImagePoppedup.put(i, label);
             imageLabel.add(label);

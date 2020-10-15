@@ -6,7 +6,7 @@ import main.App;
 import main.puzzle.Board;
 import main.puzzle.Shape;
 import main.puzzle.Stat;
-import main.ui.resource.GFLTexts;
+import main.ui.resource.AppText;
 import main.util.DoubleKeyHashMap;
 
 /**
@@ -127,7 +127,7 @@ public class StatPresetMap {
             Stat pt = bps.get(i).pt;
             String item;
             if (pt == null) {
-                item = app.getText(GFLTexts.CSET_PRESET_OPTION, String.valueOf(i + 1));
+                item = app.getText(AppText.CSET_PRESET_OPTION, String.valueOf(i + 1));
             } else {
                 item = pt.toStringSlash();
             }

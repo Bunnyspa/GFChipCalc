@@ -8,8 +8,8 @@ import javax.swing.border.TitledBorder;
 import main.App;
 import main.puzzle.Board;
 import main.puzzle.Stat;
-import main.ui.resource.GFLGraphics;
-import main.ui.resource.GFLTexts;
+import main.ui.resource.AppColor;
+import main.ui.resource.AppText;
 import main.util.Fn;
 
 /**
@@ -56,25 +56,25 @@ public class StatDialog extends JDialog {
     }
 
     private void initText() {
-        setTitle(app.getText(GFLTexts.STAT_TITLE));
+        setTitle(app.getText(AppText.STAT_TITLE));
 
-        textVersionLabel.setText(app.getText(GFLTexts.STAT_VERSION));
-        totalLabel.setText(Fn.toHTML(app.getText(GFLTexts.STAT_TOTAL)
-                + " = " + Fn.htmlColor(app.getText(GFLTexts.STAT_HOC), GFLGraphics.COLOR_LEVEL)
-                + " + " + app.getText(GFLTexts.STAT_CHIP)
-                + " + " + Fn.htmlColor(app.getText(GFLTexts.STAT_RESONANCE), GFLGraphics.COLORS_CHIP.get(board.getColor()))
-                + " + " + Fn.htmlColor(app.getText(GFLTexts.STAT_VERSION), GFLGraphics.COLOR_STAR_RED)));
+        textVersionLabel.setText(app.getText(AppText.STAT_VERSION));
+        totalLabel.setText(Fn.toHTML(app.getText(AppText.STAT_TOTAL)
+                + " = " + Fn.htmlColor(app.getText(AppText.STAT_HOC), AppColor.LEVEL)
+                + " + " + app.getText(AppText.STAT_CHIP)
+                + " + " + Fn.htmlColor(app.getText(AppText.STAT_RESONANCE), AppColor.CHIPS.get(board.getColor()))
+                + " + " + Fn.htmlColor(app.getText(AppText.STAT_VERSION), AppColor.RED_STAR)));
 
         Stat s = board.getStat();
         Stat cm = board.getCustomMaxStat();
         Stat om = board.getOrigMaxStat();
 
-        dmgPanel.setBorder(new TitledBorder(app.getText(GFLTexts.CHIP_STAT_DMG_LONG) + " " + s.dmg + " / " + cm.dmg + (cm.dmg == om.dmg ? "" : " (" + om.dmg + ")")));
-        brkPanel.setBorder(new TitledBorder(app.getText(GFLTexts.CHIP_STAT_BRK_LONG) + " " + s.brk + " / " + cm.brk + (cm.brk == om.brk ? "" : " (" + om.brk + ")")));
-        hitPanel.setBorder(new TitledBorder(app.getText(GFLTexts.CHIP_STAT_HIT_LONG) + " " + s.hit + " / " + cm.hit + (cm.hit == om.hit ? "" : " (" + om.hit + ")")));
-        rldPanel.setBorder(new TitledBorder(app.getText(GFLTexts.CHIP_STAT_RLD_LONG) + " " + s.rld + " / " + cm.rld + (cm.rld == om.rld ? "" : " (" + om.rld + ")")));
+        dmgPanel.setBorder(new TitledBorder(app.getText(AppText.CHIP_STAT_DMG_LONG) + " " + s.dmg + " / " + cm.dmg + (cm.dmg == om.dmg ? "" : " (" + om.dmg + ")")));
+        brkPanel.setBorder(new TitledBorder(app.getText(AppText.CHIP_STAT_BRK_LONG) + " " + s.brk + " / " + cm.brk + (cm.brk == om.brk ? "" : " (" + om.brk + ")")));
+        hitPanel.setBorder(new TitledBorder(app.getText(AppText.CHIP_STAT_HIT_LONG) + " " + s.hit + " / " + cm.hit + (cm.hit == om.hit ? "" : " (" + om.hit + ")")));
+        rldPanel.setBorder(new TitledBorder(app.getText(AppText.CHIP_STAT_RLD_LONG) + " " + s.rld + " / " + cm.rld + (cm.rld == om.rld ? "" : " (" + om.rld + ")")));
 
-        closeButton.setText(app.getText(GFLTexts.ACTION_CLOSE));
+        closeButton.setText(app.getText(AppText.ACTION_CLOSE));
     }
 
     private void update() {
@@ -93,7 +93,7 @@ public class StatDialog extends JDialog {
             totalStat[i] = hocStat[i] + chipStat[i] + resStat[i] + verStat[i];
         }
 
-        String totalKey = app.getText(GFLTexts.STAT_TOTAL);
+        String totalKey = app.getText(AppText.STAT_TOTAL);
 
         List<String> keys = new ArrayList<>();
         List<String> values = new ArrayList<>();
@@ -104,10 +104,10 @@ public class StatDialog extends JDialog {
 
             keys.add(totalKey);
             values.add(totalStat[i]
-                    + " = " + Fn.htmlColor(hocStat[i], GFLGraphics.COLOR_LEVEL)
+                    + " = " + Fn.htmlColor(hocStat[i], AppColor.LEVEL)
                     + " + " + chipStat[i]
-                    + " + " + Fn.htmlColor(resStat[i], GFLGraphics.COLORS_CHIP.get(board.getColor()))
-                    + " + " + Fn.htmlColor(verStat[i], GFLGraphics.COLOR_STAR_RED)
+                    + " + " + Fn.htmlColor(resStat[i], AppColor.CHIPS.get(board.getColor()))
+                    + " + " + Fn.htmlColor(verStat[i], AppColor.RED_STAR)
             );
 
             switch (i) {
@@ -116,28 +116,28 @@ public class StatDialog extends JDialog {
                     int oldBrk = board.getOldStat().limit(board.getOrigMaxStat()).brk;
                     int oldTotalBrk = hocStat[1] + oldBrk + resStat[1] + verStat[1];
 
-                    String oldTotalKey = app.getText(GFLTexts.STAT_TOTAL_OLD);
+                    String oldTotalKey = app.getText(AppText.STAT_TOTAL_OLD);
 
                     keys.add(oldTotalKey);
                     values.add(oldTotalBrk
-                            + " = " + Fn.htmlColor(hocStat[i], GFLGraphics.COLOR_LEVEL)
+                            + " = " + Fn.htmlColor(hocStat[i], AppColor.LEVEL)
                             + " + " + oldBrk
-                            + " + " + Fn.htmlColor(resStat[i], GFLGraphics.COLORS_CHIP.get(board.getColor()))
-                            + " + " + Fn.htmlColor(verStat[i], GFLGraphics.COLOR_STAR_RED)
+                            + " + " + Fn.htmlColor(resStat[i], AppColor.CHIPS.get(board.getColor()))
+                            + " + " + Fn.htmlColor(verStat[i], AppColor.RED_STAR)
                     );
 
                     break;
                 case Stat.RLD:
                     // Fire Rate
                     int firerate = rldToFirerate(totalStat[3]);
-                    keys.add(app.getText(GFLTexts.STAT_RLD_FIRERATE));
+                    keys.add(app.getText(AppText.STAT_RLD_FIRERATE));
                     values.add(String.valueOf(firerate));
 
                     // Frame
                     int frame = firerateToFrame(firerate);
                     double sec = frame / 30.0f;
-                    keys.add(app.getText(GFLTexts.STAT_RLD_DELAY));
-                    values.add(app.getText(GFLTexts.STAT_RLD_DELAY_FRAME, String.valueOf(frame)) + " = " + app.getText(GFLTexts.STAT_RLD_DELAY_SECOND, Fn.fStr(sec, 4)));
+                    keys.add(app.getText(AppText.STAT_RLD_DELAY));
+                    values.add(app.getText(AppText.STAT_RLD_DELAY_FRAME, String.valueOf(frame)) + " = " + app.getText(AppText.STAT_RLD_DELAY_SECOND, Fn.fStr(sec, 4)));
 
                     break;
                 default:

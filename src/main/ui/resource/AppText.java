@@ -1,5 +1,8 @@
 package main.ui.resource;
 
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,13 +20,13 @@ import main.util.IO;
  *
  * @author Bunnyspa
  */
-public class GFLTexts {
+public class AppText {
 
     public static final Map<Integer, String> TEXT_MAP_COLOR = new HashMap<Integer, String>() // <editor-fold defaultstate="collapsed">
     {
         {
-            put(Chip.COLOR_ORANGE, GFLTexts.CHIP_COLOR_ORANGE);
-            put(Chip.COLOR_BLUE, GFLTexts.CHIP_COLOR_BLUE);
+            put(Chip.COLOR_ORANGE, AppText.CHIP_COLOR_ORANGE);
+            put(Chip.COLOR_BLUE, AppText.CHIP_COLOR_BLUE);
         }
     }; // </editor-fold>
 
@@ -46,7 +49,7 @@ public class GFLTexts {
 
     public static final String TEXT_STAR_FULL = "★";
     public static final String TEXT_STAR_EMPTY = "☆";
-    
+
     // <editor-fold defaultstate="collapsed" desc="Resources">
     private Properties prop;
     private String propTag = "";
@@ -56,7 +59,20 @@ public class GFLTexts {
     public static final Locale JA_JP = Locale.forLanguageTag("ja-JP");
     public static final Locale[] LOCALES = {KO_KR, EN_US, JA_JP};
 
-    private static final Map<Locale, Properties> LANGMAP = GFLResources.readInternalProp();
+    private static final Map<Locale, Properties> LANGMAP = new HashMap<Locale, Properties>() // <editor-fold defaultstate="collapsed">
+    {
+        {
+            for (Locale locale : LOCALES) {
+                URL url = App.getResource("language/" + locale.toLanguageTag() + ".properties");
+                try (Reader r = new InputStreamReader(url.openStream(), IO.UTF8)) {
+                    Properties props = new Properties();
+                    props.load(r);
+                    put(locale, props);
+                } catch (Exception ex) {
+                }
+            }
+        }
+    }; // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Map">
     // ACTION

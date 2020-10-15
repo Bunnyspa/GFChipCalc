@@ -13,8 +13,8 @@ import main.setting.BoardSetting;
 import main.setting.Filter;
 import main.setting.StatPresetMap;
 import main.ui.component.TagPanel;
-import main.ui.resource.GFLResources;
-import main.ui.resource.GFLTexts;
+import main.ui.resource.AppImage;
+import main.ui.resource.AppText;
 import main.util.Fn;
 
 /**
@@ -53,60 +53,60 @@ public class FilterDialog extends JDialog {
     }
 
     private void init() {
-        setTitle(app.getText(GFLTexts.FILTER_TITLE));
-        okButton.setText(app.getText(GFLTexts.ACTION_OK));
-        cancelButton.setText(app.getText(GFLTexts.ACTION_CANCEL));
-        presetButton.setText(app.getText(GFLTexts.FILTER_PRESET));
-        resetButton.setText(app.getText(GFLTexts.FILTER_RESET));
-        tagResetButton.setText(app.getText(GFLTexts.FILTER_TAG_RESET));
+        setTitle(app.getText(AppText.FILTER_TITLE));
+        okButton.setText(app.getText(AppText.ACTION_OK));
+        cancelButton.setText(app.getText(AppText.ACTION_CANCEL));
+        presetButton.setText(app.getText(AppText.FILTER_PRESET));
+        resetButton.setText(app.getText(AppText.FILTER_RESET));
+        tagResetButton.setText(app.getText(AppText.FILTER_TAG_RESET));
 
-        markedTrueTB.setIcon(GFLResources.CHECKED);
-        markedFalseTB.setIcon(GFLResources.UNCHECKED);
-        dmgTextLabel.setIcon(GFLResources.DMG);
-        brkTextLabel.setIcon(GFLResources.BRK);
-        hitTextLabel.setIcon(GFLResources.HIT);
-        rldTextLabel.setIcon(GFLResources.RLD);
+        markedTrueTB.setIcon(AppImage.CHECKED);
+        markedFalseTB.setIcon(AppImage.UNCHECKED);
+        dmgTextLabel.setIcon(AppImage.DMG);
+        brkTextLabel.setIcon(AppImage.BRK);
+        hitTextLabel.setIcon(AppImage.HIT);
+        rldTextLabel.setIcon(AppImage.RLD);
 
-        starPanel.setBorder(new TitledBorder(app.getText(GFLTexts.FILTER_GROUP_STAR)));
+        starPanel.setBorder(new TitledBorder(app.getText(AppText.FILTER_GROUP_STAR)));
         for (int i = 0; i < Filter.NUM_STAR; i++) {
             String starStr = String.valueOf(5 - i);
-            starTBs[i].setText(app.getText(GFLTexts.UNIT_STAR, starStr));
+            starTBs[i].setText(app.getText(AppText.UNIT_STAR, starStr));
             starTBs[i].setSelected(app.filter.getStar(i));
         }
 
-        colorPanel.setBorder(new TitledBorder(app.getText(GFLTexts.FILTER_GROUP_COLOR)));
-        colorOrangeTB.setText(app.getText(GFLTexts.CHIP_COLOR_ORANGE));
-        colorBlueTB.setText(app.getText(GFLTexts.CHIP_COLOR_BLUE));
+        colorPanel.setBorder(new TitledBorder(app.getText(AppText.FILTER_GROUP_COLOR)));
+        colorOrangeTB.setText(app.getText(AppText.CHIP_COLOR_ORANGE));
+        colorBlueTB.setText(app.getText(AppText.CHIP_COLOR_BLUE));
         for (int i = 0; i < Filter.NUM_COLOR; i++) {
             colorTBs[i].setSelected(app.filter.getColor(i));
         }
 
-        cellPanel.setBorder(new TitledBorder(app.getText(GFLTexts.FILTER_GROUP_CELL)));
+        cellPanel.setBorder(new TitledBorder(app.getText(AppText.FILTER_GROUP_CELL)));
         String[] typeStrs = {
-            app.getText(GFLTexts.UNIT_CELL, "6"),
-            app.getText(GFLTexts.UNIT_CELLTYPE, "5", "B"),
-            app.getText(GFLTexts.UNIT_CELLTYPE, "5", "A"),
-            app.getText(GFLTexts.UNIT_CELL, "4"),
-            app.getText(GFLTexts.UNIT_CELL, "3"),
-            app.getText(GFLTexts.UNIT_CELL, "2"),
-            app.getText(GFLTexts.UNIT_CELL, "1")
+            app.getText(AppText.UNIT_CELL, "6"),
+            app.getText(AppText.UNIT_CELLTYPE, "5", "B"),
+            app.getText(AppText.UNIT_CELLTYPE, "5", "A"),
+            app.getText(AppText.UNIT_CELL, "4"),
+            app.getText(AppText.UNIT_CELL, "3"),
+            app.getText(AppText.UNIT_CELL, "2"),
+            app.getText(AppText.UNIT_CELL, "1")
         };
         for (int i = 0; i < Filter.NUM_TYPE; i++) {
             typeTBs[i].setText(typeStrs[i]);
             typeTBs[i].setSelected(app.filter.getType(i));
         }
 
-        markPanel.setBorder(new TitledBorder(app.getText(GFLTexts.FILTER_GROUP_MARK)));
+        markPanel.setBorder(new TitledBorder(app.getText(AppText.FILTER_GROUP_MARK)));
         for (int i = 0; i < Filter.NUM_MARK; i++) {
             markedTBs[i].setSelected(app.filter.getMark(i));
         }
 
-        ptPanel.setBorder(new TitledBorder(app.getText(GFLTexts.FILTER_GROUP_PT)));
+        ptPanel.setBorder(new TitledBorder(app.getText(AppText.FILTER_GROUP_PT)));
 
-        dmgTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_DMG));
-        brkTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_BRK));
-        hitTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_HIT));
-        rldTextLabel.setText(app.getText(GFLTexts.CHIP_STAT_RLD));
+        dmgTextLabel.setText(app.getText(AppText.CHIP_STAT_DMG));
+        brkTextLabel.setText(app.getText(AppText.CHIP_STAT_BRK));
+        hitTextLabel.setText(app.getText(AppText.CHIP_STAT_HIT));
+        rldTextLabel.setText(app.getText(AppText.CHIP_STAT_RLD));
         ptMinDmgSpinner.setModel(new SpinnerNumberModel(0, 0, Chip.PT_MAX, 1));
         ptMinBrkSpinner.setModel(new SpinnerNumberModel(0, 0, Chip.PT_MAX, 1));
         ptMinHitSpinner.setModel(new SpinnerNumberModel(0, 0, Chip.PT_MAX, 1));
@@ -127,14 +127,14 @@ public class FilterDialog extends JDialog {
         ptMaxHitSpinner.setValue(ptMax.hit);
         ptMaxRldSpinner.setValue(ptMax.rld);
 
-        enhancementPanel.setBorder(new TitledBorder(app.getText(GFLTexts.FILTER_GROUP_ENHANCEMENT)));
+        enhancementPanel.setBorder(new TitledBorder(app.getText(AppText.FILTER_GROUP_ENHANCEMENT)));
         levelMinSpinner.setModel(new SpinnerNumberModel(0, 0, Chip.LEVEL_MAX, 1));
         levelMaxSpinner.setModel(new SpinnerNumberModel(0, 0, Chip.LEVEL_MAX, 1));
         levelMinSpinner.setValue(app.filter.levelMin);
         levelMaxSpinner.setValue(app.filter.levelMax);
 
-        tagIncludedPanel.setBorder(new TitledBorder(app.getText(GFLTexts.FILTER_GROUP_TAG_INCLUDE)));
-        tagExcludedPanel.setBorder(new TitledBorder(app.getText(GFLTexts.FILTER_GROUP_TAG_EXCLUDE)));
+        tagIncludedPanel.setBorder(new TitledBorder(app.getText(AppText.FILTER_GROUP_TAG_INCLUDE)));
+        tagExcludedPanel.setBorder(new TitledBorder(app.getText(AppText.FILTER_GROUP_TAG_EXCLUDE)));
         tagIncludedPanel.add(tip);
         tagExcludedPanel.add(txp);
 
