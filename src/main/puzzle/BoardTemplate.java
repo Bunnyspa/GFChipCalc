@@ -164,6 +164,12 @@ public class BoardTemplate implements Comparable<BoardTemplate> {
 
     @Override
     public String toString() {
+        if (state == EMPTY) {
+            return "EMPTY";
+        }
+        if (state == END) {
+            return "end";
+        }
         return puzzles.toString();
     }
 }
