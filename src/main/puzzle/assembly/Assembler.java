@@ -187,11 +187,11 @@ public class Assembler {
         }
     }
 
-    public static BoardTemplate generateBT(String boardName, int boardStar, List<Shape> shapes, BooleanSupplier checkPause) {
-        return generateBT_DXZ(boardName, boardStar, shapes, checkPause);
+    public static BoardTemplate generateTemplate(String boardName, int boardStar, List<Shape> shapes, BooleanSupplier checkPause) {
+        return generateTemplate_DXZ(boardName, boardStar, shapes, checkPause);
     }
 
-    private static BoardTemplate generateBT_DXZ(String boardName, int boardStar, List<Shape> shapes, BooleanSupplier checkPause) {
+    private static BoardTemplate generateTemplate_DXZ(String boardName, int boardStar, List<Shape> shapes, BooleanSupplier checkPause) {
         PuzzleMatrix<Integer> puzzle = Board.initMatrix(boardName, boardStar);
 
         Set<Point> emptyCoords = puzzle.getPoints(Board.EMPTY);
@@ -379,7 +379,7 @@ public class Assembler {
             return BoardTemplate.empty();
         }
         List<Shape> shapes = iterator.next();
-        return generateBT(cs.boardName, cs.boardStar, shapes, checkPause);
+        return generateTemplate(cs.boardName, cs.boardStar, shapes, checkPause);
     }
 
     private void combine_assemble(BlockingQueue<BoardTemplate> q, ChipCombinationIterator cIt) {

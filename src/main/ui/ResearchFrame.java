@@ -61,7 +61,7 @@ public class ResearchFrame extends javax.swing.JFrame {
                         for (String s : shapeStrs.split(",")) {
                             shapes.add(Shape.byId(Integer.valueOf(s)));
                         }
-                        BoardTemplate result = Assembler.generateBT(boardName, boardStar, shapes, () -> running);
+                        BoardTemplate result = Assembler.generateTemplate(boardName, boardStar, shapes, () -> running);
                         if (running) {
                             if (result.isEmpty()) {
                                 ResearchConnection.sendResult(shapes.stream().map(s -> String.valueOf(s.id)).collect(Collectors.joining(",")) + ";-");
