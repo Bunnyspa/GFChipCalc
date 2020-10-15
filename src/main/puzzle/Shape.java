@@ -7,6 +7,7 @@ package main.puzzle;
 
 import java.awt.Point;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import main.util.DoubleKeyHashMap;
@@ -321,11 +322,15 @@ public enum Shape {
     }
 
     public Point getPivot(int rotation) {
-        return PIVOTS.get(this, rotation);
+        return new Point(PIVOTS.get(this, rotation));
     }
 
     public Set<Point> getPoints(int rotation) {
-        return POINTS.get(this, rotation);
+        Set<Point> points = new HashSet<>();
+        for (Point point : POINTS.get(this, rotation)) {
+            points.add(new Point(point));
+        }
+        return points;
     }
 
     private static final boolean O = true;
@@ -558,6 +563,7 @@ public enum Shape {
                 }
                 PuzzleMatrix<Boolean> matrix = new PuzzleMatrix<>(MATRIX_MAP.get(shape));
                 for (int i = 0; i < shape.getMaxRotation(); i++) {
+                    matrix.rotate(i);
                     Point pivot = matrix.getPivot(true);
                     put(shape, i, pivot);
                 }
@@ -573,6 +579,7 @@ public enum Shape {
                 }
                 PuzzleMatrix<Boolean> matrix = new PuzzleMatrix<>(MATRIX_MAP.get(shape));
                 for (int i = 0; i < shape.getMaxRotation(); i++) {
+                    matrix.rotate(i);
                     Set<Point> pts = matrix.getPoints(true);
                     put(shape, i, pts);
                 }
