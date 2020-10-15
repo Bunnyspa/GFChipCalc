@@ -158,33 +158,70 @@ public class Assembler {
         intermediate.set(progress.nDone, progress.nTotal);
     }
 
-    public synchronized void publishBoard(Board board) {
-        switch (ces.markType) {
-            case Setting.BOARD_MARKTYPE_CELL:
-                if (board.getMarkedCellCount() < ces.markMin || ces.markMax < board.getMarkedCellCount()) {
-                    return;
-                }
-                break;
-            case Setting.BOARD_MARKTYPE_CHIP:
-                if (board.getMarkedChipCount() < ces.markMin || ces.markMax < board.getMarkedChipCount()) {
-                    return;
-                }
-                break;
-            default:
-                throw new AssertionError();
+    private void combine() {
+        BlockingQueue<BoardTemplate> q = new ArrayBlockingQueue<>(5);
+        ChipCombinationIterator cIt = new ChipCombinationIterator(ces.chips);
+
+        Thread templateThread = new Thread(() -> combine_template(q, cIt));
+        Thread assembleThread = new Thread(() -> combine_assemble(q, cIt));
+
+        templateThread.start();
+        assembleThread.start();
+        try {
+            templateThread.join();
+            assembleThread.join();
+        } catch (InterruptedException ex) {
         }
+    }
 
-        board.minimizeTicket();
-        board.colorChips();
+    private void combine_template(BlockingQueue<BoardTemplate> q, ChipCombinationIterator cIt) {
+        // Dictionary
+        if (ces.calcMode == CalcExtraSetting.CALCMODE_DICTIONARY) {
+            List<BoardTemplate> templates = getBT(cs.boardName, cs.boardStar, ces.calcModeTag == 1);
 
-        if (cs.rotation || board.getTicketCount() == 0) {
-            progress.addBoard(board);
-            if (RESULT_LIMIT > 0 && progress.getBoardSize() > RESULT_LIMIT) {
-                progress.removeLastBoard();
+            int count = 0;
+            for (BoardTemplate boardTemplate : templates) {
+                if (cIt.hasEnoughChips(boardTemplate)) {
+                    if (!cs.symmetry || boardTemplate.isSymmetric()) {
+                        count++;
+                    }
+                }
             }
-            progress.nComb++;
-            boardsChanged = true;
+            progress.nTotal = count;
+
+            setProgBar();
+
+            Iterator<BoardTemplate> pIt = templates.subList(progress.nDone, templates.size()).iterator();
+            while (checkPause() && pIt.hasNext()) {
+                BoardTemplate template = pIt.next();
+                if ((!cs.symmetry || template.isSymmetric())
+                        && cIt.hasEnoughChips(template)) {
+                    offer(q, template);
+                }
+            }
+        } //
+        // Algorithm X
+        else {
+            TCIHandler it = new TCIHandler(cs.boardName, cs.boardStar, ces.chips);
+            progress.nTotal = it.total();
+            setProgBar();
+
+            it.skip(progress.nDone);
+            while (checkPause() && it.hasNext()) {
+                BoardTemplate template = combine_template_algX(it);
+                offer(q, template);
+            }
         }
+        offer(q, BoardTemplate.end());
+    }
+
+    private BoardTemplate combine_template_algX(TCIHandler iterator) {
+        if (!iterator.isNextValid()) {
+            iterator.skip();
+            return BoardTemplate.empty();
+        }
+        List<Shape> shapes = iterator.next();
+        return generateTemplate(cs.boardName, cs.boardStar, shapes, checkPause);
     }
 
     public static BoardTemplate generateTemplate(String boardName, int boardStar, List<Shape> shapes, BooleanSupplier checkPause) {
@@ -210,9 +247,7 @@ public class Assembler {
         List<boolean[]> rows = new ArrayList<>();
         for (int i = 0; i < nCol_name; i++) {
             Shape shape = shapes.get(i);
-            // Chip c = new Chip(shape);
             for (int rot = 0; rot < shape.getMaxRotation(); rot++) {
-                //  c.setRotation(rot);
                 for (Point bp : emptyCoords) {
                     Set<Point> tps = translate(shape, rot, bp);
                     if (Board.isChipPlaceable(puzzle, tps)) {
@@ -316,72 +351,6 @@ public class Assembler {
         return new DXZResult(x, false);
     }
 
-    private void combine() {
-        BlockingQueue<BoardTemplate> q = new ArrayBlockingQueue<>(5);
-        ChipCombinationIterator cIt = new ChipCombinationIterator(ces.chips);
-
-        Thread templateThread = new Thread(() -> combine_template(q, cIt));
-        Thread assembleThread = new Thread(() -> combine_assemble(q, cIt));
-
-        templateThread.start();
-        assembleThread.start();
-        try {
-            templateThread.join();
-            assembleThread.join();
-        } catch (InterruptedException ex) {
-        }
-    }
-
-    private void combine_template(BlockingQueue<BoardTemplate> q, ChipCombinationIterator cIt) {
-        // Dictionary
-        if (ces.calcMode == CalcExtraSetting.CALCMODE_DICTIONARY) {
-            List<BoardTemplate> templates = getBT(cs.boardName, cs.boardStar, ces.calcModeTag == 1);
-
-            int count = 0;
-            for (BoardTemplate boardTemplate : templates) {
-                if (cIt.hasEnoughChips(boardTemplate)) {
-                    if (!cs.symmetry || boardTemplate.isSymmetric()) {
-                        count++;
-                    }
-                }
-            }
-            progress.nTotal = count;
-
-            setProgBar();
-
-            Iterator<BoardTemplate> pIt = templates.subList(progress.nDone, templates.size()).iterator();
-            while (checkPause() && pIt.hasNext()) {
-                BoardTemplate template = pIt.next();
-                if ((!cs.symmetry || template.isSymmetric())
-                        && cIt.hasEnoughChips(template)) {
-                    offer(q, template);
-                }
-            }
-        } //
-        // Algorithm X
-        else {
-            TCIHandler it = new TCIHandler(cs.boardName, cs.boardStar, ces.chips);
-            progress.nTotal = it.total();
-            setProgBar();
-
-            it.skip(progress.nDone);
-            while (checkPause() && it.hasNext()) {
-                BoardTemplate template = combine_template_algX(it);
-                offer(q, template);
-            }
-        }
-        offer(q, BoardTemplate.end());
-    }
-
-    private BoardTemplate combine_template_algX(TCIHandler iterator) {
-        if (!iterator.isNextValid()) {
-            iterator.skip();
-            return BoardTemplate.empty();
-        }
-        List<Shape> shapes = iterator.next();
-        return generateTemplate(cs.boardName, cs.boardStar, shapes, checkPause);
-    }
-
     private void combine_assemble(BlockingQueue<BoardTemplate> q, ChipCombinationIterator cIt) {
         while (checkPause()) {
             BoardTemplate template = poll(q);
@@ -407,7 +376,6 @@ public class Assembler {
                                 break;
                             }
                         }
-
                     }
 
                     // add
@@ -423,6 +391,35 @@ public class Assembler {
                 }
             }
             prog_inc();
+        }
+    }
+
+    public synchronized void publishBoard(Board board) {
+        switch (ces.markType) {
+            case Setting.BOARD_MARKTYPE_CELL:
+                if (board.getMarkedCellCount() < ces.markMin || ces.markMax < board.getMarkedCellCount()) {
+                    return;
+                }
+                break;
+            case Setting.BOARD_MARKTYPE_CHIP:
+                if (board.getMarkedChipCount() < ces.markMin || ces.markMax < board.getMarkedChipCount()) {
+                    return;
+                }
+                break;
+            default:
+                throw new AssertionError();
+        }
+
+        board.minimizeTicket();
+        board.colorChips();
+
+        if (cs.rotation || board.getTicketCount() == 0) {
+            progress.addBoard(board);
+            if (RESULT_LIMIT > 0 && progress.getBoardSize() > RESULT_LIMIT) {
+                progress.removeLastBoard();
+            }
+            progress.nComb++;
+            boardsChanged = true;
         }
     }
 

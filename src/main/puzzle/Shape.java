@@ -562,10 +562,10 @@ public enum Shape {
                     continue;
                 }
                 PuzzleMatrix<Boolean> matrix = new PuzzleMatrix<>(MATRIX_MAP.get(shape));
-                for (int i = 0; i < shape.getMaxRotation(); i++) {
-                    matrix.rotate(i);
+                for (int r = 0; r < shape.getMaxRotation(); r++) {
                     Point pivot = matrix.getPivot(true);
-                    put(shape, i, pivot);
+                    put(shape, r, pivot);
+                    matrix.rotate();
                 }
             }
         }
@@ -578,10 +578,10 @@ public enum Shape {
                     continue;
                 }
                 PuzzleMatrix<Boolean> matrix = new PuzzleMatrix<>(MATRIX_MAP.get(shape));
-                for (int i = 0; i < shape.getMaxRotation(); i++) {
-                    matrix.rotate(i);
+                for (int r = 0; r < shape.getMaxRotation(); r++) {
                     Set<Point> pts = matrix.getPoints(true);
-                    put(shape, i, pts);
+                    put(shape, r, pts);
+                    matrix.rotate();
                 }
             }
         }
