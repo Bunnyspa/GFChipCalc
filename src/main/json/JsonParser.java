@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import main.App;
 import main.puzzle.Board;
@@ -30,7 +31,7 @@ public class JsonParser {
 
     public static List<Chip> readFile(String filePath) {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String data = br.readLine();
+            String data = br.lines().collect(Collectors.joining());
             List<Chip> chips = parseChip(data);
             return chips;
         } catch (IOException ex) {
