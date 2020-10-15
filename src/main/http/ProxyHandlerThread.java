@@ -63,7 +63,6 @@ public class ProxyHandlerThread extends Thread {
         try {
             this.cpSocket.setSoTimeout(5000);
         } catch (IOException ex) {
-            // Logger.getLogger(RequestHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
         this.proxy = proxy;
         pm = new ProxyMessage();
