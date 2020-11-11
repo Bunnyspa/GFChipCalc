@@ -53,11 +53,9 @@ public class ResearchConnection {
                 os.writeBytes(data);
                 os.flush();
             }
-            // Response
-            int code = con.getResponseCode();
-            String msg = con.getResponseMessage();
 
-            //System.out.println(code + " : " + msg);
+//            int code = con.getResponseCode();
+//            String msg = con.getResponseMessage(); 
         } catch (Exception ex) {
         }
     }
@@ -69,10 +67,8 @@ public class ResearchConnection {
             con.setReadTimeout(TIMEOUT);
             con.setRequestMethod("GET");
 
-            int code = con.getResponseCode();
-            String msg = con.getResponseMessage();
-
-            //System.out.println(code + " : " + msg);
+//            int code = con.getResponseCode();
+//            String msg = con.getResponseMessage(); 
             String header_te = con.getHeaderField(Proxy.TRANSFER_ENCODING);
             String header_cl = con.getHeaderField(Proxy.CONTENT_LENGTH);
 

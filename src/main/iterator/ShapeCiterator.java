@@ -3,6 +3,7 @@ package main.iterator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,14 +14,14 @@ import main.puzzle.Shape;
  *
  * @author Bunnyspa
  */
-public class TCIHandler {
+public class ShapeCiterator implements Iterator<List<Shape>> {
 
     private final Map<Shape, Integer> chipNameCountMap;
-    private final List<TypeCombinationIterator> iterators = new ArrayList<>();
+    private final List<PerTypeShapeCiterator> iterators = new ArrayList<>();
     private final boolean limited;
     private int iteratorIndex = 0;
 
-    public TCIHandler(String name, int star, List<Chip> chips) {
+    public ShapeCiterator(String name, int star, List<Chip> chips) {
         List<Shape.Type> chipTypes = new ArrayList<>();
         List<Shape> chipShapes = new ArrayList<>();
         for (Chip c : chips) {
@@ -32,37 +33,37 @@ public class TCIHandler {
 
         List<Map<Shape.Type, Integer>> typeCountMaps = new ArrayList<>();
         Set<Shape.Type> types = typeCandidateCountMap.keySet();
-        for (Map<Shape.Type, Integer> typeCountMap : TypeCombinationIterator.getTypeCountMaps(name, star, types)) {
+        for (Map<Shape.Type, Integer> typeCountMap : PerTypeShapeCiterator.getTypeCountMaps(name, star, types)) {
             if (allTypeEnough(typeCountMap, typeCandidateCountMap)) {
                 typeCountMaps.add(typeCountMap);
             }
         }
 
         for (Map<Shape.Type, Integer> map : typeCountMaps) {
-            iterators.add(new TypeCombinationIterator(map));
+            iterators.add(new PerTypeShapeCiterator(map));
         }
 
         limited = true;
     }
 
-    public TCIHandler(String name, int star, Set<Shape.Type> types) {
+    public ShapeCiterator(String name, int star, Set<Shape.Type> types) {
         chipNameCountMap = new HashMap<>();
 
-        List<Map<Shape.Type, Integer>> typeCountMaps = TypeCombinationIterator.getTypeCountMaps(name, star, types);
+        List<Map<Shape.Type, Integer>> typeCountMaps = PerTypeShapeCiterator.getTypeCountMaps(name, star, types);
         for (Map<Shape.Type, Integer> map : typeCountMaps) {
-            iterators.add(new TypeCombinationIterator(map));
+            iterators.add(new PerTypeShapeCiterator(map));
         }
 
         limited = false;
     }
 
-    private TypeCombinationIterator getIterator() {
+    private PerTypeShapeCiterator getIterator() {
         return iterators.get(iteratorIndex);
     }
 
     public int total() {
         int sum = 0;
-        for (TypeCombinationIterator it : iterators) {
+        for (PerTypeShapeCiterator it : iterators) {
             int total = it.total();
             sum += total;
         }
@@ -79,6 +80,7 @@ public class TCIHandler {
         }
     }
 
+    @Override
     public boolean hasNext() {
         if (iterators.isEmpty()) {
             return false;
@@ -89,6 +91,7 @@ public class TCIHandler {
         return getIterator().hasNext();
     }
 
+    @Override
     public List<Shape> next() {
         if (iterators.isEmpty()) {
             return new ArrayList<>();

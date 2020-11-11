@@ -15,13 +15,13 @@ import main.puzzle.Shape;
  *
  * @author Bunnyspa
  */
-public class ChipCombinationIterator implements Iterator<List<Chip>> {
+public class ChipCiterator implements Iterator<List<Chip>> {
 
     private final Map<Shape, List<Chip>> candidateMap;
     private final List<Shape> shapes;
     private final List<int[]> combs;
 
-    public ChipCombinationIterator(Collection<Chip> candidates) {
+    public ChipCiterator(Collection<Chip> candidates) {
         candidateMap = new HashMap<>();
         for (Chip c : candidates) {
             Shape shape = c.getShape();

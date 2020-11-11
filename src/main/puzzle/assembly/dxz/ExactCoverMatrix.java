@@ -1,4 +1,4 @@
-package main.puzzle.assembly;
+package main.puzzle.assembly.dxz;
 
 import java.util.HashSet;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.Stack;
  *
  * @author Bunnyspa
  */
-public class BinaryMatrix {
+public class ExactCoverMatrix {
 
     private final boolean[][] array;
     private final int nRow, nCol;
@@ -17,14 +17,16 @@ public class BinaryMatrix {
     private final Stack<Set<Integer>> hiddenRowSetStack = new Stack<>();
     private final Stack<Set<Integer>> hiddenColSetStack = new Stack<>();
     private final boolean[] hiddenRows, hiddenCols;
+    private final int[] rowCounts;
     private int nVisibleRow, nVisibleCol;
 
-    public BinaryMatrix(List<boolean[]> rows) {
+    public ExactCoverMatrix(List<boolean[]> rows) {
         nRow = rows.size();
         nCol = rows.isEmpty() ? 0 : rows.get(0).length;
 
         hiddenRows = new boolean[nRow];
         hiddenCols = new boolean[nCol];
+        rowCounts = new int[nCol];
         nVisibleRow = nRow;
         nVisibleCol = nCol;
 
@@ -34,12 +36,13 @@ public class BinaryMatrix {
             for (int c = 0; c < nCol; c++) {
                 if (rowArray[c]) {
                     array[r][c] = true;
+                    rowCounts[c]++;
                 }
             }
         }
     }
 
-    public void revertLastHiding() {
+    public void uncover() {
         Set<Integer> hiddenColSet = hiddenColSetStack.pop();
         Set<Integer> hiddenRowSet = hiddenRowSetStack.pop();
 
@@ -50,7 +53,7 @@ public class BinaryMatrix {
         nVisibleRow += hiddenRowSet.size();
     }
 
-    public void hideRowChain(int r) {
+    public void cover(int r) {
         Set<Integer> hiddenColSet = new HashSet<>();
         Set<Integer> hiddenRowSet = new HashSet<>();
 
@@ -84,6 +87,19 @@ public class BinaryMatrix {
 
     public Set<Integer> getCols() {
         return getVisibleIndices(hiddenCols);
+    }
+
+    public int getCol() {
+        Set<Integer> cols = getCols();
+        int minCol = cols.iterator().next();
+        int min = rowCounts[minCol];
+        for (int c : cols) {
+            if (rowCounts[c] < min) {
+                min = rowCounts[c];
+                minCol = c;
+            }
+        }
+        return minCol;
     }
 
     private static Set<Integer> getVisibleIndices(boolean[] hidden) {

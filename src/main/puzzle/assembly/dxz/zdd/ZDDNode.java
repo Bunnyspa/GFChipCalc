@@ -1,4 +1,4 @@
-package main.puzzle.zdd;
+package main.puzzle.assembly.dxz.zdd;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,32 +11,29 @@ import main.util.Fn;
  */
 public class ZDDNode {
 
-    public static final ZDDNode TRUE_TERMINAL = new ZDDNode();
-    public static final ZDDNode FALSE_TERMINAL = null;
-
     private final UUID uuid = UUID.randomUUID();
 
-    public final int label;
-    public final ZDDNode loChild; // false terminal
-    public final ZDDNode hiChild; // true terminal
+    final int label;
+    final ZDDNode loChild; // false terminal
+    final ZDDNode hiChild; // true terminal
 
-    private ZDDNode() {
+    ZDDNode() {
         this.label = 0;
         this.loChild = null;
         this.hiChild = null;
     }
 
-    public ZDDNode(int i, ZDDNode l, ZDDNode h) {
+    ZDDNode(int i, ZDDNode l, ZDDNode h) {
         this.label = i;
         this.loChild = l;
         this.hiChild = h;
     }
 
-    public boolean isTerminal() {
+    boolean isTerminal() {
         return hiChild == null;
     }
 
-    public boolean equals(int i, ZDDNode l, ZDDNode h) {
+    boolean equals(int i, ZDDNode l, ZDDNode h) {
         return label == i && loChild == l && hiChild == h;
     }
 
@@ -65,7 +62,7 @@ public class ZDDNode {
         return toString_tree(0);
     }
 
-    public String toString_tree(int depth) {
+    private String toString_tree(int depth) {
         StringBuilder sb = new StringBuilder();
         sb.append(label).append(" ").append(uuid.toString().substring(0, 4));
         String pad = Fn.pad("  ", depth);

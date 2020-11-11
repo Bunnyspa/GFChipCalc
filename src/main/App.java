@@ -28,7 +28,7 @@ public class App {
 
     public static final String NAME_KR = "소녀전선 칩셋 조합기";
     public static final String NAME_EN = "Girls' Frontline HOC Chip Calculator";
-    public static final Version3 VERSION = new Version3(7, 2, 4);
+    public static final Version3 VERSION = new Version3(7, 2, 5);
     private static final String RESOURCE_PATH = "/resources/";
 
     public Color orange() {
@@ -53,7 +53,7 @@ public class App {
     public final MainFrame mf;
     public final Setting setting = IO.loadSettings();
     public final Filter filter = new Filter();
-    private final AppText language = new AppText();
+    private final AppText text = new AppText();
 
     /**
      * @param args the command line arguments
@@ -83,11 +83,11 @@ public class App {
     }
 
     public String getText(String key) {
-        return language.getText(setting.locale, key);
+        return text.getText(setting.locale, key);
     }
 
     public String getText(String key, String... replaces) {
-        return language.getText(setting.locale, key, replaces);
+        return text.getText(setting.locale, key, replaces);
     }
 
     public String getText(String key, int... replaces) {

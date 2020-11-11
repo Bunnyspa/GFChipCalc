@@ -1,4 +1,4 @@
-package main.puzzle.zdd;
+package main.puzzle.assembly.dxz.zdd;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,7 +13,7 @@ public class ZDDNodeTable {
 
     private final Map<Integer, Set<ZDDNode>> map = new HashMap<>();
 
-    public ZDDNode get(int i, ZDDNode l, ZDDNode h) {
+    ZDDNode get(int i, ZDDNode l, ZDDNode h) {
         if (!map.containsKey(i)) {
             return null;
         }
@@ -25,7 +25,7 @@ public class ZDDNodeTable {
         return null;
     }
 
-    public void add(ZDDNode node) {
+    void add(ZDDNode node) {
         int key = node.label;
         if (!map.containsKey(key)) {
             map.put(key, new HashSet<>());

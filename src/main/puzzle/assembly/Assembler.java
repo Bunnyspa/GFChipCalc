@@ -4,13 +4,12 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.BooleanSupplier;
-import main.iterator.ChipCombinationIterator;
-import main.iterator.TCIHandler;
+import main.iterator.ChipCiterator;
+import main.iterator.ShapeCiterator;
 import main.puzzle.Board;
 import main.puzzle.BoardTemplate;
 import main.puzzle.BoardTemplateMap;
@@ -18,10 +17,8 @@ import main.puzzle.Chip;
 import main.puzzle.Puzzle;
 import main.puzzle.PuzzleMatrix;
 import main.puzzle.Shape;
-import main.puzzle.zdd.ZDD;
-import main.puzzle.zdd.ZDDMemoCache;
-import main.puzzle.zdd.ZDDNode;
-import main.puzzle.zdd.ZDDNodeTable;
+import main.puzzle.assembly.dxz.DXZ;
+import main.puzzle.assembly.dxz.dlx.DancingLinksMatrix;
 import main.setting.Setting;
 import main.util.IO;
 
@@ -160,7 +157,7 @@ public class Assembler {
 
     private void combine() {
         BlockingQueue<BoardTemplate> q = new ArrayBlockingQueue<>(5);
-        ChipCombinationIterator cIt = new ChipCombinationIterator(ces.chips);
+        ChipCiterator cIt = new ChipCiterator(ces.chips);
 
         Thread templateThread = new Thread(() -> combine_template(q, cIt));
         Thread assembleThread = new Thread(() -> combine_assemble(q, cIt));
@@ -174,7 +171,7 @@ public class Assembler {
         }
     }
 
-    private void combine_template(BlockingQueue<BoardTemplate> q, ChipCombinationIterator cIt) {
+    private void combine_template(BlockingQueue<BoardTemplate> q, ChipCiterator cIt) {
         // Dictionary
         if (ces.calcMode == CalcExtraSetting.CALCMODE_DICTIONARY) {
             List<BoardTemplate> templates = getBT(cs.boardName, cs.boardStar, ces.calcModeTag == 1);
@@ -202,7 +199,7 @@ public class Assembler {
         } //
         // Algorithm X
         else {
-            TCIHandler it = new TCIHandler(cs.boardName, cs.boardStar, ces.chips);
+            ShapeCiterator it = new ShapeCiterator(cs.boardName, cs.boardStar, ces.chips);
             progress.nTotal = it.total();
             setProgBar();
 
@@ -215,7 +212,7 @@ public class Assembler {
         offer(q, BoardTemplate.end());
     }
 
-    private BoardTemplate combine_template_algX(TCIHandler iterator) {
+    private BoardTemplate combine_template_algX(ShapeCiterator iterator) {
         if (!iterator.isNextValid()) {
             iterator.skip();
             return BoardTemplate.empty();
@@ -237,14 +234,10 @@ public class Assembler {
         int nCol_cell = puzzle.getNumContaining(Board.EMPTY);
         int nCol = nCol_name + nCol_cell;
 
-        List<Point> cols_pt = new ArrayList<>(nCol_cell);
-        puzzle.getPoints(Board.EMPTY).forEach((p) -> cols_pt.add(p));
-
-        List<Shape> rows_shape = new ArrayList<>();
-        List<Integer> rows_rotation = new ArrayList<>();
-        List<Point> rows_location = new ArrayList<>();
-
+        List<Point> cols_pt = new ArrayList<>(emptyCoords);
         List<boolean[]> rows = new ArrayList<>();
+        List<Puzzle> rows_puzzle = new ArrayList<>();
+
         for (int i = 0; i < nCol_name; i++) {
             Shape shape = shapes.get(i);
             for (int rot = 0; rot < shape.getMaxRotation(); rot++) {
@@ -255,9 +248,7 @@ public class Assembler {
                         row[i] = true;
                         tps.forEach((p) -> row[nCol_name + cols_pt.indexOf(p)] = true);
                         rows.add(row);
-                        rows_shape.add(shape);
-                        rows_rotation.add(rot);
-                        rows_location.add(bp);
+                        rows_puzzle.add(new Puzzle(shape, rot, bp));
                     }
                 }
             }
@@ -267,29 +258,19 @@ public class Assembler {
             return BoardTemplate.empty();
         }
 
-        BinaryMatrix matrix = new BinaryMatrix(rows);
-        ZDDNode node = DXZ(matrix, nCol_name, checkPause);
-        if (node == null) {
+        Set<Integer> resultRows = DXZ.solve(rows, checkPause);
+        if (resultRows == null) {
             return BoardTemplate.empty();
         }
-        Set<Set<Integer>> results = node.get();
-        for (Set<Integer> resultRows : results) {
 
-            List<Puzzle> puzzles = new ArrayList<>();
+        List<Puzzle> puzzles = new ArrayList<>();
 
-            List<Integer> sortedRows = new ArrayList<>(resultRows);
-            sortedRows.sort((o1, o2) -> Shape.compare(rows_shape.get(o1), rows_shape.get(o2)));
-            sortedRows.forEach((r) -> {
-                puzzles.add(new Puzzle(
-                        rows_shape.get(r),
-                        rows_rotation.get(r),
-                        rows_location.get(r)
-                ));
-            });
-            BoardTemplate bt = new BoardTemplate(boardName, boardStar, puzzles);
-            return bt;
-        }
-        return BoardTemplate.empty();
+        List<Integer> sortedRows = new ArrayList<>(resultRows);
+        sortedRows.sort((o1, o2) -> Shape.compare(rows_puzzle.get(o1).shape, rows_puzzle.get(o2).shape));
+        sortedRows.forEach((r) -> puzzles.add(rows_puzzle.get(r)));
+        // System.out.println(puzzles);
+        BoardTemplate bt = new BoardTemplate(boardName, boardStar, puzzles);
+        return bt;
     }
 
     private static Set<Point> translate(Shape shape, int rotation, Point bp) {
@@ -301,57 +282,7 @@ public class Assembler {
         return cps;
     }
 
-    private static class DXZResult {
-
-        public final ZDDNode node;
-        public final boolean trueTerminalFound;
-
-        public DXZResult(ZDDNode node, boolean trueTerminalFound) {
-            this.node = node;
-            this.trueTerminalFound = trueTerminalFound;
-        }
-    }
-
-    private static ZDDNode DXZ(BinaryMatrix X, int nCol_name, BooleanSupplier checkPause) {
-        ZDDMemoCache C = new ZDDMemoCache();
-        ZDDNodeTable Z = new ZDDNodeTable();
-        return DXZ_search(X, C, Z, nCol_name, checkPause).node;
-    }
-
-    private static DXZResult DXZ_search(BinaryMatrix A, ZDDMemoCache C, ZDDNodeTable Z, int nCol_name, BooleanSupplier checkPause) {
-        if (A.isEmpty()) {
-            return new DXZResult(ZDDNode.TRUE_TERMINAL, true);
-        }
-        Set<Integer> colA = A.getCols();
-        if (C.containsKey(colA)) {
-            return new DXZResult(C.get(colA), false);
-        }
-        Set<Integer> rowA = A.getRows();
-        Optional<Integer> cOp = colA.stream().filter((col) -> col <= nCol_name).findAny();
-        if (!cOp.isPresent()) {
-            return null;
-        }
-        int c = cOp.get();
-        ZDDNode x = null;
-        for (int r : rowA) {
-            if (checkPause.getAsBoolean() && A.get(r, c)) {
-                A.hideRowChain(r);
-                DXZResult result = DXZ_search(A, C, Z, nCol_name, checkPause);
-                ZDDNode y = result.node;
-                if (y != null) {
-                    x = ZDD.unique(r, x, y, Z);
-                }
-                if (result.trueTerminalFound) {
-                    return new DXZResult(x, true);
-                }
-                A.revertLastHiding();
-            }
-        }
-        C.put(colA, x);
-        return new DXZResult(x, false);
-    }
-
-    private void combine_assemble(BlockingQueue<BoardTemplate> q, ChipCombinationIterator cIt) {
+    private void combine_assemble(BlockingQueue<BoardTemplate> q, ChipCiterator cIt) {
         while (checkPause()) {
             BoardTemplate template = poll(q);
             if (template == null || template.isEnd()) {

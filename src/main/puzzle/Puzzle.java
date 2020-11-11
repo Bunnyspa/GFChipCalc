@@ -44,6 +44,6 @@ public class Puzzle implements Comparable<Puzzle> {
 
     @Override
     public String toString() {
-        return shape + ", " + rotation + ", " + IO.data(location);
+        return "{" + shape + ", " + rotation + ", " + IO.data(location) + "}";
     }
 }

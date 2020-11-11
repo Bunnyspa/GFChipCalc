@@ -17,17 +17,17 @@ import main.puzzle.Shape;
  *
  * @author Bunnyspa
  */
-public class TypeCombinationIterator implements Iterator<List<Shape>> {
+class PerTypeShapeCiterator implements Iterator<List<Shape>> {
 
     private List<List<Shape>> next;
     private final int total;
 
-    public TypeCombinationIterator(Map<Shape.Type, Integer> typeCountMap) {
+    public PerTypeShapeCiterator(Map<Shape.Type, Integer> typeCountMap) {
         next = initComb(typeCountMap);
         total = total(typeCountMap);
     }
 
-    public TypeCombinationIterator(List<Shape> progress) {
+    public PerTypeShapeCiterator(List<Shape> progress) {
         next = toComb(progress);
         total = total(getTypeCount(progress));
     }
