@@ -641,3 +641,13 @@
 
 ### Changed
 - Raised the piercing stat PT upper bound for the 2nd stat preset for 5-star Mk 153 from 2 to 3
+
+## 7.2.4 (10/15/2020)
+
+### Fixed
+- Slow calculation bug
+
+## 7.2.5 (11/11/2020)
+
+## Changed
+- 2nd "Mk 153" filter preset adjusted
