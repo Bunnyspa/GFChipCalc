@@ -18,7 +18,6 @@ import main.puzzle.Puzzle;
 import main.puzzle.PuzzleMatrix;
 import main.puzzle.Shape;
 import main.puzzle.assembly.dxz.DXZ;
-import main.puzzle.assembly.dxz.dlx.DancingLinksMatrix;
 import main.setting.Setting;
 import main.util.IO;
 
