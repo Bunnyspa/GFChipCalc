@@ -651,3 +651,8 @@
 
 ## Changed
 - 2nd "Mk 153" filter preset adjusted
+
+## 7.3.0 (11/15/2020)
+
+## Changed
+- Improved algorithm for the slow calculation (1-6 cell calculation)
