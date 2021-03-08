@@ -60,6 +60,9 @@ public class ResearchConnection {
         }
     }
 
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String TRANSFER_ENCODING = "Transfer-Encoding";
+
     private static String get(String path) {
         try {
             URL u = new URL(URL + path);
@@ -69,8 +72,8 @@ public class ResearchConnection {
 
 //            int code = con.getResponseCode();
 //            String msg = con.getResponseMessage(); 
-            String header_te = con.getHeaderField(Proxy.TRANSFER_ENCODING);
-            String header_cl = con.getHeaderField(Proxy.CONTENT_LENGTH);
+            String header_te = con.getHeaderField(TRANSFER_ENCODING);
+            String header_cl = con.getHeaderField(CONTENT_LENGTH);
 
             InputStream cis = con.getInputStream();
             List<Byte> out = new ArrayList<>();

@@ -4,8 +4,8 @@ import java.awt.Point;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -476,12 +476,12 @@ public class Board implements Comparable<Board>, Serializable {
         this.xp = board.xp;
     }
 
-    // Combination File / Board Template
-    public Board(String name, int star, Stat maxStat, List<Chip> chips, List<Point> chipLocs) {
+    // Combination File
+    public Board(String name, int star, Stat maxStat, List<Chip> chips_, List<Point> chipLocs) {
         this.name = name;
         this.star = star;
 
-        this.chips = new ArrayList<>(chips);
+        this.chips = new ArrayList<>(chips_);
         colorChips();
 
         this.matrix = toPlacement(name, star, chips, chipLocs);
@@ -490,13 +490,88 @@ public class Board implements Comparable<Board>, Serializable {
         this.stat = Stat.chipStatSum(chips);
         this.pt = Stat.chipPtSum(chips);
 
-        statPerc = getStatPerc(this.stat, this.maxStat);
+        this.statPerc = getStatPerc(this.stat, this.maxStat);
 
-        int xpSum = 0;
+        int xp_ = 0;
         for (Chip chip : chips) {
-            xpSum += chip.getCumulXP();
+            xp_ += chip.getCumulXP();
         }
-        xp = xpSum;
+        xp = xp_;
+    }
+
+    // Board Template
+    public Board(String name, int star, Stat maxStat, List<Chip> candidates, BoardTemplate template) {
+        this.name = name;
+        this.star = star;
+
+        int rotation = 0;
+        int min = candidates.size();
+        for (int r = 0; r < 4; r += MAP_ROTATIONSTEP.get(name, star)) {
+            int count = template.getNumRotationNeeded(r, candidates);
+            if (count < min) {
+                min = count;
+                rotation = r;
+            }
+        }
+
+        BoardTemplate newTemplate = template.getRotatedTemplate(rotation);
+
+        List<Puzzle> puzzles = newTemplate.getPuzzles();
+
+        this.chips = new ArrayList<>();
+        for (Chip candidate : candidates) {
+            chips.add(new Chip(candidate));
+        }
+
+        int sa = 0;
+        boolean[] sortCache = new boolean[puzzles.size()];
+        while (sa < puzzles.size()) {
+            Shape shape = puzzles.get(sa).shape;
+            int sb = sa;
+            while (sb + 1 < puzzles.size() && shape == puzzles.get(sb + 1).shape) {
+                sb++;
+            }
+
+            for (int i = sa; i <= sb; i++) {
+                int r = puzzles.get(i).rotation;
+                if (chips.get(i).getInitRotation() == r) {
+                    sortCache[i] = true;
+                    continue;
+                }
+                for (int j = sa; j <= sb; j++) {
+                    if (i == j || sortCache[j]) {
+                        continue;
+                    }
+                    Chip chip = chips.get(j);
+                    if (chip.getInitRotation() == r) {
+                        Collections.swap(chips, i, j);
+                        sortCache[i] = true;
+                        break;
+                    }
+                }
+            }
+            sa = sb + 1;
+        }
+
+        for (int i = 0; i < chips.size(); i++) {
+            Chip chip = chips.get(i);
+            chip.setRotation(puzzles.get(i).rotation);
+        }
+        colorChips();
+
+        this.matrix = newTemplate.getMatrix();
+        this.maxStat = maxStat;
+
+        this.stat = Stat.chipStatSum(chips);
+        this.pt = Stat.chipPtSum(chips);
+
+        this.statPerc = getStatPerc(this.stat, this.maxStat);
+
+        int xp_ = 0;
+        for (Chip chip : chips) {
+            xp_ += chip.getCumulXP();
+        }
+        xp = xp_;
     }
 
     // <editor-fold defaultstate="collapsed" desc="Name">
@@ -556,13 +631,6 @@ public class Board implements Comparable<Board>, Serializable {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Rotation and Ticket">
-    private void rotate(int i) {
-        matrix.rotateContent(i, UNUSED);
-        for (Chip chip : chips) {
-            chip.rotate(i);
-        }
-    }
-
     public int getTicketCount() {
         int sum = 0;
         for (Chip chip : chips) {
@@ -570,69 +638,68 @@ public class Board implements Comparable<Board>, Serializable {
         }
         return sum;
     }
-
-    public void minimizeTicket() {
-        for (int rotation = 0; rotation < 4; rotation += MAP_ROTATIONSTEP.get(name, star)) {
-            // Start a new board
-            Board b = new Board(this);
-            Set<Shape> cShapes = new HashSet<>();
-            Chip[] newUsedChips = new Chip[b.chips.size()];
-            // Rotate board
-            b.rotate(rotation);
-
-            for (Chip chip : b.chips) {
-                cShapes.add(chip.getShape());
-            }
-
-            // Get indicies and candidates
-            for (Shape cs : cShapes) {
-                Set<Integer> cIndices = new HashSet<>();
-                List<Chip> cCandidates = new ArrayList<>();
-                for (int i = 0; i < b.chips.size(); i++) {
-                    Chip c = b.chips.get(i);
-                    if (c.getShape() == cs) {
-                        cIndices.add(i);
-                        cCandidates.add(new Chip(c));
-                    }
-                }
-                // Put matching initial rotation
-                for (Integer cIndex : cIndices) {
-                    int r = b.chips.get(cIndex).getRotation();
-                    for (Chip c : cCandidates) {
-                        if (c.getInitRotation() == r) {
-                            c.setRotation(c.getInitRotation());
-                            newUsedChips[cIndex] = c;
-                            cCandidates.remove(c);
-                            break;
-                        }
-                    }
-                }
-                // Put remaining
-                if (!cCandidates.isEmpty()) {
-                    int i = 0;
-                    for (Integer ci : cIndices) {
-                        if (newUsedChips[ci] == null) {
-                            Chip c = cCandidates.get(i);
-                            int r = b.chips.get(ci).getRotation();
-                            c.setRotation(r);
-                            newUsedChips[ci] = cCandidates.get(i);
-                            i++;
-                        }
-                    }
-                }
-            }
-            b.chips = Arrays.asList(newUsedChips);
-            // Replace if better
-            if (getTicketCount() > b.getTicketCount()) {
-                matrix = b.matrix;
-                chips = b.chips;
-            }
-            // Exit if 0
-            if (getTicketCount() == 0) {
-                break;
-            }
-        }
-    }
+//    public void minimizeTicket() {
+//        for (int rotation = 0; rotation < 4; rotation += MAP_ROTATIONSTEP.get(name, star)) {
+//            // Start a new board
+//            Board b = new Board(this);
+//            Set<Shape> cShapes = new HashSet<>();
+//            Chip[] newUsedChips = new Chip[b.chips.size()];
+//            // Rotate board
+//            b.rotate(rotation);
+//
+//            for (Chip chip : b.chips) {
+//                cShapes.add(chip.getShape());
+//            }
+//
+//            // Get indicies and candidates
+//            for (Shape cs : cShapes) {
+//                Set<Integer> cIndices = new HashSet<>();
+//                List<Chip> cCandidates = new ArrayList<>();
+//                for (int i = 0; i < b.chips.size(); i++) {
+//                    Chip c = b.chips.get(i);
+//                    if (c.getShape() == cs) {
+//                        cIndices.add(i);
+//                        cCandidates.add(new Chip(c));
+//                    }
+//                }
+//                // Put matching initial rotation
+//                for (Integer cIndex : cIndices) {
+//                    int r = b.chips.get(cIndex).getRotation();
+//                    for (Chip c : cCandidates) {
+//                        if (c.getInitRotation() == r) {
+//                            c.setRotation(c.getInitRotation());
+//                            newUsedChips[cIndex] = c;
+//                            cCandidates.remove(c);
+//                            break;
+//                        }
+//                    }
+//                }
+//                // Put remaining
+//                if (!cCandidates.isEmpty()) {
+//                    int i = 0;
+//                    for (Integer ci : cIndices) {
+//                        if (newUsedChips[ci] == null) {
+//                            Chip c = cCandidates.get(i);
+//                            int r = b.chips.get(ci).getRotation();
+//                            c.setRotation(r);
+//                            newUsedChips[ci] = cCandidates.get(i);
+//                            i++;
+//                        }
+//                    }
+//                }
+//            }
+//            b.chips = Arrays.asList(newUsedChips);
+//            // Replace if better
+//            if (getTicketCount() > b.getTicketCount()) {
+//                matrix = b.matrix;
+//                chips = b.chips;
+//            }
+//            // Exit if 0
+//            if (getTicketCount() == 0) {
+//                break;
+//            }
+//        }
+//    }
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="PT">

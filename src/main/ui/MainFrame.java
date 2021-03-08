@@ -1983,7 +1983,7 @@ public class MainFrame extends JFrame {
                 );
                 // Response
                 start = response != JOptionPane.CLOSED_OPTION && response <= 2;
-                calcMode = response <= 1 ? CalcExtraSetting.CALCMODE_DICTIONARY : CalcExtraSetting.CALCMODE_ALGX;
+                calcMode = response <= 1 ? CalcExtraSetting.CALCMODE_DICTIONARY : CalcExtraSetting.CALCMODE_DXZ;
                 alt = response == 0;
             } //
             // Full option
@@ -1993,12 +1993,12 @@ public class MainFrame extends JFrame {
                 while (elements.hasMoreElements() && calcMode == CalcExtraSetting.CALCMODE_DICTIONARY) {
                     Chip c = elements.nextElement();
                     if (!c.typeGeq(minType)) {
-                        calcMode = CalcExtraSetting.CALCMODE_ALGX;
+                        calcMode = CalcExtraSetting.CALCMODE_DXZ;
                         break;
                     }
                 }
                 // Query
-                if (calcMode == CalcExtraSetting.CALCMODE_ALGX) {
+                if (calcMode == CalcExtraSetting.CALCMODE_DXZ) {
                     String combOption0Text = AppText.text_type(app, minType);
                     String[] options = {
                         app.getText(AppText.COMB_OPTION_DEFAULT_0, combOption0Text),
@@ -2012,7 +2012,7 @@ public class MainFrame extends JFrame {
                     );
                     // Response
                     start = response != JOptionPane.CLOSED_OPTION && response <= 1;
-                    calcMode = response == 0 ? CalcExtraSetting.CALCMODE_DICTIONARY : CalcExtraSetting.CALCMODE_ALGX;
+                    calcMode = response == 0 ? CalcExtraSetting.CALCMODE_DICTIONARY : CalcExtraSetting.CALCMODE_DXZ;
                 }
             }
         } else if (getBoardStar() == 5 && !setting_isPresetFilter()) {
@@ -2028,7 +2028,7 @@ public class MainFrame extends JFrame {
 
         // If preset DNE
         if (!assembler.btExists(boardName, boardStar, alt)) {
-            calcMode = CalcExtraSetting.CALCMODE_ALGX;
+            calcMode = CalcExtraSetting.CALCMODE_DXZ;
         }
 
         if (start) {
@@ -2037,7 +2037,7 @@ public class MainFrame extends JFrame {
             for (Enumeration<Chip> elements = invLM.elements(); elements.hasMoreElements();) {
                 Chip chip = elements.nextElement();
                 boolean colorMatch = !app.setting.colorMatch || Board.getColor(boardName) == chip.getColor();
-                boolean sizeMatch = calcMode == CalcExtraSetting.CALCMODE_ALGX || chip.typeGeq(minType);
+                boolean sizeMatch = calcMode == CalcExtraSetting.CALCMODE_DXZ || chip.typeGeq(minType);
                 boolean markMatchNeg = 0 < app.setting.boardMarkMax || !chip.isMarked();
                 boolean markMatchPos = app.setting.boardMarkMin < Board.getCellCount(boardName, boardStar) || chip.isMarked();
                 if (colorMatch && sizeMatch && markMatchNeg && markMatchPos) {

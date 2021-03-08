@@ -3,10 +3,13 @@ package main.ui.dialog;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import javax.swing.JDialog;
+import javax.swing.SwingUtilities;
 import main.App;
-import main.http.Proxy;
 import main.json.JsonParser;
+import main.net.GFLInterceptor;
+import main.net.Proxy;
 import main.puzzle.Chip;
 import main.puzzle.Tag;
 import main.ui.help.HelpProxyDialog;
@@ -42,7 +45,8 @@ public class ProxyDialog extends JDialog {
         this.app = app;
         this.chips = new ArrayList<>();
         try {
-            this.proxy = new Proxy(this);
+            Consumer<String> consumer = (data) -> parse(data);
+            this.proxy = new Proxy(new GFLInterceptor(consumer));
             init();
         } catch (IOException ex) {
             setStage(Stage.ERROR);
@@ -104,8 +108,10 @@ public class ProxyDialog extends JDialog {
     // </editor-fold>
 
     public void parse(String data) {
-        chips = JsonParser.parseChip(data);
-        setStage(Stage.DONE);
+        SwingUtilities.invokeLater(() -> {
+            chips = JsonParser.parseChip(data);
+            setStage(Stage.DONE);
+        });
     }
 
     /**

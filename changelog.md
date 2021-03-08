@@ -657,3 +657,8 @@
 
 ### Changed
 - Improved algorithm for the slow calculation (1-6 cell calculation)
+
+## 7.3.1 (3/9/2021)
+
+### Changed
+- Proxy server and calculation performance improvements

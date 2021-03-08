@@ -141,10 +141,6 @@ public class Assembler {
         return boardsChanged;
     }
 
-    public boolean resultEmpty() {
-        return progress.getBoardSize() == 0;
-    }
-
     public AssemblyResult getResult() {
         boardsChanged = false;
         return new AssemblyResult(progress.getBoards(), progress.getChipFreqs());
@@ -156,10 +152,10 @@ public class Assembler {
 
     private void combine() {
         BlockingQueue<BoardTemplate> q = new ArrayBlockingQueue<>(5);
-        ChipCiterator cIt = new ChipCiterator(ces.chips);
+        ChipCiterator cit = new ChipCiterator(ces.chips);
 
-        Thread templateThread = new Thread(() -> combine_template(q, cIt));
-        Thread assembleThread = new Thread(() -> combine_assemble(q, cIt));
+        Thread templateThread = new Thread(() -> combine_template(q, cit));
+        Thread assembleThread = new Thread(() -> combine_assemble(q, cit));
 
         templateThread.start();
         assembleThread.start();
@@ -170,14 +166,14 @@ public class Assembler {
         }
     }
 
-    private void combine_template(BlockingQueue<BoardTemplate> q, ChipCiterator cIt) {
+    private void combine_template(BlockingQueue<BoardTemplate> q, ChipCiterator chipCit) {
         // Dictionary
         if (ces.calcMode == CalcExtraSetting.CALCMODE_DICTIONARY) {
             List<BoardTemplate> templates = getBT(cs.boardName, cs.boardStar, ces.calcModeTag == 1);
 
             int count = 0;
             for (BoardTemplate boardTemplate : templates) {
-                if (cIt.hasEnoughChips(boardTemplate)) {
+                if (chipCit.hasEnoughChips(boardTemplate)) {
                     if (!cs.symmetry || boardTemplate.isSymmetric()) {
                         count++;
                     }
@@ -191,32 +187,32 @@ public class Assembler {
             while (checkPause() && pIt.hasNext()) {
                 BoardTemplate template = pIt.next();
                 if ((!cs.symmetry || template.isSymmetric())
-                        && cIt.hasEnoughChips(template)) {
+                        && chipCit.hasEnoughChips(template)) {
                     offer(q, template);
                 }
             }
         } //
-        // Algorithm X
+        // DXZ
         else {
-            ShapeCiterator it = new ShapeCiterator(cs.boardName, cs.boardStar, ces.chips);
-            progress.nTotal = it.total();
+            ShapeCiterator shapeCit = new ShapeCiterator(cs.boardName, cs.boardStar, ces.chips);
+            progress.nTotal = shapeCit.total();
             setProgBar();
 
-            it.skip(progress.nDone);
-            while (checkPause() && it.hasNext()) {
-                BoardTemplate template = combine_template_algX(it);
+            shapeCit.skip(progress.nDone);
+            while (checkPause() && shapeCit.hasNext()) {
+                BoardTemplate template = combine_template_dxz(shapeCit);
                 offer(q, template);
             }
         }
         offer(q, BoardTemplate.end());
     }
 
-    private BoardTemplate combine_template_algX(ShapeCiterator iterator) {
-        if (!iterator.isNextValid()) {
-            iterator.skip();
+    private BoardTemplate combine_template_dxz(ShapeCiterator citerator) {
+        if (!citerator.isNextValid()) {
+            citerator.skip();
             return BoardTemplate.empty();
         }
-        List<Shape> shapes = iterator.next();
+        List<Shape> shapes = citerator.next();
         return generateTemplate(cs.boardName, cs.boardStar, shapes, checkPause);
     }
 
@@ -281,7 +277,7 @@ public class Assembler {
         return cps;
     }
 
-    private void combine_assemble(BlockingQueue<BoardTemplate> q, ChipCiterator cIt) {
+    private void combine_assemble(BlockingQueue<BoardTemplate> q, ChipCiterator cit) {
         while (checkPause()) {
             BoardTemplate template = poll(q);
             if (template == null || template.isEnd()) {
@@ -290,10 +286,10 @@ public class Assembler {
             if (!template.isEmpty()) {
                 // Show progress
                 intermediate.show(template);
-                cIt.init(template);
+                cit.init(template);
                 // For all combinations
-                while (checkPause() && cIt.hasNext()) {
-                    List<Chip> candidates = cIt.next();
+                while (checkPause() && cit.hasNext()) {
+                    List<Chip> candidates = cit.next();
                     // Check PT
                     boolean addable = true;
                     int[] pt = cs.pt.toArray();
@@ -306,17 +302,14 @@ public class Assembler {
                                 break;
                             }
                         }
+                        if (!addable) {
+                            break;
+                        }
                     }
 
                     // add
                     if (addable) {
-                        List<Chip> chips = new ArrayList<>();
-                        for (int i = 0; i < candidates.size(); i++) {
-                            Chip c = new Chip(candidates.get(i));
-                            c.setRotation(template.getChipRotations().get(i));
-                            chips.add(c);
-                        }
-                        publishBoard(new Board(cs.boardName, cs.boardStar, cs.stat, chips, template.getChipLocations()));
+                        publishBoard(new Board(cs.boardName, cs.boardStar, cs.stat, candidates, template));
                     }
                 }
             }
@@ -340,7 +333,7 @@ public class Assembler {
                 throw new AssertionError();
         }
 
-        board.minimizeTicket();
+//        board.minimizeTicket();
         board.colorChips();
 
         if (cs.rotation || board.getTicketCount() == 0) {

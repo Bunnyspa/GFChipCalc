@@ -17,7 +17,7 @@ import main.puzzle.Shape;
 public class ShapeCiterator implements Iterator<List<Shape>> {
 
     private final Map<Shape, Integer> chipNameCountMap;
-    private final List<PerTypeShapeCiterator> iterators = new ArrayList<>();
+    private final List<PerTypeShapeCiterator> cits = new ArrayList<>();
     private final boolean limited;
     private int iteratorIndex = 0;
 
@@ -40,7 +40,7 @@ public class ShapeCiterator implements Iterator<List<Shape>> {
         }
 
         for (Map<Shape.Type, Integer> map : typeCountMaps) {
-            iterators.add(new PerTypeShapeCiterator(map));
+            cits.add(new PerTypeShapeCiterator(map));
         }
 
         limited = true;
@@ -51,20 +51,20 @@ public class ShapeCiterator implements Iterator<List<Shape>> {
 
         List<Map<Shape.Type, Integer>> typeCountMaps = PerTypeShapeCiterator.getTypeCountMaps(name, star, types);
         for (Map<Shape.Type, Integer> map : typeCountMaps) {
-            iterators.add(new PerTypeShapeCiterator(map));
+            cits.add(new PerTypeShapeCiterator(map));
         }
 
         limited = false;
     }
 
-    private PerTypeShapeCiterator getIterator() {
-        return iterators.get(iteratorIndex);
+    private PerTypeShapeCiterator getCiterator() {
+        return cits.get(iteratorIndex);
     }
 
     public int total() {
         int sum = 0;
-        for (PerTypeShapeCiterator it : iterators) {
-            int total = it.total();
+        for (PerTypeShapeCiterator cit : cits) {
+            int total = cit.total();
             sum += total;
         }
         return sum;
@@ -82,39 +82,39 @@ public class ShapeCiterator implements Iterator<List<Shape>> {
 
     @Override
     public boolean hasNext() {
-        if (iterators.isEmpty()) {
+        if (cits.isEmpty()) {
             return false;
         }
-        if (iteratorIndex < iterators.size() - 1) {
+        if (iteratorIndex < cits.size() - 1) {
             return true;
         }
-        return getIterator().hasNext();
+        return getCiterator().hasNext();
     }
 
     @Override
     public List<Shape> next() {
-        if (iterators.isEmpty()) {
+        if (cits.isEmpty()) {
             return new ArrayList<>();
         }
-        List<Shape> next = getIterator().next();
+        List<Shape> next = getCiterator().next();
         if (next.isEmpty() && hasNext()) {
             iteratorIndex++;
-            next = getIterator().next();
+            next = getCiterator().next();
         }
         return next;
     }
 
     public boolean isNextValid() {
-        if (iterators.isEmpty()) {
+        if (cits.isEmpty()) {
             return false;
         }
         if (!limited) {
             return true;
         }
 
-        List<Shape> next = getIterator().peek();
+        List<Shape> next = getCiterator().peek();
         if (next.isEmpty() && hasNext()) {
-            next = iterators.get(iteratorIndex + 1).peek();
+            next = cits.get(iteratorIndex + 1).peek();
         }
         Map<Shape, Integer> nameCount = getShapeCount(next);
         return allShapeEnough(nameCount, chipNameCountMap);
