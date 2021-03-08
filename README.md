@@ -31,4 +31,7 @@ Useful when you cannot run the JAR file as an executable file.
 (Do not change the name of the JAR file if you are going to use the EXE file.)
 
 ## Supported Languages
-English, Korean, and Japanese
+English, Korean, and Japanese are supported.
+
+## Changelog
+Changelog can be found [here](https://github.com/Bunnyspa/GFChipCalc/blob/master/changelog.md).
