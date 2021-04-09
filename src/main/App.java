@@ -66,7 +66,10 @@ public class App {
 
     private App() {
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            String systemLookAndFeel = UIManager.getSystemLookAndFeelClassName();
+            if (!systemLookAndFeel.equals("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")) {
+                UIManager.setLookAndFeel(systemLookAndFeel);
+            }
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException ex) {
             try {
                 UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
