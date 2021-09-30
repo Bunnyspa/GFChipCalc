@@ -79,6 +79,13 @@ public class StatPresetMap {
                     new Stat(189, 263, 176, 75), new Stat(16, 8, 9, 5),
                     new Stat(1, 0, 1, 0), new Stat(4, 3, 2, 3)
             );
+
+            // PP-93
+            // TODO
+            put(Board.NAME_PP93, 5, Shape.Type._5B,
+                    Board.getMaxStat(Board.NAME_PP93, 5), Board.getMaxPt(Board.NAME_PP93, 5),
+                    new Stat(0, 0, 0, 0), new Stat(5, 5, 5, 5)
+            );
         }
     }; // </editor-fold>
 
