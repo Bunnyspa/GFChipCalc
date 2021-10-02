@@ -37,7 +37,8 @@ public class Board implements Comparable<Board>, Serializable {
     public static final String NAME_AT4 = "AT4";
     public static final String NAME_QLZ04 = "QLZ-04";
     public static final String NAME_MK153 = "Mk 153";
-    public static String[] NAMES = {NAME_BGM71, NAME_AGS30, NAME_2B14, NAME_M2, NAME_AT4, NAME_QLZ04, NAME_MK153};
+    public static final String NAME_PP93 = "PP-93";
+    public static String[] NAMES = {NAME_BGM71, NAME_AGS30, NAME_2B14, NAME_M2, NAME_AT4, NAME_QLZ04, NAME_MK153, NAME_PP93};
 
     public static String getTrueName(String fileName) {
         for (String name : NAMES) {
@@ -121,6 +122,16 @@ public class Board implements Comparable<Board>, Serializable {
                 {6, 5, 1, 1, 6, 6, 6, 6},
                 {6, 6, 1, 1, 6, 6, 6, 6}
             });
+            put(NAME_PP93, new Integer[][]{
+                {6, 6, 6, 5, 5, 6, 6, 6},
+                {6, 6, 6, 1, 1, 6, 6, 6},
+                {6, 6, 3, 1, 1, 3, 6, 6},
+                {4, 2, 1, 1, 1, 1, 1, 4},
+                {4, 2, 1, 1, 1, 1, 1, 4},
+                {6, 6, 3, 1, 1, 3, 6, 6},
+                {6, 6, 6, 2, 2, 6, 6, 6},
+                {6, 6, 6, 5, 5, 6, 6, 6}
+            });
         }
     }; // </editor-fold>
     private static final Map<String, Integer> MAP_COLOR = new HashMap<String, Integer>() // <editor-fold defaultstate="collapsed">
@@ -133,6 +144,7 @@ public class Board implements Comparable<Board>, Serializable {
             put(NAME_AT4, Chip.COLOR_BLUE);
             put(NAME_QLZ04, Chip.COLOR_ORANGE);
             put(NAME_MK153, Chip.COLOR_BLUE);
+            put(NAME_PP93, Chip.COLOR_ORANGE);
         }
     }; // </editor-fold>
     private static final Map<String, Stat> MAP_STAT_UNIT = new HashMap<String, Stat>() // <editor-fold defaultstate="collapsed"> 
@@ -145,6 +157,7 @@ public class Board implements Comparable<Board>, Serializable {
             put(NAME_AT4, new Stat(113, 261, 284, 134));
             put(NAME_QLZ04, new Stat(77, 136, 188, 331));
             put(NAME_MK153, new Stat(107, 224, 233, 107));
+            put(NAME_PP93, new Stat(138, 67, 182, 166));
         }
     }; // </editor-fold>
     private static final Map<String, Stat[]> MAP_STAT_CHIP = new HashMap<String, Stat[]>() // <editor-fold defaultstate="collapsed"> 
@@ -198,6 +211,14 @@ public class Board implements Comparable<Board>, Serializable {
                 new Stat(137, 191, 133, 61),
                 new Stat(166, 232, 162, 74),
                 new Stat(195, 273, 190, 87)
+            });
+            // TODO
+            put(NAME_PP93, new Stat[]{
+                new Stat(0, 0, 0, 0),
+                new Stat(0, 0, 0, 0),
+                new Stat(0, 0, 0, 0),
+                new Stat(0, 0, 0, 0),
+                new Stat(169, 55, 100, 91)
             });
         }
     }; // </editor-fold>
@@ -279,6 +300,12 @@ public class Board implements Comparable<Board>, Serializable {
                     put(30, new Stat(32, 0, 0, 10));
                     put(34, new Stat(0, 18, 12, 0));
                     put(38, new Stat(32, 18, 0, 0));
+                }
+            });
+            // TODO
+            put(NAME_PP93, new HashMap<Integer, Stat>() {
+                {
+                    put(32, new Stat(20, 15, 68, 46));
                 }
             });
         }
@@ -370,6 +397,19 @@ public class Board implements Comparable<Board>, Serializable {
                 new Stat(0, 12, 12, 0),
                 new Stat(16, 16, 0, 0)
             });
+            // TODO
+            put(NAME_PP93, new Stat[]{
+                new Stat(0, 0, 0, 0),
+                new Stat(0, 0, 0, 0),
+                new Stat(0, 0, 0, 0),
+                new Stat(0, 0, 0, 0),
+                new Stat(0, 0, 0, 0),
+                new Stat(0, 0, 0, 0),
+                new Stat(0, 0, 0, 0),
+                new Stat(0, 0, 0, 0),
+                new Stat(0, 0, 0, 0),
+                new Stat(41, 14, 28, 43)
+            });
         }
     }; // </editor-fold>
     private static final DoubleKeyHashMap<String, Integer, Integer> MAP_ROTATIONSTEP = new DoubleKeyHashMap<String, Integer, Integer>() // <editor-fold defaultstate="collapsed">
@@ -381,36 +421,48 @@ public class Board implements Comparable<Board>, Serializable {
             put(NAME_BGM71, 3, 2);
             put(NAME_BGM71, 4, 4);
             put(NAME_BGM71, 5, 1);
+
             put(NAME_AGS30, 1, 1);
             put(NAME_AGS30, 2, 1);
             put(NAME_AGS30, 3, 2);
             put(NAME_AGS30, 4, 2);
             put(NAME_AGS30, 5, 2);
+
             put(NAME_2B14, 1, 1);
             put(NAME_2B14, 2, 2);
             put(NAME_2B14, 3, 2);
             put(NAME_2B14, 4, 2);
             put(NAME_2B14, 5, 2);
+
             put(NAME_M2, 1, 2);
             put(NAME_M2, 2, 2);
             put(NAME_M2, 3, 2);
             put(NAME_M2, 4, 2);
             put(NAME_M2, 5, 2);
+
             put(NAME_AT4, 1, 4);
             put(NAME_AT4, 2, 4);
             put(NAME_AT4, 3, 4);
             put(NAME_AT4, 4, 4);
             put(NAME_AT4, 5, 1);
+
             put(NAME_QLZ04, 1, 4);
             put(NAME_QLZ04, 2, 4);
             put(NAME_QLZ04, 3, 4);
             put(NAME_QLZ04, 4, 4);
             put(NAME_QLZ04, 5, 4);
+
             put(NAME_MK153, 1, 4);
             put(NAME_MK153, 2, 4);
             put(NAME_MK153, 3, 4);
             put(NAME_MK153, 4, 4);
             put(NAME_MK153, 5, 4);
+
+            put(NAME_PP93, 1, 4);
+            put(NAME_PP93, 2, 1);
+            put(NAME_PP93, 3, 1);
+            put(NAME_PP93, 4, 2);
+            put(NAME_PP93, 5, 1);
         }
     };
 
