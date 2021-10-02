@@ -82,7 +82,7 @@ public class StatPresetMap {
 
             // PP-93
             // TODO
-            put(Board.NAME_PP93, 5, Shape.Type._5B,
+            put(Board.NAME_PP93, 5, Shape.Type._5A,
                     Board.getMaxStat(Board.NAME_PP93, 5), Board.getMaxPt(Board.NAME_PP93, 5),
                     new Stat(0, 0, 0, 0), new Stat(5, 5, 5, 5)
             );

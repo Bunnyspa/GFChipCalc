@@ -662,3 +662,8 @@
 
 ### Changed
 - Proxy server and calculation performance improvements
+
+## 7.4.0 (10/2/2021)
+
+### Added
+- PP-93 board and 5-star stat added temporarily
