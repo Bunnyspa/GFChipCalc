@@ -212,12 +212,11 @@ public class Board implements Comparable<Board>, Serializable {
                 new Stat(166, 232, 162, 74),
                 new Stat(195, 273, 190, 87)
             });
-            // TODO
             put(NAME_PP93, new Stat[]{
-                new Stat(0, 0, 0, 0),
-                new Stat(0, 0, 0, 0),
-                new Stat(0, 0, 0, 0),
-                new Stat(0, 0, 0, 0),
+                new Stat(85, 28, 50, 46),
+                new Stat(102, 33, 60, 55),
+                new Stat(118, 38, 70, 64),
+                new Stat(144, 47, 85, 77),
                 new Stat(169, 55, 100, 91)
             });
         }
@@ -302,10 +301,12 @@ public class Board implements Comparable<Board>, Serializable {
                     put(38, new Stat(32, 18, 0, 0));
                 }
             });
-            // TODO
             put(NAME_PP93, new HashMap<Integer, Stat>() {
                 {
-                    put(32, new Stat(20, 15, 68, 46));
+                    put(10, new Stat(10, 3, 8, 8));
+                    put(15, new Stat(0, 4, 15, 20));
+                    put(18, new Stat(10, 8, 15, 18));
+                    put(26, new Stat(0, 0, 30, 0));
                 }
             });
         }
@@ -397,18 +398,17 @@ public class Board implements Comparable<Board>, Serializable {
                 new Stat(0, 12, 12, 0),
                 new Stat(16, 16, 0, 0)
             });
-            // TODO
             put(NAME_PP93, new Stat[]{
-                new Stat(0, 0, 0, 0),
-                new Stat(0, 0, 0, 0),
-                new Stat(0, 0, 0, 0),
-                new Stat(0, 0, 0, 0),
-                new Stat(0, 0, 0, 0),
-                new Stat(0, 0, 0, 0),
-                new Stat(0, 0, 0, 0),
-                new Stat(0, 0, 0, 0),
-                new Stat(0, 0, 0, 0),
-                new Stat(41, 14, 28, 43)
+                new Stat(2, 0, 4, 0),
+                new Stat(1, 3, 0, 5),
+                new Stat(3, 0, 6, 0),
+                new Stat(3, 4, 0, 5),
+                new Stat(4, 0, 0, 6),
+                new Stat(5, 0, 9, 0),
+                new Stat(6, 2, 0, 8),
+                new Stat(6, 0, 9, 0),
+                new Stat(3, 5, 0, 11),
+                new Stat(8, 0, 0, 8)
             });
         }
     }; // </editor-fold>
