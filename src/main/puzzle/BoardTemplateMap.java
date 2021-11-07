@@ -37,4 +37,13 @@ public class BoardTemplateMap {
     private boolean containsMinTypeKey(Unit unit, int star) {
         return minTypeMap.containsKey(unit, star);
     }
+
+    public void print(Unit unit, int star) {
+        List<BoardTemplate> templates = get(unit, star);
+        if (templates != null) {
+            for (BoardTemplate t : templates) {
+                System.out.println(t.getMatrix().toString());
+            }
+        }
+    }
 }

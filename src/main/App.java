@@ -24,7 +24,7 @@ public class App {
 
     public static final String NAME_KR = "소녀전선 칩셋 조합기";
     public static final String NAME_EN = "Girls' Frontline HOC Chip Calculator";
-    public static final Version3 VERSION = new Version3(8, 0, 0);
+    public static final Version3 VERSION = new Version3(8, 1, 0);
     private static final String RESOURCE_PATH = "/resources/";
 
     public Color orange() {
