@@ -5,10 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ExactCoverMatrix {
 
     private final boolean[][] array;

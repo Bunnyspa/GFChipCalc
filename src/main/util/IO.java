@@ -36,6 +36,7 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.swing.JOptionPane;
 import main.App;
+import main.data.Unit;
 import main.puzzle.Board;
 import main.puzzle.BoardTemplate;
 import main.puzzle.Chip;
@@ -52,10 +53,6 @@ import main.setting.BoardSetting;
 import main.setting.Setting;
 import main.ui.resource.AppText;
 
-/**
- *
- * @author Bunnyspa
- */
 public class IO {
 
     public static final String UTF8 = "UTF-8";
@@ -160,7 +157,7 @@ public class IO {
                 String name = info[0];
                 int star = Integer.valueOf(info[1]);
 
-                Stat maxStat = Board.getMaxStat(name, star);
+                Stat maxStat = Board.getMaxStat(Unit.byName(name), star);
                 if (v.isCurrent(4, 2, 0) && info.length > 2) {
                     maxStat = new Stat(
                             Integer.valueOf(info[2]),
@@ -212,7 +209,7 @@ public class IO {
                     }
 
                     // Generate board
-                    Board b = new Board(name, star, maxStat, chips, locations);
+                    Board b = new Board(Unit.byName(name), star, maxStat, chips, locations);
                     boards.add(b);
                 }
             }
@@ -221,7 +218,7 @@ public class IO {
             String name = info[0];
             int star = Integer.valueOf(info[1]);
 
-            Stat max = Board.getMaxStat(name, star);
+            Stat max = Board.getMaxStat(Unit.byName(name), star);
             if (info.length > 6 && !"1".equals(info[6])) {
                 max = new Stat(
                         Integer.valueOf(info[2]),
@@ -255,7 +252,7 @@ public class IO {
                 }
                 List<Point> chipLocs = Board.toLocation(matrix);
                 if (chips.size() == chipLocs.size()) {
-                    Board b = new Board(name, star, max, chips, chipLocs);
+                    Board b = new Board(Unit.byName(name), star, max, chips, chipLocs);
                     boards.add(b);
                 }
             }
@@ -275,12 +272,12 @@ public class IO {
                     return parseProgressFile(v, bri, invChips);
                 } else {
                     List<Board> boards = loadCombination(s, bri);
-                    String name = "";
+                    Unit unit = null;
                     int star = 0;
                     Stat stat = new Stat();
                     if (!boards.isEmpty()) {
                         Board b = boards.get(0);
-                        name = b.getName();
+                        unit = b.getUnit();
                         star = b.getStar();
                         stat = b.getCustomMaxStat();
                     }
@@ -288,7 +285,7 @@ public class IO {
                     boards.forEach((b) -> b.forEachChip((c) -> chipSet.add(c)));
                     loadProgress_adjustInits(chipSet, invChips);
                     return new ProgressFile(
-                            new CalcSetting(name, star, false, false, false, stat, null),
+                            new CalcSetting(unit, star, false, false, false, stat, null),
                             new CalcExtraSetting(CalcExtraSetting.CALCMODE_FINISHED, 0, false, 0, 0, 0, 0, new ArrayList<>(chipSet)),
                             new Progress(0, -1, 1, 1, boards)
                     );
@@ -347,23 +344,23 @@ public class IO {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Preset">
-    public static List<BoardTemplate> loadBoardTemplates(String name, int star, boolean isPartial) {
+    public static List<BoardTemplate> loadBoardTemplates(Unit unit, int star, boolean isPartial) {
         List<BoardTemplate> out = new ArrayList<>();
 
-        String fileName = "template_" + toFileName(name) + "_" + star + (isPartial ? "_p" : "") + ".dat";
+        String fileName = "template_" + unit.getFileName() + "_" + star + (isPartial ? "_p" : "") + ".dat";
         URL url = App.getResource("template/" + fileName);
         try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))) {
             Iterator<String> bri = br.lines().iterator();
             while (bri.hasNext()) {
                 String line = bri.next();
-                out.add(loadBoardTemplate(name, star, line));
+                out.add(loadBoardTemplate(unit, star, line));
             }
         } catch (Exception ex) {
         }
         return out;
     }
 
-    private static BoardTemplate loadBoardTemplate(String name, int star, String line) {
+    private static BoardTemplate loadBoardTemplate(Unit unit, int star, String line) {
         String[] split = line.split(";");
         String[] names = split[0].split(",");
         String[] rotations = split[1].split(",");
@@ -382,16 +379,12 @@ public class IO {
             // Symmetry
             boolean symmetry = parseBoolean(split[3]);
 
-            BoardTemplate pp = new BoardTemplate(name, star, puzzles, symmetry);
+            BoardTemplate pp = new BoardTemplate(unit, star, puzzles, symmetry);
             return pp;
         } else {
-            BoardTemplate pp = new BoardTemplate(name, star, puzzles);
+            BoardTemplate pp = new BoardTemplate(unit, star, puzzles);
             return pp;
         }
-    }
-
-    public static String toFileName(String boardName) {
-        return boardName.replace("-", "").replace(" ", "").toLowerCase();
     }
     // </editor-fold>
 
@@ -638,19 +631,19 @@ public class IO {
     public static BoardSetting parseBS(List<String> data, boolean advancedSetting) {
         BoardSetting out = new BoardSetting();
         data.stream().map((line) -> line.split(";")).forEachOrdered((parts) -> {
-            String name = parts[0];
-            if (Arrays.asList(Board.NAMES).contains(name)) {
+            Unit unit = Unit.byName(parts[0]);
+            if (unit != null) {
                 int star = Integer.valueOf(parts[1]);
                 if (advancedSetting) {
                     int mode = Integer.valueOf(parts[2]);
-                    out.setMode(name, star, mode);
+                    out.setMode(unit, star, mode);
                 }
                 Stat stat = parseStat(parts[3]);
                 Stat pt = parseStat(parts[4]);
-                out.setStat(name, star, stat);
-                out.setPt(name, star, pt);
+                out.setStat(unit, star, stat);
+                out.setPt(unit, star, pt);
                 if (parts.length > 5) {
-                    out.setPresetIndex(name, star, Integer.valueOf(parts[5]));
+                    out.setPresetIndex(unit, star, Integer.valueOf(parts[5]));
                 }
             }
         });
@@ -663,7 +656,7 @@ public class IO {
         String id = it.next();
         Shape shape = v.isCurrent(7, 0, 0) ? Shape.byId(Integer.valueOf(it.next())) : Shape.byName(it.next());
         int star = Integer.valueOf(it.next());
-        int color = Integer.valueOf(it.next());
+        Unit.Color color = Unit.Color.byId(Integer.valueOf(it.next()));
 
         Stat pt = parseStat(it.next());
 
@@ -697,7 +690,7 @@ public class IO {
     //========== Progress ==========//
     public static ProgressFile parseProgressFile(Version3 v, Iterator<String> it, List<Chip> invChips) {
         int calcMode = Integer.valueOf(it.next());
-        String name = it.next();
+        Unit unit = Unit.byName(it.next());
         int star = Integer.valueOf(it.next());
 
         if (!v.isCurrent(6, 5, 3) && calcMode == CalcExtraSetting.CALCMODE_FINISHED) {
@@ -711,10 +704,10 @@ public class IO {
             List<Chip> chips = parseProgress_chips(v, it, invChips);
             chips.forEach((c) -> c.setMaxLevel());
 
-            List<Board> boards = parseProgress_boards(name, star, stat, chips, it);
+            List<Board> boards = parseProgress_boards(unit, star, stat, chips, it);
 
             return new ProgressFile(
-                    new CalcSetting(name, star, true, true, false, stat, new Stat(0)),
+                    new CalcSetting(unit, star, true, true, false, stat, new Stat(0)),
                     new CalcExtraSetting(calcMode, 0, true, 0, 0, 0, 0, chips),
                     new Progress(0, nComb, 1, 1, boards)
             );
@@ -747,10 +740,10 @@ public class IO {
             chips.forEach((c) -> c.setMaxLevel());
         }
 
-        List<Board> boards = parseProgress_boards(name, star, stat, chips, it);
+        List<Board> boards = parseProgress_boards(unit, star, stat, chips, it);
 
         return new ProgressFile(
-                new CalcSetting(name, star, maxLevel, rotation, symmetry, stat, pt),
+                new CalcSetting(unit, star, maxLevel, rotation, symmetry, stat, pt),
                 new CalcExtraSetting(calcMode, tag, matchColor, markMin, markMax, markType, sortType, chips),
                 new Progress(sortType, nComb, progress, progMax, boards)
         );
@@ -780,7 +773,7 @@ public class IO {
         });
     }
 
-    private static List<Board> parseProgress_boards(String name, int star, Stat stat, List<Chip> chips, Iterator<String> it) {
+    private static List<Board> parseProgress_boards(Unit unit, int star, Stat stat, List<Chip> chips, Iterator<String> it) {
         List<Board> boards = new ArrayList<>();
         while (it.hasNext()) {
             int n = Integer.valueOf(it.next());
@@ -798,7 +791,7 @@ public class IO {
                 bChips.add(c);
                 bLocs.add(l);
             }
-            Board board = new Board(name, star, stat, bChips, bLocs);
+            Board board = new Board(unit, star, stat, bChips, bLocs);
             boards.add(board);
         }
         return boards;

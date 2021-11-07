@@ -6,10 +6,6 @@ import java.awt.SystemColor;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-/**
- *
- * @author Bunnyspa
- */
 public class HelpTableCellRenderer extends DefaultTableCellRenderer {
 
     private final int rowHeaderNum, colHeaderNum;

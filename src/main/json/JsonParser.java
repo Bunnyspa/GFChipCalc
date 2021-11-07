@@ -12,16 +12,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import main.App;
-import main.puzzle.Board;
+import main.data.Unit;
 import main.puzzle.Chip;
 import main.puzzle.Shape;
 import main.puzzle.Stat;
 import main.puzzle.Tag;
 
-/**
- *
- * @author Bunnyspa
- */
 public class JsonParser {
 
     private static final String SIGNKEY = "sign";
@@ -99,7 +95,7 @@ public class JsonParser {
             int rld = Integer.valueOf(Json.getText(chipJ.getValue("assist_reload")));
             int star = Integer.valueOf(Json.getText(chipJ.getValue("chip_id")).substring(0, 1));
             int level = Integer.valueOf(Json.getText(chipJ.getValue("chip_level")));
-            int color = Integer.valueOf(Json.getText(chipJ.getValue("color_id"))) - 1;
+            Unit.Color color = Unit.Color.byId(Integer.valueOf(Json.getText(chipJ.getValue("color_id"))) - 1);
             int rotation = Integer.valueOf(Json.getText(chipJ.getValue("shape_info")).substring(0, 1));
             int squadID = Integer.valueOf(Json.getText(chipJ.getValue("squad_with_user_id")));
 
@@ -117,8 +113,8 @@ public class JsonParser {
     }
 
     private static Tag boardTag(int index) {
-        if (index < Board.NAMES.length) {
-            return new Tag(Color.GRAY, Board.NAMES[index]);
+        if (index < Unit.values().length) {
+            return new Tag(Color.GRAY, Unit.values()[index].getName());
         }
         return new Tag(Color.GRAY, UNKNOWN_HOC);
     }

@@ -27,10 +27,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.plaf.FontUIResource;
 import main.puzzle.Chip;
 
-/**
- *
- * @author Bunnyspa
- */
 public class Fn {
 
     // <editor-fold defaultstate="collapsed" desc="GUI Methods"> 

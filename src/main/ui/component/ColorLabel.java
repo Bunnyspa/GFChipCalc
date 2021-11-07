@@ -10,10 +10,6 @@ import javax.swing.JLabel;
 import main.App;
 import main.ui.resource.AppColor;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ColorLabel extends JLabel {
 
     private final App app;

@@ -1,10 +1,5 @@
 package main.util;
 
-/**
- *
- * @author Bunnyspa
- * @param <E>
- */
 public class Ref<E> {
 
     public E v;

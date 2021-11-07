@@ -9,10 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import main.util.IO;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ResearchConnection {
 
     private static final int TIMEOUT = 1000;

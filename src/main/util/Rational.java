@@ -1,9 +1,5 @@
 package main.util;
 
-/**
- *
- * @author Bunnyspa
- */
 public class Rational {
 
     private final int numerator, denominator;

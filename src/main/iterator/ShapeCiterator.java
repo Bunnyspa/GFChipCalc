@@ -7,13 +7,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import main.data.Unit;
 import main.puzzle.Chip;
 import main.puzzle.Shape;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ShapeCiterator implements Iterator<List<Shape>> {
 
     private final Map<Shape, Integer> chipNameCountMap;
@@ -21,7 +18,7 @@ public class ShapeCiterator implements Iterator<List<Shape>> {
     private final boolean limited;
     private int iteratorIndex = 0;
 
-    public ShapeCiterator(String name, int star, List<Chip> chips) {
+    public ShapeCiterator(Unit unit, int star, List<Chip> chips) {
         List<Shape.Type> chipTypes = new ArrayList<>();
         List<Shape> chipShapes = new ArrayList<>();
         for (Chip c : chips) {
@@ -33,7 +30,7 @@ public class ShapeCiterator implements Iterator<List<Shape>> {
 
         List<Map<Shape.Type, Integer>> typeCountMaps = new ArrayList<>();
         Set<Shape.Type> types = typeCandidateCountMap.keySet();
-        for (Map<Shape.Type, Integer> typeCountMap : PerTypeShapeCiterator.getTypeCountMaps(name, star, types)) {
+        for (Map<Shape.Type, Integer> typeCountMap : PerTypeShapeCiterator.getTypeCountMaps(unit, star, types)) {
             if (allTypeEnough(typeCountMap, typeCandidateCountMap)) {
                 typeCountMaps.add(typeCountMap);
             }
@@ -46,10 +43,10 @@ public class ShapeCiterator implements Iterator<List<Shape>> {
         limited = true;
     }
 
-    public ShapeCiterator(String name, int star, Set<Shape.Type> types) {
+    public ShapeCiterator(Unit unit, int star, Set<Shape.Type> types) {
         chipNameCountMap = new HashMap<>();
 
-        List<Map<Shape.Type, Integer>> typeCountMaps = PerTypeShapeCiterator.getTypeCountMaps(name, star, types);
+        List<Map<Shape.Type, Integer>> typeCountMaps = PerTypeShapeCiterator.getTypeCountMaps(unit, star, types);
         for (Map<Shape.Type, Integer> map : typeCountMaps) {
             cits.add(new PerTypeShapeCiterator(map));
         }

@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.Timer;
 import main.App;
+import main.data.Unit;
 import main.http.ResearchConnection;
-import main.puzzle.Board;
 import main.puzzle.BoardTemplate;
 import main.puzzle.Shape;
 import main.puzzle.assembly.Assembler;
@@ -16,10 +16,6 @@ import main.ui.resource.AppImage;
 import main.ui.resource.AppText;
 import main.util.Fn;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ResearchFrame extends javax.swing.JFrame {
 
     private final App app;
@@ -46,22 +42,22 @@ public class ResearchFrame extends javax.swing.JFrame {
                     wait_(10000);
                 } else {
                     String[] split = task.split(";");
-                    String boardName = Board.getTrueName(split[0]);
-                    int boardStar = Integer.valueOf(split[1]);
+                    Unit unit = Unit.byName(split[0]);
+                    int unitStar = Integer.valueOf(split[1]);
                     if (split.length == 2) {
-                        currentLabel.setText(app.getText(AppText.RESEARCH_WAITING, boardName, String.valueOf(boardStar)));
+                        currentLabel.setText(app.getText(AppText.RESEARCH_WAITING, unit.getName(), String.valueOf(unitStar)));
                         wait_(5000);
                     } else {
                         String shapeStrs = split[2];
 
-                        currentLabel.setText(app.getText(AppText.RESEARCH_WORKING, boardName, String.valueOf(boardStar)));
+                        currentLabel.setText(app.getText(AppText.RESEARCH_WORKING, unit.getName(), String.valueOf(unitStar)));
 
                         // Run task
                         List<Shape> shapes = new ArrayList<>();
                         for (String s : shapeStrs.split(",")) {
                             shapes.add(Shape.byId(Integer.valueOf(s)));
                         }
-                        BoardTemplate result = Assembler.generateTemplate(boardName, boardStar, shapes, () -> running);
+                        BoardTemplate result = Assembler.generateTemplate(unit, unitStar, shapes, () -> running);
                         if (running) {
                             if (result.isEmpty()) {
                                 ResearchConnection.sendResult(shapes.stream().map(s -> String.valueOf(s.id)).collect(Collectors.joining(",")) + ";-");

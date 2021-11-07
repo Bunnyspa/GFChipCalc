@@ -16,10 +16,6 @@ import main.ui.help.HelpProxyDialog;
 import main.ui.resource.AppText;
 import main.util.Fn;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ProxyDialog extends JDialog {
 
     private enum Stage {

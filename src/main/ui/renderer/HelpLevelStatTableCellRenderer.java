@@ -10,10 +10,6 @@ import main.ui.help.HelpChipDialog;
 import main.util.Fn;
 import main.util.Ref;
 
-/**
- *
- * @author Bunnyspa
- */
 public class HelpLevelStatTableCellRenderer extends DefaultTableCellRenderer {
 
     private final App app;

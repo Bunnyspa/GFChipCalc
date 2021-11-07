@@ -1,28 +1,20 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package main.ui.resource;
 
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 import main.App;
+import main.data.Unit;
 import main.puzzle.Chip;
 import main.puzzle.Shape;
 import main.setting.Setting;
 
-/**
- *
- * @author Bunnyspa
- */
 public class AppColor {
 
-    public static final Map<Integer, Color> CHIPS = new HashMap<Integer, Color>() {
+    public static final Map<Unit.Color, Color> CHIPS = new HashMap<Unit.Color, Color>() {
         {
-            put(Chip.COLOR_ORANGE, new Color(240, 107, 65));
-            put(Chip.COLOR_BLUE, new Color(111, 137, 218));
+            put(Unit.Color.ORANGE, new Color(240, 107, 65));
+            put(Unit.Color.BLUE, new Color(111, 137, 218));
         }
     }; // </editor-fold>
     public static final Color LEVEL = new Color(10, 205, 171);
@@ -83,9 +75,9 @@ public class AppColor {
         public static Color[] colors(int alt) {
             switch (alt % Setting.NUM_COLOR) {
                 case 1:
-                    return  CB;
+                    return CB;
                 default:
-                    return  DEFAULT;
+                    return DEFAULT;
             }
         }
     }
@@ -102,27 +94,27 @@ public class AppColor {
         public static Color blue(int alt) {
             switch (alt % Setting.NUM_COLOR) {
                 case 1:
-                    return  CB[2];
+                    return CB[2];
                 default:
-                    return  DEFAULT[2];
+                    return DEFAULT[2];
             }
         }
 
         public static Color green(int alt) {
             switch (alt % Setting.NUM_COLOR) {
                 case 1:
-                    return  CB[1];
+                    return CB[1];
                 default:
-                    return  DEFAULT[1];
+                    return DEFAULT[1];
             }
         }
 
         public static Color orange(int alt) {
             switch (alt % Setting.NUM_COLOR) {
                 case 1:
-                    return  CB[0];
+                    return CB[0];
                 default:
-                    return  DEFAULT[0];
+                    return DEFAULT[0];
             }
         }
     }

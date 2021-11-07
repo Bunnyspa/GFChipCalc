@@ -10,10 +10,6 @@ import main.App;
 import main.puzzle.Chip;
 import main.ui.resource.AppImage;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ChipListCellRenderer extends DefaultListCellRenderer {
 
     private final App app;

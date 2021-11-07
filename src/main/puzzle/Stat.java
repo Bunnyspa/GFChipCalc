@@ -3,10 +3,6 @@ package main.puzzle;
 import java.io.Serializable;
 import java.util.Collection;
 
-/**
- *
- * @author Bunnyspa
- */
 public class Stat implements Comparable<Stat>, Serializable {
 
     public static final int DMG = 0;

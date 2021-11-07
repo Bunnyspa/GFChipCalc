@@ -7,25 +7,21 @@ import javax.swing.JOptionPane;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 import main.App;
+import main.data.Unit;
 import main.puzzle.Board;
 import main.puzzle.Stat;
 import main.setting.BoardSetting;
 import main.setting.Setting;
-import main.setting.StatPresetMap;
 import main.ui.resource.AppImage;
 import main.ui.resource.AppText;
 import main.util.Fn;
 
-/**
- *
- * @author Bunnyspa
- */
 public class CalcSettingDialog extends JDialog {
 
     private static final int MARK_MIN = 0;
     private static final int MARK_MAX = 64;
     private final App app;
-    private final String name;
+    private final Unit unit;
     private final int star;
 
     private boolean advancedSetting;
@@ -41,8 +37,8 @@ public class CalcSettingDialog extends JDialog {
     private CalcSettingDialog(App app) {
         initComponents();
         this.app = app;
-        name = app.mf.getBoardName();
-        star = app.mf.getBoardStar();
+        unit = app.mf.getUnit();
+        star = app.mf.getUnitStar();
         loadResources();
         pack();
         loadSettings();
@@ -96,11 +92,11 @@ public class CalcSettingDialog extends JDialog {
 
         setAdvandedSetting(setting.advancedSetting);
 
-        mode = setting.board.getStatMode(name, star);
-        stat = setting.board.getStat(name, star);
-        pt = setting.board.getPt(name, star);
-        presetIndex = setting.board.getPresetIndex(name, star);
-        if (star != 5 || !StatPresetMap.PRESET.containsKey(name, star)) {
+        mode = setting.board.getStatMode(unit, star);
+        stat = setting.board.getStat(unit, star);
+        pt = setting.board.getPt(unit, star);
+        presetIndex = setting.board.getPresetIndex(unit, star);
+        if (star != 5 || !unit.hasPreset()) {
             maxPresetRadioButton.setEnabled(false);
             statPresetComboBox.setVisible(false);
         }
@@ -202,7 +198,7 @@ public class CalcSettingDialog extends JDialog {
                 maxRldSpinner.setValue(pt.rld);
                 break;
             case BoardSetting.MAX_PRESET:
-                List<String> strs = StatPresetMap.PRESET.getStrings(app, name, star);
+                List<String> strs = unit.getPresetStrings(app);
                 for (int i = 0; i < strs.size(); i++) {
                     String s = strs.get(i);
                     statPresetComboBox.addItem((i + 1) + ": " + s);
@@ -210,7 +206,7 @@ public class CalcSettingDialog extends JDialog {
                 statPresetComboBox.setSelectedIndex(presetIndex < statPresetComboBox.getItemCount() ? presetIndex : 0);
                 break;
             default:
-                Stat maxStat = Board.getMaxStat(getBoardName(), getBoardStar());
+                Stat maxStat = Board.getMaxStat(getUnit(), getUnitStar());
                 maxDmgSpinner.setValue(maxStat.dmg);
                 maxBrkSpinner.setValue(maxStat.brk);
                 maxHitSpinner.setValue(maxStat.hit);
@@ -227,7 +223,7 @@ public class CalcSettingDialog extends JDialog {
             int i = statPresetComboBox.getSelectedIndex();
             if (0 <= i) {
                 presetIndex = i;
-                Stat presetStat = StatPresetMap.PRESET.get(getBoardName(), star, i).stat;
+                Stat presetStat = getUnit().getPresetStat(i);
                 maxDmgSpinner.setValue(presetStat.dmg);
                 maxBrkSpinner.setValue(presetStat.brk);
                 maxHitSpinner.setValue(presetStat.hit);
@@ -255,7 +251,7 @@ public class CalcSettingDialog extends JDialog {
                     break;
             }
 
-            int total = Board.getCellCount(getBoardName(), getBoardStar());
+            int total = Board.getCellCount(getUnit(), getUnitStar());
             if (maxPtRadioButton.isSelected()) {
                 ptSumLabel.setText(app.getText(AppText.UNIT_PT, String.valueOf(pt.sum() + "/" + total)));
             } else {
@@ -301,12 +297,12 @@ public class CalcSettingDialog extends JDialog {
         }
     }
 
-    private String getBoardName() {
-        return app.mf.getBoardName();
+    private Unit getUnit() {
+        return app.mf.getUnit();
     }
 
-    private int getBoardStar() {
-        return app.mf.getBoardStar();
+    private int getUnitStar() {
+        return app.mf.getUnitStar();
     }
 
     /**
@@ -708,10 +704,10 @@ public class CalcSettingDialog extends JDialog {
         setting.rotation = rotationCheckBox.isSelected();
         setting.symmetry = symmetryCheckBox.isSelected();
 
-        setting.board.setMode(name, star, mode);
-        setting.board.setPt(name, star, pt);
-        setting.board.setStat(name, star, stat);
-        setting.board.setPresetIndex(name, star, presetIndex);
+        setting.board.setMode(unit, star, mode);
+        setting.board.setPt(unit, star, pt);
+        setting.board.setStat(unit, star, stat);
+        setting.board.setPresetIndex(unit, star, presetIndex);
 
         setting.boardMarkType = markType;
         setting.boardMarkMin = (int) markMinSpinner.getValue();

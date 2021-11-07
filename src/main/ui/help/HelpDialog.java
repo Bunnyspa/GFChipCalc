@@ -6,10 +6,6 @@ import main.ui.resource.AppText;
 import main.util.Fn;
 import main.util.IO;
 
-/**
- *
- * @author Bunnyspa
- */
 public class HelpDialog extends JDialog {
 
     private static final String LINK_CHANGELOG = "https://github.com/Bunnyspa/GFChipCalc/blob/master/changelog.md";

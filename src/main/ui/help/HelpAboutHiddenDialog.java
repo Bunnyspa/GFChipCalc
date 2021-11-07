@@ -13,10 +13,6 @@ import main.App;
 import main.ui.resource.AppImage;
 import main.util.Fn;
 
-/**
- *
- * @author Bunnyspa
- */
 public class HelpAboutHiddenDialog extends JDialog {
 
     private final App app;

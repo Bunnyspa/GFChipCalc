@@ -14,6 +14,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
+import main.data.Unit;
 import main.puzzle.Chip;
 import main.puzzle.PuzzleMatrix;
 import main.puzzle.Shape;
@@ -23,10 +24,6 @@ import main.ui.resource.AppImage;
 import main.util.DoubleKeyHashMap;
 import main.util.Fn;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ImageProcessor {
 
     private static final Color STAR = AppColor.YELLOW_STAR;
@@ -44,7 +41,7 @@ public class ImageProcessor {
 
         ColorMatrix image;
         boolean used, leveled;
-        int color;
+        Unit.Color color;
     }
 
     private static class ShapeRot {
@@ -103,11 +100,11 @@ public class ImageProcessor {
         // System.out.println("Used: " + used);
 
         // Color
-        Color orange = used ? used(AppColor.CHIPS.get(Chip.COLOR_ORANGE)) : AppColor.CHIPS.get(Chip.COLOR_ORANGE);
-        Color blue = used ? used(AppColor.CHIPS.get(Chip.COLOR_BLUE)) : AppColor.CHIPS.get(Chip.COLOR_BLUE);
-        int colorNOrange = matrix.monochromeCount(orange, THRESHOLD_COLOR);
-        int colorNBlue = matrix.monochromeCount(blue, THRESHOLD_COLOR);
-        int color = colorNBlue > colorNOrange ? Chip.COLOR_BLUE : Chip.COLOR_ORANGE;
+        Color orange = AppColor.CHIPS.get(Unit.Color.ORANGE);
+        Color blue = AppColor.CHIPS.get(Unit.Color.BLUE);
+        int colorNOrange = matrix.monochromeCount(used ? used(orange) : orange, THRESHOLD_COLOR);
+        int colorNBlue = matrix.monochromeCount(used ? used(blue) : blue, THRESHOLD_COLOR);
+        Unit.Color color = colorNBlue > colorNOrange ? Unit.Color.BLUE : Unit.Color.ORANGE;
         if (debug != null) {
             debug.color = color;
         }
@@ -262,7 +259,7 @@ public class ImageProcessor {
         );
     }
 
-    private static ColorMatrix simplify(ColorMatrix matrix, boolean used, int color) {
+    private static ColorMatrix simplify(ColorMatrix matrix, boolean used, Unit.Color color) {
         return matrix.simplify(used, STAR, LEVEL, WHITE, GRAY, BLACK, AppColor.CHIPS.get(color));
     }
 

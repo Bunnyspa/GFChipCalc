@@ -12,10 +12,6 @@ import main.puzzle.Chip;
 import main.ui.resource.AppText;
 import main.util.Fn;
 
-/**
- *
- * @author Bunnyspa
- */
 public class JsonFilterDialog extends JDialog {
 
     private final App app;

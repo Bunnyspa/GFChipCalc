@@ -6,10 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ResponseHeader extends HttpHeader {
 
     public final int code;

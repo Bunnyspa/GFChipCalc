@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package main.puzzle.assembly.dxz;
 
 import java.util.List;
@@ -17,10 +12,6 @@ import main.puzzle.assembly.dxz.zdd.ZDDNode;
 import main.puzzle.assembly.dxz.zdd.ZDDNodeTable;
 import main.util.Pair;
 
-/**
- *
- * @author Bunnyspa
- */
 public class DXZ {
 
     public static Set<Integer> solve(List<boolean[]> rows, BooleanSupplier checkPause) {
@@ -98,7 +89,6 @@ public class DXZ {
 //        c.uncover();
 //        return false;
 //    }
-
     private static Set<Integer> dxz(DancingLinksMatrix X, BooleanSupplier checkPause) {
         ZDDNode node = dxz_search(X, new ZDDMemoCache(), new ZDDNodeTable(), checkPause).first;
         if (node == null) {

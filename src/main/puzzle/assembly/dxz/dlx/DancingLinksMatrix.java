@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package main.puzzle.assembly.dxz.dlx;
 
 import java.util.ArrayList;
@@ -10,10 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- *
- * @author Bunnyspa
- */
 public class DancingLinksMatrix {
 
     private final ColumnNode header;
@@ -84,7 +75,7 @@ public class DancingLinksMatrix {
 
     @Override
     public String toString() {
-        StringBuilder sb= new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         for (ColumnNode c = header.R.column; c != header; c = c.R.column) {
             sb.append(c.colIndex);
             sb.append(" ");

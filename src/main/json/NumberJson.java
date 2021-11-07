@@ -1,9 +1,5 @@
 package main.json;
 
-/**
- *
- * @author Bunnyspa
- */
 public class NumberJson implements Json {
 
     private final String data;

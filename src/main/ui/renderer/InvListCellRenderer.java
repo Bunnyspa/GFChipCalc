@@ -12,10 +12,6 @@ import main.puzzle.assembly.ChipFreq;
 import main.ui.resource.AppImage;
 import main.util.Ref;
 
-/**
- *
- * @author Bunnyspa
- */
 public class InvListCellRenderer extends DefaultListCellRenderer {
 
     private final App app;

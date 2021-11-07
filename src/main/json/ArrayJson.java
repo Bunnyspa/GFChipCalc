@@ -3,10 +3,6 @@ package main.json;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ArrayJson implements Json {
 
     private final List<Json> data;

@@ -11,14 +11,11 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 import main.App;
+import main.data.Unit;
 import main.puzzle.PuzzleMatrix;
 import main.setting.Setting;
 import main.util.Fn;
 
-/**
- *
- * @author Bunnyspa
- */
 public class AppImage {
 
     public static final Image FAVICON = getImage("favicon.png");
@@ -145,7 +142,7 @@ public class AppImage {
             int star = chip.getStar();
             int boardIndex = chip.getBoardIndex();
             boolean marked = chip.isMarked();
-            int color = chip.getColor();
+            Unit.Color color = chip.getColor();
             int level = chip.getLevel();
             int initLevel = chip.getInitLevel();
             int rotation = chip.getRotation();
@@ -252,8 +249,8 @@ public class AppImage {
 
     public static class Board {
 
-        public static ImageIcon get(App app, int size, String boardName, int boardStar) {
-            return get(app, size, main.puzzle.Board.initMatrix(boardName, boardStar));
+        public static ImageIcon get(App app, int size, Unit unit, int star) {
+            return get(app, size, main.puzzle.Board.initMatrix(unit, star));
         }
 
         public static ImageIcon get(App app, int size, main.puzzle.Board board) {

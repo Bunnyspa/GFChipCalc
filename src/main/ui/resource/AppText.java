@@ -12,21 +12,17 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import main.App;
-import main.puzzle.Chip;
+import main.data.Unit;
 import main.puzzle.Shape;
 import main.util.IO;
 
-/**
- *
- * @author Bunnyspa
- */
 public class AppText {
 
-    public static final Map<Integer, String> TEXT_MAP_COLOR = new HashMap<Integer, String>() // <editor-fold defaultstate="collapsed">
+    public static final Map<Unit.Color, String> TEXT_MAP_COLOR = new HashMap<Unit.Color, String>() // <editor-fold defaultstate="collapsed">
     {
         {
-            put(Chip.COLOR_ORANGE, AppText.CHIP_COLOR_ORANGE);
-            put(Chip.COLOR_BLUE, AppText.CHIP_COLOR_BLUE);
+            put(Unit.Color.ORANGE, AppText.CHIP_COLOR_ORANGE);
+            put(Unit.Color.BLUE, AppText.CHIP_COLOR_BLUE);
         }
     }; // </editor-fold>
 

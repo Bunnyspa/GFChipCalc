@@ -9,10 +9,6 @@ import main.App;
 import main.puzzle.Chip;
 import main.puzzle.Tag;
 
-/**
- *
- * @author Bunnyspa
- */
 public class TagTableCellRenderer extends DefaultTableCellRenderer {
 
     private final App app;

@@ -1,9 +1,5 @@
 package main.puzzle.assembly.dxz.zdd;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ZDD {
 
     public static final ZDDNode TRUE_TERMINAL = new ZDDNode();

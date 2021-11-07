@@ -13,10 +13,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- * @author Bunnyspa
- */
 public class Session extends Thread {
 
     private static final String CRLF = "\r\n";

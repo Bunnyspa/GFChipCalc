@@ -5,10 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- *
- * @author Bunnyspa
- */
 public abstract class HttpHeader {
 
     private Map<String, String> headerMap;

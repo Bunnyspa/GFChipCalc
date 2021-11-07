@@ -15,10 +15,6 @@ import main.util.Fn;
 import main.util.IO;
 import main.util.Ref;
 
-/**
- *
- * @author Bunnyspa
- */
 public class AppSettingDialog extends JDialog {
 
     private static final int GAP = 5;

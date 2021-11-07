@@ -7,13 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import main.data.Unit;
 import main.util.IO;
 import main.util.Pair;
 
-/**
- *
- * @author Bunnyspa
- */
 public class BoardTemplate implements Comparable<BoardTemplate> {
 
     private final List<Puzzle> puzzles;
@@ -47,12 +44,12 @@ public class BoardTemplate implements Comparable<BoardTemplate> {
         return BOARD_END;
     }
 
-    public BoardTemplate(String name, int star, List<Puzzle> puzzles) {
+    public BoardTemplate(Unit unit, int star, List<Puzzle> puzzles) {
         this.puzzles = puzzles;
         shapeCountMap = new HashMap<>();
 
         // Placement
-        placement = Board.toPlacement(name, star, puzzles);
+        placement = Board.toPlacement(unit, star, puzzles);
 
         // Symmetry
         this.symmetry = placement.isSymmetric(Board.UNUSED);
@@ -61,12 +58,12 @@ public class BoardTemplate implements Comparable<BoardTemplate> {
         state = NORMAL;
     }
 
-    public BoardTemplate(String name, int star, List<Puzzle> puzzles, boolean symmetry) {
+    public BoardTemplate(Unit unit, int star, List<Puzzle> puzzles, boolean symmetry) {
         this.puzzles = puzzles;
         this.shapeCountMap = new HashMap<>();
 
         // Placement
-        this.placement = Board.toPlacement(name, star, puzzles);
+        this.placement = Board.toPlacement(unit, star, puzzles);
 
         // Symmetry
         this.symmetry = symmetry;

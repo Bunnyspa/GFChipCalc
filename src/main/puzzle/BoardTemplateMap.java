@@ -1,43 +1,40 @@
 package main.puzzle;
 
 import java.util.List;
+import main.data.Unit;
 import main.util.DoubleKeyHashMap;
 
-/**
- *
- * @author Bunnyspa
- */
 public class BoardTemplateMap {
 
-    private final DoubleKeyHashMap<String, Integer, List<BoardTemplate>> data = new DoubleKeyHashMap<>();
-    private final DoubleKeyHashMap<String, Integer, Shape.Type> minTypeMap = new DoubleKeyHashMap<>();
+    private final DoubleKeyHashMap<Unit, Integer, List<BoardTemplate>> data = new DoubleKeyHashMap<>();
+    private final DoubleKeyHashMap<Unit, Integer, Shape.Type> minTypeMap = new DoubleKeyHashMap<>();
 
-    public void put(String name, int star, List<BoardTemplate> templates, Shape.Type minType) {
+    public void put(Unit unit, int star, List<BoardTemplate> templates, Shape.Type minType) {
         if (!templates.isEmpty()) {
-            data.put(name, star, templates);
+            data.put(unit, star, templates);
         }
-        minTypeMap.put(name, star, minType);
+        minTypeMap.put(unit, star, minType);
     }
 
-    public List<BoardTemplate> get(String name, int star) {
-        if (containsKey(name, star)) {
-            return data.get(name, star);
+    public List<BoardTemplate> get(Unit unit, int star) {
+        if (containsKey(unit, star)) {
+            return data.get(unit, star);
         }
         return null;
     }
 
-    public Shape.Type getMinType(String name, int star) {
-        if (containsMinTypeKey(name, star)) {
-            return minTypeMap.get(name, star);
+    public Shape.Type getMinType(Unit unit, int star) {
+        if (containsMinTypeKey(unit, star)) {
+            return minTypeMap.get(unit, star);
         }
         return Shape.Type.NONE;
     }
 
-    public boolean containsKey(String name, int star) {
-        return data.containsKey(name, star);
+    public boolean containsKey(Unit unit, int star) {
+        return data.containsKey(unit, star);
     }
 
-    private boolean containsMinTypeKey(String name, int star) {
-        return minTypeMap.containsKey(name, star);
+    private boolean containsMinTypeKey(Unit unit, int star) {
+        return minTypeMap.containsKey(unit, star);
     }
 }

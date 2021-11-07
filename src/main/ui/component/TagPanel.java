@@ -18,10 +18,6 @@ import main.puzzle.Tag;
 import main.ui.renderer.TagTableCellRenderer;
 import main.ui.resource.AppText;
 
-/**
- *
- * @author Bunnyspa
- */
 public class TagPanel extends JPanel {
 
     private final App app;

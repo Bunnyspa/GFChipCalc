@@ -35,6 +35,7 @@ import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import main.App;
+import main.data.Unit;
 import main.http.ResearchConnection;
 import main.json.JsonParser;
 import main.puzzle.Board;
@@ -51,9 +52,7 @@ import main.puzzle.assembly.ChipFreq;
 import main.puzzle.assembly.Progress;
 import main.puzzle.assembly.ProgressFile;
 import main.setting.BoardSetting;
-import main.setting.Filter;
 import main.setting.Setting;
-import main.setting.StatPresetMap;
 import main.ui.dialog.AppSettingDialog;
 import main.ui.dialog.ApplyDialog;
 import main.ui.dialog.CalcSettingDialog;
@@ -80,10 +79,6 @@ import main.util.Fn;
 import main.util.IO;
 import main.util.Ref;
 
-/**
- *
- * @author Bunnyspa
- */
 public class MainFrame extends JFrame {
 
     /* STATIC */
@@ -147,7 +142,7 @@ public class MainFrame extends JFrame {
 
     // Chip Stat 
     private boolean invStat_loading;
-    private int invStat_color = -1;
+    private Unit.Color invStat_color = null;
     private int focusedStat = FOCUSED_NONE;
     private final List<Integer> statInputBuffer = new ArrayList<>(INPUT_BUFFER_SIZE + 1);
 
@@ -220,8 +215,8 @@ public class MainFrame extends JFrame {
 
         settingFile_load();
 
-        for (String string : Board.NAMES) {
-            boardNameComboBox.addItem(string);
+        for (Unit unit : Unit.values()) {
+            unitComboBox.addItem(unit);
         }
 
         ((JLabel) invSortTypeComboBox.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
@@ -523,8 +518,8 @@ public class MainFrame extends JFrame {
         });
 
         // Comb Top
-        boardNameComboBox.addActionListener((e) -> setting_resetBoard());
-        boardStarComboBox.addActionListener((e) -> setting_resetBoard());
+        unitComboBox.addActionListener((e) -> setting_resetBoard());
+        unitStarComboBox.addActionListener((e) -> setting_resetBoard());
         settingButton.addActionListener((e) -> openDialog(CalcSettingDialog.getInstance(app)));
         combWarningButton.addActionListener((e) -> Fn.popup(combWarningButton, app.getText(AppText.WARNING_HOCMAX), app.getText(AppText.WARNING_HOCMAX_DESC)));
         timeWarningButton.addActionListener((e) -> Fn.popup(timeWarningButton, app.getText(AppText.WARNING_TIME), app.getText(AppText.WARNING_TIME_DESC)));
@@ -709,7 +704,7 @@ public class MainFrame extends JFrame {
             Board.getStarHTML_star(2),
             Board.getStarHTML_star(1)
         };
-        boardStarComboBox.setModel(new DefaultComboBoxModel<>(bStarCBList));
+        unitStarComboBox.setModel(new DefaultComboBoxModel<>(bStarCBList));
 
         invDmgTextLabel.setText(app.getText(AppText.CHIP_STAT_DMG));
         invBrkTextLabel.setText(app.getText(AppText.CHIP_STAT_BRK));
@@ -813,8 +808,8 @@ public class MainFrame extends JFrame {
         addTip(invHitTextLabel, app.getText(AppText.CHIP_STAT_HIT_LONG));
         addTip(invRldTextLabel, app.getText(AppText.CHIP_STAT_RLD_LONG));
 
-        addTip(boardNameComboBox, app.getText(AppText.TIP_BOARD_NAME));
-        addTip(boardStarComboBox, app.getText(AppText.TIP_BOARD_STAR));
+        addTip(unitComboBox, app.getText(AppText.TIP_BOARD_NAME));
+        addTip(unitStarComboBox, app.getText(AppText.TIP_BOARD_STAR));
 
         addTip(combWarningButton, app.getText(AppText.WARNING_HOCMAX));
         addTip(timeWarningButton, app.getText(AppText.WARNING_TIME));
@@ -960,7 +955,7 @@ public class MainFrame extends JFrame {
         }
     }
 
-    private void pool_setColor(int color) {
+    private void pool_setColor(Unit.Color color) {
         app.setting.poolColor = color;
         pool_setColorText();
         settingFile_save();
@@ -972,7 +967,7 @@ public class MainFrame extends JFrame {
     }
 
     private void pool_cycleColor() {
-        pool_setColor((app.setting.poolColor + 1) % AppText.TEXT_MAP_COLOR.size());
+        pool_setColor(Unit.Color.byId((app.setting.poolColor.id + 1) % Unit.Color.values().length));
     }
 
     private void pool_starChanged() {
@@ -1091,7 +1086,7 @@ public class MainFrame extends JFrame {
 
             invStarComboBox.setSelectedIndex(singleSelected ? 5 - invList.getSelectedValue().getStar() : 0);
             invLevelSlider.setValue(singleSelected ? invList.getSelectedValue().getLevel() : 0);
-            invStat_setColor(singleSelected ? invList.getSelectedValue().getColor() : -1);
+            invStat_setColor(singleSelected ? invList.getSelectedValue().getColor() : null);
             invMarkCheckBox.setSelected(singleSelected ? invList.getSelectedValue().isMarked() : false);
 
             invStat_setTagButtonText();
@@ -1216,7 +1211,7 @@ public class MainFrame extends JFrame {
         }
     }
 
-    private void invStat_setColor(int color) {
+    private void invStat_setColor(Unit.Color color) {
         invStat_color = color;
         invStat_setColorText();
         if (invList.getSelectedIndices().length == 1) {
@@ -1225,7 +1220,7 @@ public class MainFrame extends JFrame {
     }
 
     private void invStat_setColorText() {
-        if (invStat_color < 0) {
+        if (invStat_color == null) {
             invColorButton.setText(" ");
         } else {
             invColorButton.setText(app.getText(AppText.TEXT_MAP_COLOR.get(invStat_color)));
@@ -1235,7 +1230,7 @@ public class MainFrame extends JFrame {
 
     private void invStat_cycleColor() {
         if (invList.getSelectedIndices().length == 1) {
-            invStat_setColor((invStat_color + 1) % AppText.TEXT_MAP_COLOR.size());
+            invStat_setColor(Unit.Color.byId((invStat_color.id + 1) % Unit.Color.values().length));
         }
     }
 
@@ -1407,8 +1402,8 @@ public class MainFrame extends JFrame {
             }
             // Color
             if (pass && app.filter.anyColorTrue()) {
-                int i = c.getColor();
-                pass = app.filter.getColor(i);
+                Unit.Color color = c.getColor();
+                pass = app.filter.getColor(color);
             }
             // Size
             if (pass && app.filter.anyTypeTrue()) {
@@ -1545,17 +1540,17 @@ public class MainFrame extends JFrame {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Setting Methods">
-    public final String getBoardName() {
-        return boardNameComboBox.getItemAt(boardNameComboBox.getSelectedIndex());
+    public final Unit getUnit() {
+        return unitComboBox.getItemAt(unitComboBox.getSelectedIndex());
     }
 
-    public final int getBoardStar() {
-        return 5 - boardStarComboBox.getSelectedIndex();
+    public final int getUnitStar() {
+        return 5 - unitStarComboBox.getSelectedIndex();
     }
 
     public void setting_resetDisplay() {
         Icon settingIcon;
-        switch (app.setting.board.getStatMode(getBoardName(), getBoardStar())) {
+        switch (app.setting.board.getStatMode(getUnit(), getUnitStar())) {
             case BoardSetting.MAX_STAT:
                 settingIcon = AppImage.SETTING_STAT;
                 break;
@@ -1570,50 +1565,41 @@ public class MainFrame extends JFrame {
         }
         settingButton.setIcon(settingIcon);
         BoardSetting board = app.setting.board;
-        boolean maxWarning = getBoardStar() == 5
-                && board.getStatMode(getBoardName(), getBoardStar()) != BoardSetting.MAX_PRESET
-                && !board.hasDefaultPreset(getBoardName(), getBoardStar());
+        boolean maxWarning = getUnitStar() == 5
+                && board.getStatMode(getUnit(), getUnitStar()) != BoardSetting.MAX_PRESET
+                && !getUnit().hasDefaultPreset();
         combWarningButton.setVisible(maxWarning);
     }
 
     private void setting_resetBoard() {
         setting_resetDisplay();
-        boardImageLabel.setIcon(AppImage.Board.get(app, boardImageLabel.getWidth(), getBoardName(), getBoardStar()));
+        boardImageLabel.setIcon(AppImage.Board.get(app, boardImageLabel.getWidth(), getUnit(), getUnitStar()));
         boardImageLabel.repaint();
     }
 
     public boolean setting_isPresetFilter() {
-        String name = getBoardName();
-        int star = getBoardStar();
-        int presetIndex = app.setting.board.getPresetIndex(name, star);
+        Unit unit = getUnit();
+        int star = getUnitStar();
+        int presetIndex = app.setting.board.getPresetIndex(unit, star);
         boolean[] stars = new boolean[]{true, false, false, false};
-
-        StatPresetMap presetMap = StatPresetMap.PRESET;
-        boolean[] types = presetMap.getTypeFilter(name, star, presetIndex);
-
-        Stat ptMin = presetMap.get(name, star, presetIndex).ptMin;
-        Stat ptMax = presetMap.get(name, star, presetIndex).ptMax;
-
+        boolean[] types = unit.getPresetTypeFilter(presetIndex);
+        Stat ptMin = unit.getPresetFilterPtMin(presetIndex);
+        Stat ptMax = unit.getPresetFilterPtMax(presetIndex);
         return app.filter.equals(stars, types, ptMin, ptMax);
     }
 
     public void setting_applyPresetFilter() {
-        String name = getBoardName();
-        int star = getBoardStar();
-        int presetIndex = app.setting.board.getPresetIndex(name, star);
+        Unit unit = getUnit();
+        int star = getUnitStar();
+        int presetIndex = app.setting.board.getPresetIndex(unit, star);
         boolean[] stars = new boolean[]{true, false, false, false};
 
-        boolean[] colors = new boolean[Filter.NUM_COLOR];
-        int c = Board.getColor(name);
-        if (c < colors.length) {
-            colors[c] = true;
-        }
-
-        StatPresetMap presetMap = StatPresetMap.PRESET;
-        boolean[] types = presetMap.getTypeFilter(name, star, presetIndex);
-
-        Stat ptMin = presetMap.get(name, star, presetIndex).ptMin;
-        Stat ptMax = presetMap.get(name, star, presetIndex).ptMax;
+        boolean[] colors = new boolean[Unit.Color.values().length];
+        Unit.Color c = unit.getColor();
+        colors[c.id] = true;
+        boolean[] types = unit.getPresetTypeFilter(presetIndex);
+        Stat ptMin = unit.getPresetFilterPtMin(presetIndex);
+        Stat ptMax = unit.getPresetFilterPtMax(presetIndex);
 
         app.filter.setColors(colors);
         app.filter.setStars(stars);
@@ -1627,19 +1613,19 @@ public class MainFrame extends JFrame {
 
     // <editor-fold defaultstate="collapsed" desc="Combination Methods">
     private void comb_setBoardName(int i) {
-        if (boardNameComboBox.isEnabled()) {
-            boardNameComboBox.setSelectedIndex(Fn.limit(i, 0, boardNameComboBox.getItemCount()));
+        if (unitComboBox.isEnabled()) {
+            unitComboBox.setSelectedIndex(Fn.limit(i, 0, unitComboBox.getItemCount()));
         }
     }
 
     private void comb_nextBoardName() {
-        comb_setBoardName((boardNameComboBox.getSelectedIndex() + 1) % boardNameComboBox.getItemCount());
+        comb_setBoardName((unitComboBox.getSelectedIndex() + 1) % unitComboBox.getItemCount());
     }
 
     private void comb_setShowProgImage() {
         app.setting.showProgImage = showProgImageCheckBox.isSelected();
         if (!app.setting.showProgImage) {
-            boardImageLabel.setIcon(AppImage.Board.get(app, boardImageLabel.getWidth(), getBoardName(), getBoardStar()));
+            boardImageLabel.setIcon(AppImage.Board.get(app, boardImageLabel.getWidth(), getUnit(), getUnitStar()));
             boardImageLabel.repaint();
         }
     }
@@ -1709,11 +1695,11 @@ public class MainFrame extends JFrame {
             combHitResonanceStatLabel.setText("+" + resonance.hit);
             combRldResonanceStatLabel.setText("+" + resonance.rld);
 
-            Color chipColor = AppColor.CHIPS.get(board.getColor());
-            combDmgResonanceStatLabel.setForeground(chipColor);
-            combBrkResonanceStatLabel.setForeground(chipColor);
-            combHitResonanceStatLabel.setForeground(chipColor);
-            combRldResonanceStatLabel.setForeground(chipColor);
+            Color color = AppColor.CHIPS.get(board.getColor());
+            combDmgResonanceStatLabel.setForeground(color);
+            combBrkResonanceStatLabel.setForeground(color);
+            combHitResonanceStatLabel.setForeground(color);
+            combRldResonanceStatLabel.setForeground(color);
 
             ticketLabel.setText(String.valueOf(board.getTicketCount()));
             xpLabel.setText(Fn.thousandComma(board.getXP()));
@@ -1957,18 +1943,18 @@ public class MainFrame extends JFrame {
             }
         }
 
-        String boardName = getBoardName();
-        int boardStar = getBoardStar();
+        Unit unit = getUnit();
+        int unitStar = getUnitStar();
 
         // init
         boolean start = true;
         int calcMode = CalcExtraSetting.CALCMODE_DICTIONARY;
         boolean alt = false;
-        Shape.Type minType = assembler.getMinType(boardName, boardStar, false);
+        Shape.Type minType = assembler.getMinType(unit, unitStar, false);
 
         if (app.setting.advancedSetting) {
             // Partial option
-            if (assembler.hasPartial(boardName, boardStar)) {
+            if (assembler.hasPartial(unit, unitStar)) {
                 // Query
                 String[] options = {
                     app.getText(AppText.COMB_OPTION_M2_0),
@@ -2015,7 +2001,7 @@ public class MainFrame extends JFrame {
                     calcMode = response == 0 ? CalcExtraSetting.CALCMODE_DICTIONARY : CalcExtraSetting.CALCMODE_DXZ;
                 }
             }
-        } else if (getBoardStar() == 5 && !setting_isPresetFilter()) {
+        } else if (getUnitStar() == 5 && !setting_isPresetFilter()) {
             int retval = JOptionPane.showOptionDialog(this,
                     app.getText(AppText.COMB_OPTION_FILTER_DESC),
                     app.getText(AppText.COMB_OPTION_TITLE),
@@ -2027,7 +2013,7 @@ public class MainFrame extends JFrame {
         }
 
         // If preset DNE
-        if (!assembler.btExists(boardName, boardStar, alt)) {
+        if (!assembler.btExists(unit, unitStar, alt)) {
             calcMode = CalcExtraSetting.CALCMODE_DXZ;
         }
 
@@ -2036,10 +2022,10 @@ public class MainFrame extends JFrame {
             List<Chip> candidates = new ArrayList<>();
             for (Enumeration<Chip> elements = invLM.elements(); elements.hasMoreElements();) {
                 Chip chip = elements.nextElement();
-                boolean colorMatch = !app.setting.colorMatch || Board.getColor(boardName) == chip.getColor();
+                boolean colorMatch = !app.setting.colorMatch || unit.getColor() == chip.getColor();
                 boolean sizeMatch = calcMode == CalcExtraSetting.CALCMODE_DXZ || chip.typeGeq(minType);
                 boolean markMatchNeg = 0 < app.setting.boardMarkMax || !chip.isMarked();
-                boolean markMatchPos = app.setting.boardMarkMin < Board.getCellCount(boardName, boardStar) || chip.isMarked();
+                boolean markMatchPos = app.setting.boardMarkMin < Board.getCellCount(unit, unitStar) || chip.isMarked();
                 if (colorMatch && sizeMatch && markMatchNeg && markMatchPos) {
                     candidates.add(new Chip(chip));
                 }
@@ -2052,22 +2038,22 @@ public class MainFrame extends JFrame {
             BoardSetting bs = app.setting.board;
             Stat stat, pt;
 
-            switch (bs.getStatMode(boardName, boardStar)) {
+            switch (bs.getStatMode(unit, unitStar)) {
                 case BoardSetting.MAX_PRESET:
-                    int presetIndex = bs.getPresetIndex(boardName, boardStar);
-                    stat = BoardSetting.getPreset(boardName, boardStar, presetIndex).stat;
-                    pt = BoardSetting.getPreset(boardName, boardStar, presetIndex).pt;
+                    int presetIndex = bs.getPresetIndex(unit, unitStar);
+                    stat = unit.getPresetStat(presetIndex);
+                    pt = unit.getPresetPt(presetIndex);
                     break;
                 case BoardSetting.MAX_STAT:
-                    stat = bs.getStat(boardName, boardStar);
-                    pt = bs.getPt(boardName, boardStar);
+                    stat = bs.getStat(unit, unitStar);
+                    pt = bs.getPt(unit, unitStar);
                     break;
                 default:
-                    stat = Board.getMaxStat(boardName, boardStar);
-                    pt = Board.getMaxPt(boardName, boardStar);
+                    stat = Board.getMaxStat(unit, unitStar);
+                    pt = Board.getMaxPt(unit, unitStar);
             }
 
-            calcSetting = new CalcSetting(boardName, boardStar, app.setting.maxLevel, app.setting.rotation, app.setting.symmetry, stat, pt);
+            calcSetting = new CalcSetting(unit, unitStar, app.setting.maxLevel, app.setting.rotation, app.setting.symmetry, stat, pt);
             calcExtraSetting = new CalcExtraSetting(calcMode, alt ? 1 : 0,
                     app.setting.colorMatch,
                     app.setting.boardMarkMin, app.setting.boardMarkMax,
@@ -2114,8 +2100,8 @@ public class MainFrame extends JFrame {
         combStartPauseButton.setIcon(status == Assembler.Status.RUNNING ? AppImage.COMB_PAUSE : AppImage.COMB_START);
         combStopButton.setVisible(status != Assembler.Status.STOPPED);
 
-        boardNameComboBox.setEnabled(status == Assembler.Status.STOPPED);
-        boardStarComboBox.setEnabled(status == Assembler.Status.STOPPED);
+        unitComboBox.setEnabled(status == Assembler.Status.STOPPED);
+        unitStarComboBox.setEnabled(status == Assembler.Status.STOPPED);
         settingButton.setEnabled(status == Assembler.Status.STOPPED);
         researchButton.setEnabled(status == Assembler.Status.STOPPED);
         combOpenButton.setEnabled(status == Assembler.Status.STOPPED);
@@ -2416,8 +2402,8 @@ public class MainFrame extends JFrame {
             progress = pf.p;
             combSaveButton.setEnabled(false);
 
-            boardNameComboBox.setSelectedItem(calcSetting.boardName);
-            boardStarComboBox.setSelectedIndex(5 - calcSetting.boardStar);
+            unitComboBox.setSelectedItem(calcSetting.unit);
+            unitStarComboBox.setSelectedIndex(5 - calcSetting.unitStar);
 
             if (calcExtraSetting.calcMode != CalcExtraSetting.CALCMODE_FINISHED) {
                 Setting setting = app.setting;
@@ -2591,8 +2577,8 @@ public class MainFrame extends JFrame {
         combLTPanel = new javax.swing.JPanel();
         settingButton = new javax.swing.JButton();
         jPanel8 = new javax.swing.JPanel();
-        boardNameComboBox = new javax.swing.JComboBox<>();
-        boardStarComboBox = new javax.swing.JComboBox<>();
+        unitComboBox = new javax.swing.JComboBox<>();
+        unitStarComboBox = new javax.swing.JComboBox<>();
         combLBPanel = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
         combLabel = new javax.swing.JLabel();
@@ -3212,7 +3198,7 @@ public class MainFrame extends JFrame {
         poolBPanelLayout.setHorizontalGroup(
             poolBPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(poolListPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(poolControlPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+            .addComponent(poolControlPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 307, Short.MAX_VALUE)
             .addComponent(poolReadPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         poolBPanelLayout.setVerticalGroup(
@@ -3328,7 +3314,7 @@ public class MainFrame extends JFrame {
                 .addGap(0, 0, 0)
                 .addComponent(invSaveAsButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(fileTAPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 81, Short.MAX_VALUE))
+                .addComponent(fileTAPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE))
         );
         invTPanelLayout.setVerticalGroup(
             invTPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -3534,7 +3520,7 @@ public class MainFrame extends JFrame {
                 .addComponent(invBrkPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(invHitPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE)
+                .addGap(0, 1, Short.MAX_VALUE)
                 .addComponent(invRldPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
@@ -3744,25 +3730,25 @@ public class MainFrame extends JFrame {
         jPanel8.setFocusable(false);
         jPanel8.setPreferredSize(new java.awt.Dimension(100, 50));
 
-        boardNameComboBox.setFocusable(false);
-        boardNameComboBox.setPreferredSize(new java.awt.Dimension(100, 21));
+        unitComboBox.setFocusable(false);
+        unitComboBox.setPreferredSize(new java.awt.Dimension(100, 21));
 
-        boardStarComboBox.setFocusable(false);
-        boardStarComboBox.setPreferredSize(new java.awt.Dimension(100, 21));
+        unitStarComboBox.setFocusable(false);
+        unitStarComboBox.setPreferredSize(new java.awt.Dimension(100, 21));
 
         javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
         jPanel8.setLayout(jPanel8Layout);
         jPanel8Layout.setHorizontalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(boardNameComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(boardStarComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(unitComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(unitStarComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanel8Layout.setVerticalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel8Layout.createSequentialGroup()
-                .addComponent(boardNameComboBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(unitComboBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(0, 0, 0)
-                .addComponent(boardStarComboBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(unitStarComboBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout combLTPanelLayout = new javax.swing.GroupLayout(combLTPanel);
@@ -4046,8 +4032,6 @@ public class MainFrame extends JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addButton;
     private javax.swing.JLabel boardImageLabel;
-    private javax.swing.JComboBox<String> boardNameComboBox;
-    private javax.swing.JComboBox<String> boardStarComboBox;
     private javax.swing.JPanel combBrkPanel;
     private javax.swing.JLabel combBrkPercLabel;
     private javax.swing.JLabel combBrkPtLabel;
@@ -4197,6 +4181,8 @@ public class MainFrame extends JFrame {
     private javax.swing.JLabel timeLabel;
     private javax.swing.JButton timeWarningButton;
     private javax.swing.JLabel tipLabel;
+    private javax.swing.JComboBox<Unit> unitComboBox;
+    private javax.swing.JComboBox<String> unitStarComboBox;
     private javax.swing.JLabel xpLabel;
     private javax.swing.JLabel xpTextLabel;
     // End of variables declaration//GEN-END:variables

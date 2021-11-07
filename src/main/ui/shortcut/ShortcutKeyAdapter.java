@@ -5,10 +5,6 @@ import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ShortcutKeyAdapter extends KeyAdapter {
 
     Map<Shortcut, Runnable> map = new HashMap<>();

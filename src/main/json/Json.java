@@ -2,10 +2,6 @@ package main.json;
 
 import java.util.List;
 
-/**
- *
- * @author Bunnyspa
- */
 public interface Json {
 
     public static final int NULL = 0;

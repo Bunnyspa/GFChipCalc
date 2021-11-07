@@ -16,10 +16,6 @@ import main.ui.resource.AppImage;
 import main.ui.resource.AppText;
 import main.util.Fn;
 
-/**
- *
- * @author Bunnyspa
- */
 public class HelpAppDialog extends JDialog {
 
     private final App app;

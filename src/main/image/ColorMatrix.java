@@ -10,10 +10,6 @@ import java.util.List;
 import java.util.Set;
 import main.util.Fn;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ColorMatrix {
 
     private static final int MIN = 0;

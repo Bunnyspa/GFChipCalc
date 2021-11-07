@@ -6,21 +6,16 @@ import javax.swing.JToggleButton;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 import main.App;
-import main.puzzle.Board;
+import main.data.Unit;
 import main.puzzle.Chip;
 import main.puzzle.Stat;
 import main.setting.BoardSetting;
 import main.setting.Filter;
-import main.setting.StatPresetMap;
 import main.ui.component.TagPanel;
 import main.ui.resource.AppImage;
 import main.ui.resource.AppText;
 import main.util.Fn;
 
-/**
- *
- * @author Bunnyspa
- */
 public class FilterDialog extends JDialog {
 
     private final App app;
@@ -77,8 +72,8 @@ public class FilterDialog extends JDialog {
         colorPanel.setBorder(new TitledBorder(app.getText(AppText.FILTER_GROUP_COLOR)));
         colorOrangeTB.setText(app.getText(AppText.CHIP_COLOR_ORANGE));
         colorBlueTB.setText(app.getText(AppText.CHIP_COLOR_BLUE));
-        for (int i = 0; i < Filter.NUM_COLOR; i++) {
-            colorTBs[i].setSelected(app.filter.getColor(i));
+        for (int i = 0; i < Unit.Color.values().length; i++) {
+            colorTBs[i].setSelected(app.filter.getColor(Unit.Color.byId(i)));
         }
 
         cellPanel.setBorder(new TitledBorder(app.getText(AppText.FILTER_GROUP_CELL)));
@@ -138,9 +133,9 @@ public class FilterDialog extends JDialog {
         tagIncludedPanel.add(tip);
         tagExcludedPanel.add(txp);
 
-        String name = app.mf.getBoardName();
-        int star = app.mf.getBoardStar();
-        if (star != 5 || app.setting.board.getStatMode(name, star) != BoardSetting.MAX_PRESET) {
+        Unit unit = app.mf.getUnit();
+        int star = app.mf.getUnitStar();
+        if (star != 5 || app.setting.board.getStatMode(unit, star) != BoardSetting.MAX_PRESET) {
             presetButton.setVisible(false);
         }
 
@@ -216,30 +211,28 @@ public class FilterDialog extends JDialog {
     }
 
     private void applyPreset() {
-        String name = app.mf.getBoardName();
-        int star = app.mf.getBoardStar();
-        int presetIndex = app.setting.board.getPresetIndex(name, star);
-
-        StatPresetMap presetMap = StatPresetMap.PRESET;
+        Unit unit = app.mf.getUnit();
+        int star = app.mf.getUnitStar();
+        int presetIndex = app.setting.board.getPresetIndex(unit, star);
 
         for (JToggleButton starTB : starTBs) {
             starTB.setSelected(starTB == star5TB);
         }
 
-        colorOrangeTB.setSelected(Board.getColor(name) == Chip.COLOR_ORANGE);
-        colorBlueTB.setSelected(Board.getColor(name) == Chip.COLOR_BLUE);
+        colorOrangeTB.setSelected(unit.getColor() == Unit.Color.ORANGE);
+        colorBlueTB.setSelected(unit.getColor() == Unit.Color.BLUE);
 
-        boolean[] typeArray = presetMap.getTypeFilter(name, 5, presetIndex);
+        boolean[] typeArray = unit.getPresetTypeFilter(presetIndex);
         for (int i = 0; i < typeTBs.length; i++) {
             typeTBs[i].setSelected(typeArray[i]);
         }
 
-        int[] minPtArray = presetMap.get(name, 5, presetIndex).ptMin.toArray();
+        int[] minPtArray = unit.getPresetFilterPtMin(presetIndex).toArray();
         for (int i = 0; i < ptMinSpinners.length; i++) {
             ptMinSpinners[i].setValue(minPtArray[i]);
         }
 
-        int[] maxPtArray = presetMap.get(name, 5, presetIndex).ptMax.toArray();
+        int[] maxPtArray = unit.getPresetFilterPtMax(presetIndex).toArray();
         for (int i = 0; i < ptMaxSpinners.length; i++) {
             ptMaxSpinners[i].setValue(maxPtArray[i]);
         }
@@ -748,7 +741,7 @@ public class FilterDialog extends JDialog {
         for (int i = 0; i < Filter.NUM_STAR; i++) {
             app.filter.setStar(i, starTBs[i].isSelected());
         }
-        for (int i = 0; i < Filter.NUM_COLOR; i++) {
+        for (int i = 0; i < Unit.Color.values().length; i++) {
             app.filter.setColor(i, colorTBs[i].isSelected());
         }
         for (int i = 0; i < Filter.NUM_TYPE; i++) {

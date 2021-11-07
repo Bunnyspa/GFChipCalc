@@ -4,13 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-/**
- *
- * @author Bunnyspa
- * @param <KA>
- * @param <KB>
- * @param <V>
- */
 public class DoubleKeyHashMap<KA, KB, V> {
 
     private final Map<KA, Map<KB, V>> data = new HashMap<>();

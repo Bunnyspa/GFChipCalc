@@ -11,10 +11,6 @@ import main.puzzle.Board;
 import main.puzzle.Chip;
 import main.setting.Setting;
 
-/**
- *
- * @author Bunnyspa
- */
 public class Progress {
 
     // Progress

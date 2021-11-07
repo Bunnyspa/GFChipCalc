@@ -1,9 +1,5 @@
 package main.ui.shortcut;
 
-/**
- *
- * @author Bunnyspa
- */
 public class Shortcut {
 
     private final int keyCode;

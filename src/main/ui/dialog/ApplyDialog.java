@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import main.App;
+import main.data.Unit;
 import main.puzzle.Chip;
 import main.puzzle.Tag;
 import main.ui.component.TagPanel;
@@ -15,10 +16,6 @@ import main.ui.resource.AppImage;
 import main.ui.resource.AppText;
 import main.util.Fn;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ApplyDialog extends JDialog {
 
     private final App app;
@@ -307,11 +304,11 @@ public class ApplyDialog extends JDialog {
     }//GEN-LAST:event_cancelButtonActionPerformed
 
     private void colorOrangeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorOrangeButtonActionPerformed
-        confirmAndApply((t) -> t.setColor(Chip.COLOR_ORANGE));
+        confirmAndApply((t) -> t.setColor(Unit.Color.ORANGE));
     }//GEN-LAST:event_colorOrangeButtonActionPerformed
 
     private void colorBlueButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorBlueButtonActionPerformed
-        confirmAndApply((t) -> t.setColor(Chip.COLOR_BLUE));
+        confirmAndApply((t) -> t.setColor(Unit.Color.BLUE));
     }//GEN-LAST:event_colorBlueButtonActionPerformed
 
     private void levelMinButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_levelMinButtonActionPerformed

@@ -1,9 +1,5 @@
 package main.json;
 
-/**
- *
- * @author Bunnyspa
- */
 public class NullJson implements Json {
 
     @Override

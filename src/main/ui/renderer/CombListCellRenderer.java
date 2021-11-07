@@ -10,10 +10,6 @@ import main.puzzle.Board;
 import main.puzzle.assembly.ChipFreq;
 import main.util.Fn;
 
-/**
- *
- * @author Bunnyspa
- */
 public class CombListCellRenderer extends DefaultListCellRenderer {
 
     private final App app;

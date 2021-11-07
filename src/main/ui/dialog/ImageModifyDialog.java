@@ -9,6 +9,7 @@ import javax.swing.JDialog;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 import main.App;
+import main.data.Unit;
 import main.puzzle.Board;
 import main.puzzle.Chip;
 import main.puzzle.Shape;
@@ -19,10 +20,6 @@ import main.ui.resource.AppImage;
 import main.ui.resource.AppText;
 import main.util.Fn;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ImageModifyDialog extends JDialog {
 
     private final App app;
@@ -30,7 +27,7 @@ public class ImageModifyDialog extends JDialog {
 
     private Shape shape = Shape.DEFAULT;
     private int star = 5;
-    private int color = Chip.COLOR_ORANGE;
+    private Unit.Color color = Unit.Color.ORANGE;
     private int[] pt = new int[4];
     private int level = 0;
     private int rotation = 0;
@@ -234,11 +231,11 @@ public class ImageModifyDialog extends JDialog {
     }
 
     private void cycleColor() {
-        setColor((color + 1) % AppText.TEXT_MAP_COLOR.size());
+        setColor(Unit.Color.byId((color.id + 1) % Unit.Color.values().length));
     }
 
-    private void setColor(int c) {
-        color = c;
+    private void setColor(Unit.Color color) {
+        this.color = color;
         setColorText();
     }
 

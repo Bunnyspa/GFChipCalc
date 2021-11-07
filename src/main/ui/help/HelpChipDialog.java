@@ -16,7 +16,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import main.App;
-import main.puzzle.Board;
+import main.data.Unit;
 import main.puzzle.Chip;
 import main.puzzle.Shape;
 import main.puzzle.Stat;
@@ -29,10 +29,6 @@ import main.util.Fn;
 import main.util.Rational;
 import main.util.Ref;
 
-/**
- *
- * @author Bunnyspa
- */
 public class HelpChipDialog extends JDialog {
 
     private static final double CHIP_SIZE_FACTOR = 0.7;
@@ -110,8 +106,8 @@ public class HelpChipDialog extends JDialog {
         fiveBList.setFixedCellHeight(chipHeight);
         fiveBScrollPane.setPreferredSize(new Dimension(chipWidth * 3 + GAP * 2, chipHeight * 3 + GAP * 2));
 
-        for (String boardName : Board.NAMES) {
-            resonanceBoardComboBox.addItem(boardName);
+        for (Unit unit : Unit.values()) {
+            resonanceBoardComboBox.addItem(unit);
         }
 
         closeButton.setText(app.getText(AppText.ACTION_CLOSE));
@@ -141,7 +137,7 @@ public class HelpChipDialog extends JDialog {
         resonanceTable.getTableHeader().setUI(null);
 
         resonanceTM.addRow(resonanceCols);
-        int resonanceRowCount = Board.MAP_STAT_RESONANCE.size(Board.NAMES[0]);
+        int resonanceRowCount = Unit.BGM71.GetResonanceStats().size();
         resonanceTablePanel.setPreferredSize(new Dimension(200, resonanceTable.getRowHeight() * (resonanceRowCount + 1) + GAP));
 
         percTable.setModel(percTM);
@@ -292,11 +288,11 @@ public class HelpChipDialog extends JDialog {
     }
 
     private void updateResonance() {
-        String name = resonanceBoardComboBox.getItemAt(resonanceBoardComboBox.getSelectedIndex());
+        Unit unit = resonanceBoardComboBox.getItemAt(resonanceBoardComboBox.getSelectedIndex());
 
-        int color = Board.getColor(name);
+        Unit.Color color = unit.getColor();
         boardLabel.setText(app.getText(AppText.CHIP_COLOR) + ": " + app.getText(AppText.TEXT_MAP_COLOR.get(color)));
-        Set<Integer> steps = Board.MAP_STAT_RESONANCE.keySet(name);
+        Set<Integer> steps = unit.GetResonanceStats().keySet();
 
         List<Integer> resonanceSteps = new ArrayList<>(steps);
         resonanceSteps.sort(Collections.reverseOrder());
@@ -304,7 +300,7 @@ public class HelpChipDialog extends JDialog {
         resonanceTM.setRowCount(1);
         if (resonanceType == SECTION) {
             resonanceSteps.forEach((step) -> {
-                Stat stat = Board.MAP_STAT_RESONANCE.get(name, step);
+                Stat stat = unit.GetResonanceStats().get(step);
                 resonanceTM.addRow(new Integer[]{step, stat.dmg, stat.brk, stat.hit, stat.rld});
             });
         } else {
@@ -312,7 +308,7 @@ public class HelpChipDialog extends JDialog {
                 List<Stat> stats = new ArrayList<>();
                 for (Integer key : steps) {
                     if (key <= step) {
-                        stats.add(Board.MAP_STAT_RESONANCE.get(name, key));
+                        stats.add(unit.GetResonanceStats().get(key));
                     }
                 }
                 Stat s = new Stat(stats);
@@ -685,7 +681,7 @@ public class HelpChipDialog extends JDialog {
     private javax.swing.JPanel multiplierPanel;
     private javax.swing.JTable percTable;
     private javax.swing.JPanel percTablePanel;
-    private javax.swing.JComboBox<String> resonanceBoardComboBox;
+    private javax.swing.JComboBox<Unit> resonanceBoardComboBox;
     private javax.swing.JButton resonanceButton;
     private javax.swing.JTable resonanceTable;
     private javax.swing.JPanel resonanceTablePanel;

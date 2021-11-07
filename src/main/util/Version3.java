@@ -1,9 +1,5 @@
 package main.util;
 
-/**
- *
- * @author Bunnyspa
- */
 public class Version3 {
 
     public final int v1, v2, v3;

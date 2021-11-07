@@ -5,10 +5,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- * @author Bunnyspa
- */
 public class NetUtil {
 
     private static final char CR = '\r';

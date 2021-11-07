@@ -5,10 +5,6 @@ import java.util.Set;
 import java.util.UUID;
 import main.util.Fn;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ZDDNode {
 
     private final UUID uuid = UUID.randomUUID();

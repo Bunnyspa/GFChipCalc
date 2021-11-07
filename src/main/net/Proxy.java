@@ -9,10 +9,6 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
-/**
- *
- * @author Bunnyspa
- */
 public class Proxy extends Thread {
 
     public static final int PORT = 8080;

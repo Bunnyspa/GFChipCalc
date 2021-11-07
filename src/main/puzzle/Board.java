@@ -3,25 +3,17 @@ package main.puzzle;
 import java.awt.Point;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import main.data.Unit;
 import main.ui.resource.AppColor;
 import main.ui.resource.AppText;
-import main.util.DoubleKeyHashMap;
 import main.util.Fn;
-import main.util.IO;
 import main.util.Rational;
 
-/**
- *
- * @author Bunnyspa
- */
 public class Board implements Comparable<Board>, Serializable {
 
     public static int UNUSED = -2;
@@ -30,460 +22,7 @@ public class Board implements Comparable<Board>, Serializable {
     public static int HEIGHT = 8;
     public static int WIDTH = 8;
 
-    public static final String NAME_BGM71 = "BGM-71";
-    public static final String NAME_AGS30 = "AGS-30";
-    public static final String NAME_2B14 = "2B14";
-    public static final String NAME_M2 = "M2";
-    public static final String NAME_AT4 = "AT4";
-    public static final String NAME_QLZ04 = "QLZ-04";
-    public static final String NAME_MK153 = "Mk 153";
-    public static final String NAME_PP93 = "PP-93";
-    public static String[] NAMES = {NAME_BGM71, NAME_AGS30, NAME_2B14, NAME_M2, NAME_AT4, NAME_QLZ04, NAME_MK153, NAME_PP93};
-
-    public static String getTrueName(String fileName) {
-        for (String name : NAMES) {
-            if (IO.toFileName(name).equals(fileName)) {
-                return name;
-            }
-        }
-        return "";
-    }
-
-    private static final Map<String, Integer[][]> MAP_MATRIX = new HashMap<String, Integer[][]>() // <editor-fold defaultstate="collapsed">
-    {
-        {
-            put(NAME_BGM71, new Integer[][]{
-                {6, 6, 6, 6, 6, 6, 6, 6},
-                {6, 4, 4, 4, 3, 3, 3, 6},
-                {6, 4, 1, 1, 1, 1, 2, 6},
-                {6, 2, 1, 1, 1, 1, 2, 6},
-                {6, 2, 1, 1, 1, 1, 2, 6},
-                {6, 2, 1, 1, 1, 1, 5, 6},
-                {6, 3, 3, 3, 5, 5, 5, 6},
-                {6, 6, 6, 6, 6, 6, 6, 6}
-            });
-            put(NAME_AGS30, new Integer[][]{
-                {6, 6, 5, 5, 6, 6, 6, 6},
-                {6, 3, 3, 2, 2, 6, 6, 6},
-                {4, 3, 1, 1, 1, 1, 6, 6},
-                {4, 2, 1, 1, 1, 1, 2, 6},
-                {6, 2, 1, 1, 1, 1, 2, 4},
-                {6, 6, 1, 1, 1, 1, 3, 4},
-                {6, 6, 6, 2, 2, 3, 3, 6},
-                {6, 6, 6, 6, 5, 5, 6, 6}
-            });
-            put(NAME_2B14, new Integer[][]{
-                {6, 6, 6, 6, 6, 6, 6, 6},
-                {6, 6, 5, 6, 6, 5, 6, 6},
-                {6, 2, 1, 1, 1, 1, 3, 6},
-                {4, 2, 1, 1, 1, 1, 3, 4},
-                {4, 2, 1, 1, 1, 1, 3, 4},
-                {6, 2, 1, 1, 1, 1, 3, 6},
-                {6, 6, 5, 6, 6, 5, 6, 6},
-                {6, 6, 6, 6, 6, 6, 6, 6}
-            });
-            put(NAME_M2, new Integer[][]{
-                {5, 3, 3, 6, 6, 6, 6, 5},
-                {6, 3, 1, 1, 6, 6, 2, 4},
-                {6, 6, 1, 1, 6, 2, 2, 4},
-                {6, 6, 1, 1, 1, 1, 2, 6},
-                {6, 2, 1, 1, 1, 1, 6, 6},
-                {4, 2, 2, 6, 1, 1, 6, 6},
-                {4, 2, 6, 6, 1, 1, 3, 6},
-                {5, 6, 6, 6, 6, 3, 3, 5}
-            });
-            put(NAME_AT4, new Integer[][]{
-                {6, 6, 6, 1, 1, 6, 6, 6},
-                {6, 6, 1, 1, 1, 1, 6, 6},
-                {6, 1, 1, 1, 1, 1, 1, 6},
-                {2, 1, 1, 6, 6, 1, 1, 3},
-                {2, 2, 2, 6, 6, 3, 3, 3},
-                {6, 2, 2, 4, 4, 3, 3, 6},
-                {6, 6, 5, 4, 4, 5, 6, 6},
-                {6, 6, 6, 5, 5, 6, 6, 6}
-            });
-            put(NAME_QLZ04, new Integer[][]{
-                {6, 6, 6, 6, 6, 6, 6, 6},
-                {5, 3, 6, 6, 6, 6, 3, 5},
-                {5, 3, 3, 6, 6, 3, 3, 5},
-                {4, 1, 1, 1, 1, 1, 1, 4},
-                {4, 1, 1, 1, 1, 1, 1, 4},
-                {6, 1, 1, 2, 2, 1, 1, 6},
-                {6, 6, 2, 2, 2, 2, 6, 6},
-                {6, 6, 6, 2, 2, 6, 6, 6}
-            });
-            put(NAME_MK153, new Integer[][]{
-                {6, 6, 2, 2, 6, 6, 6, 6},
-                {6, 6, 2, 2, 5, 5, 5, 6},
-                {6, 6, 2, 2, 4, 4, 4, 6},
-                {6, 6, 2, 2, 3, 3, 4, 6},
-                {1, 1, 1, 1, 1, 1, 3, 3},
-                {1, 1, 1, 1, 1, 1, 3, 3},
-                {6, 5, 1, 1, 6, 6, 6, 6},
-                {6, 6, 1, 1, 6, 6, 6, 6}
-            });
-            put(NAME_PP93, new Integer[][]{
-                {6, 6, 6, 5, 5, 6, 6, 6},
-                {6, 6, 6, 1, 1, 6, 6, 6},
-                {6, 6, 3, 1, 1, 3, 6, 6},
-                {4, 2, 1, 1, 1, 1, 1, 4},
-                {4, 2, 1, 1, 1, 1, 1, 4},
-                {6, 6, 3, 1, 1, 3, 6, 6},
-                {6, 6, 6, 2, 2, 6, 6, 6},
-                {6, 6, 6, 5, 5, 6, 6, 6}
-            });
-        }
-    }; // </editor-fold>
-    private static final Map<String, Integer> MAP_COLOR = new HashMap<String, Integer>() // <editor-fold defaultstate="collapsed">
-    {
-        {
-            put(NAME_BGM71, Chip.COLOR_BLUE);
-            put(NAME_AGS30, Chip.COLOR_ORANGE);
-            put(NAME_2B14, Chip.COLOR_ORANGE);
-            put(NAME_M2, Chip.COLOR_BLUE);
-            put(NAME_AT4, Chip.COLOR_BLUE);
-            put(NAME_QLZ04, Chip.COLOR_ORANGE);
-            put(NAME_MK153, Chip.COLOR_BLUE);
-            put(NAME_PP93, Chip.COLOR_ORANGE);
-        }
-    }; // </editor-fold>
-    private static final Map<String, Stat> MAP_STAT_UNIT = new HashMap<String, Stat>() // <editor-fold defaultstate="collapsed"> 
-    {
-        {
-            put(NAME_BGM71, new Stat(155, 402, 349, 83));
-            put(NAME_AGS30, new Stat(78, 144, 198, 386));
-            put(NAME_2B14, new Stat(152, 58, 135, 160));
-            put(NAME_M2, new Stat(113, 49, 119, 182));
-            put(NAME_AT4, new Stat(113, 261, 284, 134));
-            put(NAME_QLZ04, new Stat(77, 136, 188, 331));
-            put(NAME_MK153, new Stat(107, 224, 233, 107));
-            put(NAME_PP93, new Stat(138, 67, 182, 166));
-        }
-    }; // </editor-fold>
-    private static final Map<String, Stat[]> MAP_STAT_CHIP = new HashMap<String, Stat[]>() // <editor-fold defaultstate="collapsed"> 
-    {
-        {
-            put(NAME_BGM71, new Stat[]{
-                new Stat(95, 165, 96, 23),
-                new Stat(114, 198, 115, 28),
-                new Stat(133, 231, 134, 32),
-                new Stat(162, 280, 162, 39),
-                new Stat(190, 329, 191, 46)
-            });
-            put(NAME_AGS30, new Stat[]{
-                new Stat(53, 65, 60, 117),
-                new Stat(64, 78, 72, 140),
-                new Stat(75, 91, 84, 163),
-                new Stat(90, 111, 102, 198),
-                new Stat(106, 130, 120, 233)
-            });
-            put(NAME_2B14, new Stat[]{
-                new Stat(114, 29, 45, 54),
-                new Stat(136, 35, 54, 64),
-                new Stat(159, 41, 63, 75),
-                new Stat(193, 49, 77, 91),
-                new Stat(227, 58, 90, 107)
-            });
-            put(NAME_M2, new Stat[]{
-                new Stat(103, 30, 49, 74),
-                new Stat(124, 36, 59, 89),
-                new Stat(145, 42, 68, 104),
-                new Stat(176, 51, 83, 126),
-                new Stat(206, 60, 97, 148)
-            });
-            put(NAME_AT4, new Stat[]{
-                new Stat(85, 131, 95, 45),
-                new Stat(102, 157, 114, 54),
-                new Stat(118, 183, 133, 63),
-                new Stat(144, 222, 161, 76),
-                new Stat(169, 261, 190, 90)
-            });
-            put(NAME_QLZ04, new Stat[]{
-                new Stat(61, 72, 66, 117),
-                new Stat(73, 86, 79, 140),
-                new Stat(85, 100, 93, 163),
-                new Stat(103, 122, 112, 198),
-                new Stat(122, 143, 132, 233)
-            });
-            put(NAME_MK153, new Stat[]{
-                new Stat(98, 137, 95, 44),
-                new Stat(117, 164, 114, 52),
-                new Stat(137, 191, 133, 61),
-                new Stat(166, 232, 162, 74),
-                new Stat(195, 273, 190, 87)
-            });
-            put(NAME_PP93, new Stat[]{
-                new Stat(85, 28, 50, 46),
-                new Stat(102, 33, 60, 55),
-                new Stat(118, 38, 70, 64),
-                new Stat(144, 47, 85, 77),
-                new Stat(169, 55, 100, 91)
-            });
-        }
-    }; // </editor-fold>
-    public static final DoubleKeyHashMap<String, Integer, Stat> MAP_STAT_RESONANCE = new DoubleKeyHashMap<String, Integer, Stat>() // <editor-fold defaultstate="collapsed">
-    {
-        {
-            put(NAME_BGM71, new HashMap<Integer, Stat>() {
-                {
-                    put(4, new Stat(16, 0, 6, 0));
-                    put(10, new Stat(0, 8, 0, 3));
-                    put(16, new Stat(36, 0, 8, 0));
-                    put(22, new Stat(0, 14, 10, 0));
-                    put(28, new Stat(46, 0, 0, 6));
-                    put(32, new Stat(0, 18, 14, 0));
-                    put(36, new Stat(60, 26, 0, 0));
-                }
-            });
-            put(NAME_AGS30, new HashMap<Integer, Stat>() {
-                {
-                    put(4, new Stat(8, 0, 4, 0));
-                    put(10, new Stat(0, 4, 0, 8));
-                    put(16, new Stat(14, 0, 6, 0));
-                    put(24, new Stat(0, 8, 0, 10));
-                    put(30, new Stat(26, 0, 12, 0));
-                    put(34, new Stat(0, 14, 0, 12));
-                    put(38, new Stat(36, 0, 0, 16));
-                }
-            });
-            put(NAME_2B14, new HashMap<Integer, Stat>() {
-                {
-                    put(4, new Stat(16, 0, 6, 0));
-                    put(10, new Stat(0, 3, 0, 5));
-                    put(16, new Stat(36, 0, 0, 0));
-                    put(20, new Stat(0, 4, 8, 0));
-                    put(24, new Stat(58, 0, 0, 7));
-                    put(28, new Stat(0, 8, 0, 10));
-                    put(32, new Stat(82, 0, 8, 0));
-                }
-            });
-            put(NAME_M2, new HashMap<Integer, Stat>() {
-                {
-                    put(4, new Stat(13, 0, 6, 0));
-                    put(10, new Stat(0, 3, 0, 6));
-                    put(16, new Stat(30, 0, 0, 0));
-                    put(20, new Stat(0, 4, 8, 0));
-                    put(24, new Stat(48, 0, 0, 9));
-                    put(28, new Stat(0, 8, 0, 13));
-                    put(32, new Stat(68, 0, 8, 0));
-                }
-            });
-            put(NAME_AT4, new HashMap<Integer, Stat>() {
-                {
-                    put(4, new Stat(12, 0, 5, 0));
-                    put(10, new Stat(0, 5, 0, 5));
-                    put(16, new Stat(27, 0, 7, 0));
-                    put(22, new Stat(0, 10, 9, 0));
-                    put(28, new Stat(35, 0, 0, 10));
-                    put(32, new Stat(0, 12, 12, 0));
-                    put(36, new Stat(46, 18, 0, 0));
-                }
-            });
-            put(NAME_QLZ04, new HashMap<Integer, Stat>() {
-                {
-                    put(4, new Stat(9, 0, 6, 0));
-                    put(10, new Stat(0, 6, 0, 6));
-                    put(16, new Stat(15, 0, 6, 0));
-                    put(24, new Stat(0, 9, 0, 9));
-                    put(30, new Stat(28, 0, 12, 0));
-                    put(34, new Stat(0, 15, 0, 10));
-                    put(38, new Stat(38, 0, 0, 14));
-                }
-            });
-            put(NAME_MK153, new HashMap<Integer, Stat>() {
-                {
-                    put(4, new Stat(24, 0, 6, 0));
-                    put(10, new Stat(0, 12, 0, 10));
-                    put(16, new Stat(24, 0, 6, 0));
-                    put(24, new Stat(0, 12, 12, 0));
-                    put(30, new Stat(32, 0, 0, 10));
-                    put(34, new Stat(0, 18, 12, 0));
-                    put(38, new Stat(32, 18, 0, 0));
-                }
-            });
-            put(NAME_PP93, new HashMap<Integer, Stat>() {
-                {
-                    put(10, new Stat(10, 3, 8, 8));
-                    put(15, new Stat(0, 4, 15, 20));
-                    put(18, new Stat(10, 8, 15, 18));
-                    put(26, new Stat(0, 0, 30, 0));
-                }
-            });
-        }
-    }; // </editor-fold>
-    private static final Map<String, Stat[]> MAP_STAT_ITERATION = new HashMap<String, Stat[]>() // <editor-fold defaultstate="collapsed">
-    {
-        {
-            put(NAME_BGM71, new Stat[]{
-                new Stat(4, 0, 6, 0),
-                new Stat(0, 10, 9, 0),
-                new Stat(5, 0, 0, 6),
-                new Stat(0, 12, 10, 0),
-                new Stat(7, 15, 0, 0),
-                new Stat(8, 0, 12, 0),
-                new Stat(0, 16, 14, 0),
-                new Stat(9, 0, 0, 10),
-                new Stat(0, 18, 18, 0),
-                new Stat(12, 24, 0, 0)
-            });
-            put(NAME_AGS30, new Stat[]{
-                new Stat(2, 0, 5, 0),
-                new Stat(0, 4, 0, 8),
-                new Stat(3, 0, 8, 0),
-                new Stat(0, 6, 0, 12),
-                new Stat(3, 0, 0, 13),
-                new Stat(4, 0, 12, 0),
-                new Stat(0, 10, 0, 12),
-                new Stat(4, 0, 16, 0),
-                new Stat(0, 16, 0, 16),
-                new Stat(8, 0, 0, 18)
-            });
-            put(NAME_2B14, new Stat[]{
-                new Stat(2, 0, 4, 0),
-                new Stat(2, 3, 0, 4),
-                new Stat(3, 0, 6, 0),
-                new Stat(4, 4, 0, 4),
-                new Stat(5, 0, 0, 5),
-                new Stat(6, 0, 9, 0),
-                new Stat(7, 3, 0, 6),
-                new Stat(7, 0, 10, 0),
-                new Stat(4, 5, 0, 9),
-                new Stat(10, 0, 0, 6)
-            });
-            put(NAME_M2, new Stat[]{
-                new Stat(2, 0, 4, 0),
-                new Stat(1, 3, 0, 5),
-                new Stat(3, 0, 6, 0),
-                new Stat(3, 4, 0, 5),
-                new Stat(4, 0, 0, 6),
-                new Stat(5, 0, 9, 0),
-                new Stat(6, 2, 0, 8),
-                new Stat(6, 0, 9, 0),
-                new Stat(3, 5, 0, 11),
-                new Stat(8, 0, 0, 8)
-            });
-            put(NAME_AT4, new Stat[]{
-                new Stat(3, 0, 5, 0),
-                new Stat(0, 7, 8, 0),
-                new Stat(4, 0, 0, 10),
-                new Stat(0, 8, 9, 0),
-                new Stat(5, 10, 0, 0),
-                new Stat(6, 0, 10, 0),
-                new Stat(0, 11, 12, 0),
-                new Stat(7, 0, 0, 17),
-                new Stat(0, 12, 15, 0),
-                new Stat(9, 16, 0, 0)
-            });
-            put(NAME_QLZ04, new Stat[]{
-                new Stat(3, 0, 3, 0),
-                new Stat(2, 3, 0, 4),
-                new Stat(4, 0, 6, 0),
-                new Stat(3, 3, 0, 4),
-                new Stat(5, 0, 0, 5),
-                new Stat(5, 0, 10, 0),
-                new Stat(6, 4, 0, 6),
-                new Stat(6, 0, 10, 0),
-                new Stat(4, 6, 0, 10),
-                new Stat(8, 0, 0, 8)
-            });
-            put(NAME_MK153, new Stat[]{
-                new Stat(4, 0, 4, 0),
-                new Stat(0, 8, 6, 0),
-                new Stat(6, 0, 0, 10),
-                new Stat(0, 8, 8, 0),
-                new Stat(6, 6, 0, 0),
-                new Stat(10, 0, 10, 0),
-                new Stat(0, 10, 10, 0),
-                new Stat(10, 0, 0, 10),
-                new Stat(0, 12, 12, 0),
-                new Stat(16, 16, 0, 0)
-            });
-            put(NAME_PP93, new Stat[]{
-                new Stat(2, 0, 4, 0),
-                new Stat(1, 3, 0, 5),
-                new Stat(3, 0, 6, 0),
-                new Stat(3, 4, 0, 5),
-                new Stat(4, 0, 0, 6),
-                new Stat(5, 0, 9, 0),
-                new Stat(6, 2, 0, 8),
-                new Stat(6, 0, 9, 0),
-                new Stat(3, 5, 0, 11),
-                new Stat(8, 0, 0, 8)
-            });
-        }
-    }; // </editor-fold>
-    private static final DoubleKeyHashMap<String, Integer, Integer> MAP_ROTATIONSTEP = new DoubleKeyHashMap<String, Integer, Integer>() // <editor-fold defaultstate="collapsed">
-    {
-        {
-            // generateRotationStep();
-            put(NAME_BGM71, 1, 1);
-            put(NAME_BGM71, 2, 2);
-            put(NAME_BGM71, 3, 2);
-            put(NAME_BGM71, 4, 4);
-            put(NAME_BGM71, 5, 1);
-
-            put(NAME_AGS30, 1, 1);
-            put(NAME_AGS30, 2, 1);
-            put(NAME_AGS30, 3, 2);
-            put(NAME_AGS30, 4, 2);
-            put(NAME_AGS30, 5, 2);
-
-            put(NAME_2B14, 1, 1);
-            put(NAME_2B14, 2, 2);
-            put(NAME_2B14, 3, 2);
-            put(NAME_2B14, 4, 2);
-            put(NAME_2B14, 5, 2);
-
-            put(NAME_M2, 1, 2);
-            put(NAME_M2, 2, 2);
-            put(NAME_M2, 3, 2);
-            put(NAME_M2, 4, 2);
-            put(NAME_M2, 5, 2);
-
-            put(NAME_AT4, 1, 4);
-            put(NAME_AT4, 2, 4);
-            put(NAME_AT4, 3, 4);
-            put(NAME_AT4, 4, 4);
-            put(NAME_AT4, 5, 1);
-
-            put(NAME_QLZ04, 1, 4);
-            put(NAME_QLZ04, 2, 4);
-            put(NAME_QLZ04, 3, 4);
-            put(NAME_QLZ04, 4, 4);
-            put(NAME_QLZ04, 5, 4);
-
-            put(NAME_MK153, 1, 4);
-            put(NAME_MK153, 2, 4);
-            put(NAME_MK153, 3, 4);
-            put(NAME_MK153, 4, 4);
-            put(NAME_MK153, 5, 4);
-
-            put(NAME_PP93, 1, 4);
-            put(NAME_PP93, 2, 1);
-            put(NAME_PP93, 3, 1);
-            put(NAME_PP93, 4, 2);
-            put(NAME_PP93, 5, 1);
-        }
-    };
-
-    private static void generateRotationStep() {
-        for (String name : NAMES) {
-            for (int star = 1; star <= 5; star++) {
-                PuzzleMatrix<Integer> unrotated = initMatrix(name, star);
-                for (int i = 1; i <= 4; i++) {
-                    PuzzleMatrix<Integer> b = initMatrix(name, star);
-                    b.rotateContent(i, UNUSED);
-                    if (unrotated.equals(b)) {
-                        System.out.println("put(\"" + name + "\"," + star + "," + i + ");");
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    // </editor-fold>
-
-    private final String name;
+    private final Unit unit;
     private final int star;
     private List<Chip> chips;
     private PuzzleMatrix<Integer> matrix;
@@ -510,7 +49,7 @@ public class Board implements Comparable<Board>, Serializable {
 
     // Combinator - fitness
     public Board(Board board) {
-        this.name = board.name;
+        this.unit = board.unit;
         this.star = board.star;
 
         this.chips = new ArrayList<>();
@@ -529,14 +68,14 @@ public class Board implements Comparable<Board>, Serializable {
     }
 
     // Combination File
-    public Board(String name, int star, Stat maxStat, List<Chip> chips_, List<Point> chipLocs) {
-        this.name = name;
+    public Board(Unit unit, int star, Stat maxStat, List<Chip> chips_, List<Point> chipLocs) {
+        this.unit = unit;
         this.star = star;
 
         this.chips = new ArrayList<>(chips_);
         colorChips();
 
-        this.matrix = toPlacement(name, star, chips, chipLocs);
+        this.matrix = toPlacement(unit, star, chips, chipLocs);
         this.maxStat = maxStat;
 
         this.stat = Stat.chipStatSum(chips);
@@ -552,13 +91,13 @@ public class Board implements Comparable<Board>, Serializable {
     }
 
     // Board Template
-    public Board(String name, int star, Stat maxStat, List<Chip> candidates, BoardTemplate template) {
-        this.name = name;
+    public Board(Unit unit, int star, Stat maxStat, List<Chip> candidates, BoardTemplate template) {
+        this.unit = unit;
         this.star = star;
 
         int rotation = 0;
         int min = candidates.size();
-        for (int r = 0; r < 4; r += MAP_ROTATIONSTEP.get(name, star)) {
+        for (int r = 0; r < 4; r += unit.getRotationStep(star)) {
             int count = template.getNumRotationNeeded(r, candidates);
             if (count < min) {
                 min = count;
@@ -627,8 +166,8 @@ public class Board implements Comparable<Board>, Serializable {
     }
 
     // <editor-fold defaultstate="collapsed" desc="Name">
-    public String getName() {
-        return name;
+    public Unit getUnit() {
+        return unit;
     }
     // </editor-fold>
 
@@ -670,15 +209,8 @@ public class Board implements Comparable<Board>, Serializable {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Color">
-    public final int getColor() {
-        return MAP_COLOR.get(name);
-    }
-
-    public static int getColor(String name) {
-        if (MAP_COLOR.containsKey(name)) {
-            return MAP_COLOR.get(name);
-        }
-        return -1;
+    public final Unit.Color getColor() {
+        return unit.getColor();
     }
     // </editor-fold>
 
@@ -759,15 +291,15 @@ public class Board implements Comparable<Board>, Serializable {
         return pt;
     }
 
-    public static Stat getMaxPt(String name, int star) {
-        return getMaxPt(name, star, getMaxStat(name, star));
+    public static Stat getMaxPt(Unit unit, int star) {
+        return getMaxPt(unit, star, getMaxStat(unit, star));
     }
 
-    public static Stat getMaxPt(String name, int star, Stat stat) {
+    public static Stat getMaxPt(Unit unit, int star, Stat stat) {
         int[] statArray = stat.toArray();
         int[] optimalPtArray = new int[4];
 
-        for (Integer nChip : get56ChipCount(name, star)) {
+        for (Integer nChip : get56ChipCount(unit, star)) {
             for (int i = 0; i < 4; i++) {
                 int[] dist = getPtDistribution(Chip.RATES[i], nChip, statArray[i]);
                 int total = 0;
@@ -780,7 +312,7 @@ public class Board implements Comparable<Board>, Serializable {
             }
         }
 
-        int residue = getCellCount(name, star)
+        int residue = getCellCount(unit, star)
                 - (optimalPtArray[0]
                 + optimalPtArray[1]
                 + optimalPtArray[2]
@@ -811,11 +343,11 @@ public class Board implements Comparable<Board>, Serializable {
     }
 
     public Stat getOrigMaxStat() {
-        return getMaxStat(name, star);
+        return getMaxStat(unit, star);
     }
 
-    public static Stat getMaxStat(String name, int star) {
-        return MAP_STAT_CHIP.get(name)[Fn.limit(star - 1, 0, MAP_STAT_CHIP.get(name).length)];
+    public static Stat getMaxStat(Unit unit, int star) {
+        return unit.getBoardStats()[Fn.limit(star - 1, 0, unit.getBoardStats().length)];
     }
     // </editor-fold>
 
@@ -863,10 +395,6 @@ public class Board implements Comparable<Board>, Serializable {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="HOC, Resonance, and Version">
-    public static Stat getHOCStat(String name) {
-        return MAP_STAT_UNIT.get(name);
-    }
-
     public Stat getResonance() {
         int numCell = 0;
         for (Chip chip : chips) {
@@ -876,18 +404,11 @@ public class Board implements Comparable<Board>, Serializable {
         }
 
         List<Stat> stats = new ArrayList<>();
-        for (int key : MAP_STAT_RESONANCE.keySet(name)) {
+        for (int key : unit.GetResonanceStats().keySet()) {
             if (key <= numCell) {
-                stats.add(MAP_STAT_RESONANCE.get(name, key));
+                stats.add(unit.GetResonanceStats().get(key));
             }
         }
-        return new Stat(stats);
-    }
-
-    public static Stat getVersionStat(String name, int v) {
-        List<Stat> stats = new ArrayList<>(v);
-        Stat[] array = MAP_STAT_ITERATION.get(name);
-        stats.addAll(Arrays.asList(array).subList(0, v));
         return new Stat(stats);
     }
     // </editor-fold>
@@ -919,8 +440,8 @@ public class Board implements Comparable<Board>, Serializable {
         return out;
     }
 
-    private static List<Integer> get56ChipCount(String name, int star) {
-        int nCell = getCellCount(name, star);
+    private static List<Integer> get56ChipCount(Unit unit, int star) {
+        int nCell = getCellCount(unit, star);
         List<Integer> out = new ArrayList<>();
         for (int nSix = 0; nSix < nCell / 6; nSix++) {
             int rest = nCell - nSix * 6;
@@ -1006,8 +527,8 @@ public class Board implements Comparable<Board>, Serializable {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Matrix and Cells">
-    public static PuzzleMatrix<Integer> initMatrix(String name, int star) {
-        PuzzleMatrix<Integer> matrix = new PuzzleMatrix<>(MAP_MATRIX.get(name));
+    public static PuzzleMatrix<Integer> initMatrix(Unit unit, int star) {
+        PuzzleMatrix<Integer> matrix = new PuzzleMatrix<>(unit.getGrid());
         for (int r = 0; r < matrix.getNumRow(); r++) {
             for (int c = 0; c < matrix.getNumCol(); c++) {
                 matrix.set(r, c, matrix.get(r, c) <= star ? EMPTY : UNUSED);
@@ -1028,12 +549,12 @@ public class Board implements Comparable<Board>, Serializable {
         return matrix.getPivot(i);
     }
 
-    public static int getCellCount(String name, int star) {
-        PuzzleMatrix<Integer> s = initMatrix(name, star);
+    public static int getCellCount(Unit unit, int star) {
+        PuzzleMatrix<Integer> s = initMatrix(unit, star);
         return s.getNumNotContaining(UNUSED);
     }
 
-    public static boolean rs_isValid(String name, int star, String data) {
+    public static boolean rs_isValid(Unit unit, int star, String data) {
         String[] split = data.split(";");
         String[] shapeStrs = split[0].split(",");
         Integer[] rotations = Stream.of(split[1].split(","))
@@ -1043,7 +564,7 @@ public class Board implements Comparable<Board>, Serializable {
                 .map((s) -> s.split("\\."))
                 .map((sp) -> new Point(Integer.valueOf(sp[0]), Integer.valueOf(sp[1])))
                 .toArray(Point[]::new);
-        PuzzleMatrix<Boolean> board = rs_getBoolMatrix(name, star);
+        PuzzleMatrix<Boolean> board = rs_getBoolMatrix(unit, star);
         for (int i = 0; i < shapeStrs.length; i++) {
             Shape shape = Shape.byId(Integer.parseInt(shapeStrs[i]));
             int rotation = rotations[i];
@@ -1066,15 +587,15 @@ public class Board implements Comparable<Board>, Serializable {
         return true;
     }
 
-    private static PuzzleMatrix<Boolean> rs_getBoolMatrix(String name, int star) {
-        Integer[][] im = MAP_MATRIX.get(name);
-        PuzzleMatrix<Boolean> bm = new PuzzleMatrix<>(HEIGHT, WIDTH, false);
+    private static PuzzleMatrix<Boolean> rs_getBoolMatrix(Unit unit, int star) {
+        Integer[][] levelGrid = unit.getGrid();
+        PuzzleMatrix<Boolean> out = new PuzzleMatrix<>(HEIGHT, WIDTH, false);
         for (int r = 0; r < HEIGHT; r++) {
             for (int c = 0; c < WIDTH; c++) {
-                bm.set(r, c, im[r][c] <= star);
+                out.set(r, c, levelGrid[r][c] <= star);
             }
         }
-        return bm;
+        return out;
     }
 
     private static Set<Point> rs_getPts(Shape shape, int rotation, Point location) {
@@ -1096,7 +617,7 @@ public class Board implements Comparable<Board>, Serializable {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="File">
-    public static PuzzleMatrix<Integer> toPlacement(String name, int star, List<Chip> chips, List<Point> locations) {
+    public static PuzzleMatrix<Integer> toPlacement(Unit unit, int star, List<Chip> chips, List<Point> locations) {
         List<Puzzle> puzzles = new ArrayList<>(chips.size());
         for (int i = 0; i < chips.size(); i++) {
             Chip c = chips.get(i);
@@ -1106,12 +627,12 @@ public class Board implements Comparable<Board>, Serializable {
             puzzles.add(new Puzzle(s, r, l));
         }
 
-        return toPlacement(name, star, puzzles);
+        return toPlacement(unit, star, puzzles);
     }
 
-    public static PuzzleMatrix<Integer> toPlacement(String name, int star, List<Puzzle> puzzles) {
+    public static PuzzleMatrix<Integer> toPlacement(Unit unit, int star, List<Puzzle> puzzles) {
         // Placement
-        PuzzleMatrix<Integer> placement = initMatrix(name, star);
+        PuzzleMatrix<Integer> placement = initMatrix(unit, star);
         for (int i = 0; i < puzzles.size(); i++) {
             PuzzleMatrix<Boolean> matrix = Chip.generateMatrix(puzzles.get(i).shape, puzzles.get(i).rotation);
             Set<Point> pts = matrix.getPoints(true);

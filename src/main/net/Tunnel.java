@@ -3,10 +3,6 @@ package main.net;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-/**
- *
- * @author Bunnyspa
- */
 public class Tunnel extends Thread {
 
     private final InputStream in;

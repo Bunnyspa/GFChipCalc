@@ -12,10 +12,6 @@ import java.util.Random;
 import java.util.Set;
 import main.util.Fn;
 
-/**
- *
- * @author Bunnyspa
- */
 public class Tag implements Serializable, Comparable {
 
     private static final String NAME_DEFAULT = "New Tag";

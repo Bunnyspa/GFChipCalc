@@ -1,9 +1,5 @@
 package main.json;
 
-/**
- *
- * @author Bunnyspa
- */
 public class BooleanJson implements Json {
 
     private final boolean data;

@@ -4,16 +4,12 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import main.ui.resource.AppText;
+import main.data.Unit;
 import main.util.Fn;
 import main.util.IO;
 import main.util.Rational;
 import main.util.Version3;
 
-/**
- *
- * @author Bunnyspa
- */
 public class Chip implements Serializable {
 
     public static final Rational RATE_DMG = new Rational(44, 10);
@@ -21,10 +17,6 @@ public class Chip implements Serializable {
     public static final Rational RATE_HIT = new Rational(71, 10);
     public static final Rational RATE_RLD = new Rational(57, 10);
     public static final Rational[] RATES = {Chip.RATE_DMG, Chip.RATE_BRK, Chip.RATE_HIT, Chip.RATE_RLD};
-
-    public static final int COLOR_NA = -1;
-    public static final int COLOR_ORANGE = 0;
-    public static final int COLOR_BLUE = 1;
 
     public static final boolean COUNTERCLOCKWISE = true;
     public static final boolean CLOCKWISE = false;
@@ -40,7 +32,8 @@ public class Chip implements Serializable {
     private final Shape shape;
 
     private Stat pt;
-    private int initRotation, rotation, initLevel, level, star, color, displayType;
+    private Unit.Color color;
+    private int initRotation, rotation, initLevel, level, star, displayType;
     private int boardIndex = -1;
     private boolean marked;
     private final Set<Tag> tags;
@@ -54,7 +47,7 @@ public class Chip implements Serializable {
     }
 
     // Pool to inventory init
-    public Chip(Chip c, int star, int color) {
+    public Chip(Chip c, int star, Unit.Color color) {
         this.id = UUID.randomUUID().toString();
         shape = c.shape;
         rotation = c.rotation;
@@ -134,7 +127,7 @@ public class Chip implements Serializable {
                 initLevel = level;
             }
 
-            color = data.length > i ? Fn.limit(Integer.parseInt(data[i]), 0, AppText.TEXT_MAP_COLOR.size()) : 0;
+            color = data.length > i ? Unit.Color.byId(Fn.limit(Integer.parseInt(data[i]), 0, Unit.Color.values().length)) : Unit.Color.BLUE;
             i++;
 
             tags = new HashSet<>();
@@ -158,7 +151,7 @@ public class Chip implements Serializable {
 
                 star = data.length > 6 ? Fn.limit(Integer.parseInt(data[6]), 2, 5) : 5;
                 level = data.length > 7 ? Fn.limit(Integer.parseInt(data[7]), 0, LEVEL_MAX) : 0;
-                color = data.length > 8 ? Fn.limit(Integer.parseInt(data[8]), 0, AppText.TEXT_MAP_COLOR.size()) : 0;
+                color = data.length > 8 ? Unit.Color.byId(Fn.limit(Integer.parseInt(data[8]), 0, Unit.Color.values().length)) : Unit.Color.BLUE;
 
                 marked = data.length > 9 && "1".equals(data[9]);
 
@@ -168,7 +161,7 @@ public class Chip implements Serializable {
 
                 star = data.length > 3 ? Fn.limit(Integer.parseInt(data[3]), 2, 5) : 5;
                 level = data.length > 4 ? Fn.limit(Integer.parseInt(data[4]), 0, LEVEL_MAX) : 0;
-                color = data.length > 5 ? Fn.limit(Integer.parseInt(data[5]), 0, AppText.TEXT_MAP_COLOR.size()) : 0;
+                color = data.length > 5 ? Unit.Color.byId(Fn.limit(Integer.parseInt(data[5]), 0, Unit.Color.values().length)) : Unit.Color.BLUE;
 
                 int dmgPt = data.length > 6 ? Fn.limit(Integer.parseInt(data[6]), 0, getMaxPt()) : 0;
                 int brkPt = data.length > 7 ? Fn.limit(Integer.parseInt(data[7]), 0, getMaxPt()) : 0;
@@ -183,7 +176,7 @@ public class Chip implements Serializable {
     }
 
     // ImageProcessor
-    public Chip(Shape shape, int star, int color, Stat pt,
+    public Chip(Shape shape, int star, Unit.Color color, Stat pt,
             int level, int rotation) {
         this.id = UUID.randomUUID().toString();
         this.shape = shape;
@@ -201,7 +194,7 @@ public class Chip implements Serializable {
     }
 
     // json (Inventory)
-    public Chip(String id, Shape shape, int star, int color, Stat pt,
+    public Chip(String id, Shape shape, int star, Unit.Color color, Stat pt,
             int level, int rotation) {
         this.id = id;
         this.shape = shape;
@@ -219,7 +212,7 @@ public class Chip implements Serializable {
     }
 
     public Chip(String id,
-            Shape shape, int star, int color, Stat pt,
+            Shape shape, int star, Unit.Color color, Stat pt,
             int level, int rotation,
             boolean marked, Set<Tag> tags) {
         this.id = id;
@@ -282,11 +275,11 @@ public class Chip implements Serializable {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Color">
-    public void setColor(int color) {
+    public void setColor(Unit.Color color) {
         this.color = color;
     }
 
-    public int getColor() {
+    public Unit.Color getColor() {
         return color;
     }
     // </editor-fold>
@@ -530,9 +523,9 @@ public class Chip implements Serializable {
     }
 
     public boolean containsHOCTagName() {
-        for (String hoc : Board.NAMES) {
+        for (Unit unit : Unit.values()) {
             for (Tag t : tags) {
-                if (hoc.equals(t.getName())) {
+                if (unit.getName().equals(t.getName())) {
                     return true;
                 }
             }

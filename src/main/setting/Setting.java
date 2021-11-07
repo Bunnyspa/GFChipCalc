@@ -4,15 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import main.App;
-import main.puzzle.Chip;
+import main.data.Unit;
 import main.util.IO;
 import main.util.Version2;
 import main.util.Version3;
 
-/**
- *
- * @author Bunnyspa
- */
 public class Setting {
 
     public static final String SECTION_GENERAL = "General";
@@ -49,7 +45,7 @@ public class Setting {
 
     // Pool
     public boolean poolOrder = DESCENDING;
-    public int poolColor = Chip.COLOR_ORANGE;
+    public Unit.Color poolColor = Unit.Color.ORANGE;
     public int poolStar = 5;
     public boolean poolPanelVisible = true;
 
@@ -102,7 +98,7 @@ public class Setting {
                     } else if (line.startsWith("POOL_STAR=")) {
                         poolStar = Integer.valueOf(afterEqual(line));
                     } else if (line.startsWith("POOL_COLOR=")) {
-                        poolColor = Integer.valueOf(afterEqual(line));
+                        poolColor = Unit.Color.byId(Integer.valueOf(afterEqual(line)));
                     } else if (line.startsWith("POOL_VISIBLE=")) {
                         poolPanelVisible = IO.parseBoolean(afterEqual(line));
                     }//
@@ -141,7 +137,7 @@ public class Setting {
 
                 poolOrder = IO.parseBoolean(generalLines.get(2));
                 poolStar = 5 - Integer.valueOf(generalLines.get(3));
-                poolColor = Integer.valueOf(generalLines.get(4));
+                poolColor = Unit.Color.byId(Integer.valueOf(generalLines.get(4)));
 
                 poolPanelVisible = IO.parseBoolean(generalLines.get(5));
                 displayType = Integer.valueOf(generalLines.get(6));

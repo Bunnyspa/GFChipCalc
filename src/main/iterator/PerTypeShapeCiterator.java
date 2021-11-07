@@ -9,14 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import main.data.Unit;
 import main.puzzle.Board;
 import main.puzzle.Chip;
 import main.puzzle.Shape;
 
-/**
- *
- * @author Bunnyspa
- */
 class PerTypeShapeCiterator implements Iterator<List<Shape>> {
 
     private List<List<Shape>> next;
@@ -171,8 +168,8 @@ class PerTypeShapeCiterator implements Iterator<List<Shape>> {
         return num;
     }
 
-    public static List<Map<Shape.Type, Integer>> getTypeCountMaps(String name, int star, Set<Shape.Type> types) {
-        int nCell = Board.getCellCount(name, star);
+    public static List<Map<Shape.Type, Integer>> getTypeCountMaps(Unit unit, int star, Set<Shape.Type> types) {
+        int nCell = Board.getCellCount(unit, star);
         return getTypeCountMaps(nCell, types);
     }
 

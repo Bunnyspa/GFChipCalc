@@ -6,21 +6,18 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.border.TitledBorder;
 import main.App;
+import main.data.Unit;
 import main.puzzle.Board;
 import main.puzzle.Stat;
 import main.ui.resource.AppColor;
 import main.ui.resource.AppText;
 import main.util.Fn;
 
-/**
- *
- * @author Bunnyspa
- */
 public class StatDialog extends JDialog {
 
     private final App app;
     private final Board board;
-    private final String name;
+    private final Unit unit;
     private final int star;
 
     public static void open(App app, Board board) {
@@ -31,7 +28,7 @@ public class StatDialog extends JDialog {
     private StatDialog(App app, Board board) {
         this.app = app;
         this.board = board;
-        name = board.getName();
+        unit = board.getUnit();
         star = board.getStar();
         initComponents();
         init();
@@ -40,12 +37,12 @@ public class StatDialog extends JDialog {
     private void init() {
         initText();
 
-        versionComboBox.setEnabled(star == 5);
+        iterationComboBox.setEnabled(star == 5);
         if (star < 5) {
-            versionComboBox.addItem(Board.getStarHTML_star(star));
+            iterationComboBox.addItem(Board.getStarHTML_star(star));
         } else {
             for (int v = 10; v >= 0; v--) {
-                versionComboBox.addItem(Board.getStarHTML_version(v));
+                iterationComboBox.addItem(Board.getStarHTML_version(v));
             }
         }
 
@@ -78,15 +75,15 @@ public class StatDialog extends JDialog {
     }
 
     private void update() {
-        int version = versionComboBox.isEnabled() ? 10 - versionComboBox.getSelectedIndex() : 0;
+        int iteration = iterationComboBox.isEnabled() ? 10 - iterationComboBox.getSelectedIndex() : 0;
 
         JLabel[] keyLabel = {keyDmgLabel, keyBrkLabel, keyHitLabel, keyRldLabel};
         JLabel[] valueLabel = {valueDmgLabel, valueBrkLabel, valueHitLabel, valueRldLabel};
 
-        int[] hocStat = Board.getHOCStat(name).toArray();
+        int[] hocStat = unit.getInnateStat().toArray();
         int[] chipStat = board.getStat().limit(board.getOrigMaxStat()).toArray();
         int[] resStat = board.getResonance().toArray();
-        int[] verStat = Board.getVersionStat(name, version).toArray();
+        int[] verStat = unit.getIterationStatSum(iteration).toArray();
 
         int[] totalStat = new int[4];
         for (int i = 0; i < 4; i++) {
@@ -147,7 +144,7 @@ public class StatDialog extends JDialog {
     }
 
     private void addListeners() {
-        versionComboBox.addActionListener((e) -> update());
+        iterationComboBox.addActionListener((e) -> update());
         Fn.addEscDisposeListener(this);
     }
 
@@ -195,7 +192,7 @@ public class StatDialog extends JDialog {
         valueRldLabel = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         textVersionLabel = new javax.swing.JLabel();
-        versionComboBox = new javax.swing.JComboBox<>();
+        iterationComboBox = new javax.swing.JComboBox<>();
         totalLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -261,7 +258,7 @@ public class StatDialog extends JDialog {
 
         textVersionLabel.setText("version");
 
-        versionComboBox.setPreferredSize(new java.awt.Dimension(100, 21));
+        iterationComboBox.setPreferredSize(new java.awt.Dimension(100, 21));
 
         totalLabel.setText("jLabel1");
 
@@ -272,7 +269,7 @@ public class StatDialog extends JDialog {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(textVersionLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(versionComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(iterationComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(totalLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 657, Short.MAX_VALUE))
         );
@@ -280,7 +277,7 @@ public class StatDialog extends JDialog {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                 .addComponent(textVersionLabel)
-                .addComponent(versionComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(iterationComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addComponent(totalLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
@@ -331,6 +328,7 @@ public class StatDialog extends JDialog {
     private javax.swing.JButton closeButton;
     private javax.swing.JPanel dmgPanel;
     private javax.swing.JPanel hitPanel;
+    private javax.swing.JComboBox<String> iterationComboBox;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel keyBrkLabel;
     private javax.swing.JLabel keyDmgLabel;
@@ -343,6 +341,5 @@ public class StatDialog extends JDialog {
     private javax.swing.JLabel valueDmgLabel;
     private javax.swing.JLabel valueHitLabel;
     private javax.swing.JLabel valueRldLabel;
-    private javax.swing.JComboBox<String> versionComboBox;
     // End of variables declaration//GEN-END:variables
 }

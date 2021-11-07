@@ -1,9 +1,5 @@
 package main.json;
 
-/**
- *
- * @author Bunnyspa
- */
 public class TextJson implements Json {
 
     private final String data;

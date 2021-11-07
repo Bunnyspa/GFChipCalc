@@ -3,21 +3,17 @@ package main.setting;
 import main.puzzle.Shape;
 import main.puzzle.Stat;
 
-/**
- *
- * @author Bunnyspa
- */
 public class StatPreset {
 
-    public final Stat stat, pt, ptMin, ptMax;
     public final Shape.Type typeMin;
+    public final Stat stat, pt, ptFilterMin, ptFilterMax;
 
-    public StatPreset(Stat stat, Stat pt, Stat ptMin, Stat ptMax, Shape.Type typeMin) {
+    public StatPreset(Shape.Type typeMin, Stat stat, Stat pt, Stat ptFilterMin, Stat ptFilterMax) {
+        this.typeMin = typeMin;
         this.stat = stat;
         this.pt = pt;
-        this.ptMin = ptMin;
-        this.ptMax = ptMax;
-        this.typeMin = typeMin;
+        this.ptFilterMin = ptFilterMin;
+        this.ptFilterMax = ptFilterMax;
     }
 
 }

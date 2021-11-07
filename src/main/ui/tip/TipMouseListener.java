@@ -7,10 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JLabel;
 
-/**
- *
- * @author Bunnyspa
- */
 public class TipMouseListener implements MouseListener {
 
     private final JLabel label;

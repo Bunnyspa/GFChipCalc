@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.BooleanSupplier;
+import main.data.Unit;
 import main.iterator.ChipCiterator;
 import main.iterator.ShapeCiterator;
 import main.puzzle.Board;
@@ -21,10 +22,6 @@ import main.puzzle.assembly.dxz.DXZ;
 import main.setting.Setting;
 import main.util.IO;
 
-/**
- *
- * @author Bunnyspa
- */
 public class Assembler {
 
     public interface Intermediate {
@@ -49,23 +46,22 @@ public class Assembler {
     static {
         // Full BoardTemplate
         fullBTM = new BoardTemplateMap();
-        for (String name : Board.NAMES) {
+        for (Unit unit : Unit.values()) {
             for (int star = 1; star <= 5; star++) {
-                List<BoardTemplate> templates = IO.loadBoardTemplates(name, star, false);
+                List<BoardTemplate> templates = IO.loadBoardTemplates(unit, star, false);
                 Shape.Type minType = Shape.Type._5A;
-                if (Board.NAME_M2.equals(name)
-                        || (Board.NAME_MK153.equals(name) && star <= 2)) {
+                if (unit == Unit.M2 || (unit == Unit.MK153 && star <= 2)) {
                     minType = Shape.Type._4;
-                } else if (Board.NAME_MK153.equals(name) && star == 5) {
+                } else if (unit == Unit.MK153 && star == 5) {
                     minType = Shape.Type._5B;
                 }
-                fullBTM.put(name, star, templates, minType);
+                fullBTM.put(unit, star, templates, minType);
             }
         }
         // Partial BoardTemplate
         partialBTM = new BoardTemplateMap();
-        List<BoardTemplate> templates = IO.loadBoardTemplates(Board.NAME_M2, 5, true);
-        partialBTM.put(Board.NAME_M2, 5, templates, Shape.Type._5B);
+        List<BoardTemplate> templates = IO.loadBoardTemplates(Unit.M2, 5, true);
+        partialBTM.put(Unit.M2, 5, templates, Shape.Type._5B);
     }
 
     private final Intermediate intermediate;
@@ -82,20 +78,20 @@ public class Assembler {
         this.intermediate = i;
     }
 
-    public boolean btExists(String name, int star, boolean alt) {
-        return getBT(name, star, alt) != null;
+    public boolean btExists(Unit unit, int star, boolean alt) {
+        return getBT(unit, star, alt) != null;
     }
 
-    private List<BoardTemplate> getBT(String name, int star, boolean alt) {
-        return alt ? partialBTM.get(name, star) : fullBTM.get(name, star);
+    private List<BoardTemplate> getBT(Unit unit, int star, boolean alt) {
+        return alt ? partialBTM.get(unit, star) : fullBTM.get(unit, star);
     }
 
-    public Shape.Type getMinType(String name, int star, boolean alt) {
-        return alt ? partialBTM.getMinType(name, star) : fullBTM.getMinType(name, star);
+    public Shape.Type getMinType(Unit unit, int star, boolean alt) {
+        return alt ? partialBTM.getMinType(unit, star) : fullBTM.getMinType(unit, star);
     }
 
-    public boolean hasPartial(String name, int star) {
-        return partialBTM.containsKey(name, star);
+    public boolean hasPartial(Unit unit, int star) {
+        return partialBTM.containsKey(unit, star);
     }
 
     public void set(CalcSetting cs, CalcExtraSetting ces, Progress p) {
@@ -169,7 +165,7 @@ public class Assembler {
     private void combine_template(BlockingQueue<BoardTemplate> q, ChipCiterator chipCit) {
         // Dictionary
         if (ces.calcMode == CalcExtraSetting.CALCMODE_DICTIONARY) {
-            List<BoardTemplate> templates = getBT(cs.boardName, cs.boardStar, ces.calcModeTag == 1);
+            List<BoardTemplate> templates = getBT(cs.unit, cs.unitStar, ces.calcModeTag == 1);
 
             int count = 0;
             for (BoardTemplate boardTemplate : templates) {
@@ -194,7 +190,7 @@ public class Assembler {
         } //
         // DXZ
         else {
-            ShapeCiterator shapeCit = new ShapeCiterator(cs.boardName, cs.boardStar, ces.chips);
+            ShapeCiterator shapeCit = new ShapeCiterator(cs.unit, cs.unitStar, ces.chips);
             progress.nTotal = shapeCit.total();
             setProgBar();
 
@@ -213,27 +209,27 @@ public class Assembler {
             return BoardTemplate.empty();
         }
         List<Shape> shapes = citerator.next();
-        return generateTemplate(cs.boardName, cs.boardStar, shapes, checkPause);
+        return generateTemplate(cs.unit, cs.unitStar, shapes, checkPause);
     }
 
-    public static BoardTemplate generateTemplate(String boardName, int boardStar, List<Shape> shapes, BooleanSupplier checkPause) {
-        return generateTemplate_DXZ(boardName, boardStar, shapes, checkPause);
+    public static BoardTemplate generateTemplate(Unit unit, int unitStar, List<Shape> shapes, BooleanSupplier checkPause) {
+        return generateTemplate_DXZ(unit, unitStar, shapes, checkPause);
     }
 
-    private static BoardTemplate generateTemplate_DXZ(String boardName, int boardStar, List<Shape> shapes, BooleanSupplier checkPause) {
-        PuzzleMatrix<Integer> puzzle = Board.initMatrix(boardName, boardStar);
+    private static BoardTemplate generateTemplate_DXZ(Unit unit, int unitStar, List<Shape> shapes, BooleanSupplier checkPause) {
+        PuzzleMatrix<Integer> puzzle = Board.initMatrix(unit, unitStar);
 
         Set<Point> emptyCoords = puzzle.getPoints(Board.EMPTY);
 
-        int nCol_name = shapes.size();
+        int nCol_shape = shapes.size();
         int nCol_cell = puzzle.getNumContaining(Board.EMPTY);
-        int nCol = nCol_name + nCol_cell;
+        int nCol = nCol_shape + nCol_cell;
 
         List<Point> cols_pt = new ArrayList<>(emptyCoords);
         List<boolean[]> rows = new ArrayList<>();
         List<Puzzle> rows_puzzle = new ArrayList<>();
 
-        for (int i = 0; i < nCol_name; i++) {
+        for (int i = 0; i < nCol_shape; i++) {
             Shape shape = shapes.get(i);
             for (int rot = 0; rot < shape.getMaxRotation(); rot++) {
                 for (Point bp : emptyCoords) {
@@ -241,7 +237,7 @@ public class Assembler {
                     if (Board.isChipPlaceable(puzzle, tps)) {
                         boolean[] row = new boolean[nCol];
                         row[i] = true;
-                        tps.forEach((p) -> row[nCol_name + cols_pt.indexOf(p)] = true);
+                        tps.forEach((p) -> row[nCol_shape + cols_pt.indexOf(p)] = true);
                         rows.add(row);
                         rows_puzzle.add(new Puzzle(shape, rot, bp));
                     }
@@ -264,7 +260,7 @@ public class Assembler {
         sortedRows.sort((o1, o2) -> Shape.compare(rows_puzzle.get(o1).shape, rows_puzzle.get(o2).shape));
         sortedRows.forEach((r) -> puzzles.add(rows_puzzle.get(r)));
         // System.out.println(puzzles);
-        BoardTemplate bt = new BoardTemplate(boardName, boardStar, puzzles);
+        BoardTemplate bt = new BoardTemplate(unit, unitStar, puzzles);
         return bt;
     }
 
@@ -309,7 +305,7 @@ public class Assembler {
 
                     // add
                     if (addable) {
-                        publishBoard(new Board(cs.boardName, cs.boardStar, cs.stat, candidates, template));
+                        publishBoard(new Board(cs.unit, cs.unitStar, cs.stat, candidates, template));
                     }
                 }
             }

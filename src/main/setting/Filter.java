@@ -3,23 +3,19 @@ package main.setting;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import main.data.Unit;
 import main.puzzle.Chip;
 import main.puzzle.Stat;
 import main.puzzle.Tag;
 
-/**
- *
- * @author Bunnyspa
- */
 public class Filter {
 
     public static final int NUM_STAR = 4;
-    public static final int NUM_COLOR = 2;
     public static final int NUM_TYPE = 7;
     public static final int NUM_MARK = 2;
 
     private final boolean[] stars = new boolean[NUM_STAR];
-    private final boolean[] colors = new boolean[NUM_COLOR];
+    private final boolean[] colors = new boolean[Unit.Color.values().length];
     private final boolean[] types = new boolean[NUM_TYPE];
     private final boolean[] marks = new boolean[NUM_MARK];
     public int levelMin = 0;
@@ -34,8 +30,8 @@ public class Filter {
         return stars[i];
     }
 
-    public boolean getColor(int i) {
-        return colors[i];
+    public boolean getColor(Unit.Color color) {
+        return colors[color.id];
     }
 
     public boolean getType(int i) {
@@ -104,7 +100,7 @@ public class Filter {
     // reset
     public void reset() {
         setAll(stars, new boolean[NUM_STAR]);
-        setAll(colors, new boolean[NUM_COLOR]);
+        setAll(colors, new boolean[Unit.Color.values().length]);
         setAll(types, new boolean[NUM_TYPE]);
         setAll(marks, new boolean[NUM_MARK]);
         levelMin = 0;

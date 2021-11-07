@@ -229,7 +229,7 @@
               <Group type="102" alignment="0" attributes="0">
                   <Component id="textVersionLabel" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="versionComboBox" min="-2" max="-2" attributes="0"/>
+                  <Component id="iterationComboBox" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="totalLabel" pref="657" max="32767" attributes="0"/>
               </Group>
@@ -239,7 +239,7 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="textVersionLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="versionComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="iterationComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="totalLabel" alignment="3" min="-2" pref="21" max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -251,7 +251,7 @@
             <Property name="text" type="java.lang.String" value="version"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JComboBox" name="versionComboBox">
+        <Component class="javax.swing.JComboBox" name="iterationComboBox">
           <Properties>
             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[100, 21]"/>

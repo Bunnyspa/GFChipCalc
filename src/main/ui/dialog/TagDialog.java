@@ -10,10 +10,6 @@ import main.ui.component.TagPanel;
 import main.ui.resource.AppText;
 import main.util.Fn;
 
-/**
- *
- * @author Bunnyspa
- */
 public class TagDialog extends JDialog {
 
     private final App app;

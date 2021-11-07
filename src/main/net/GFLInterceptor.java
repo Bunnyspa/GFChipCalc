@@ -7,10 +7,6 @@ import java.util.function.Consumer;
 import java.util.zip.GZIPInputStream;
 import main.json.JsonParser;
 
-/**
- *
- * @author Bunnyspa
- */
 public class GFLInterceptor implements Interceptor {
 
     private static final String CONTENT_ENCODING = "Content-Encoding";

@@ -5,10 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ZDDNodeTable {
 
     private final Map<Integer, Set<ZDDNode>> map = new HashMap<>();

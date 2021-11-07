@@ -667,3 +667,8 @@
 
 ### Added
 - PP-93 board and 5-star stat added temporarily
+
+## 8.0.0 (11/7/2021)
+
+### Added
+- PP-93 unit details

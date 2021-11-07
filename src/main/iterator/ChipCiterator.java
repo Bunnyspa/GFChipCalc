@@ -11,10 +11,6 @@ import main.puzzle.BoardTemplate;
 import main.puzzle.Chip;
 import main.puzzle.Shape;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ChipCiterator implements Iterator<List<Chip>> {
 
     private final Map<Shape, List<Chip>> candidateMap;

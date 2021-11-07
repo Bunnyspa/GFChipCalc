@@ -1,9 +1,5 @@
 package main.net;
 
-/**
- *
- * @author Bunnyspa
- */
 public interface Interceptor {
 
     boolean interceptRequest(RequestHeader requestHeader);

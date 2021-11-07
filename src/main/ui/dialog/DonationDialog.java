@@ -7,10 +7,6 @@ import main.ui.resource.AppText;
 import main.util.Fn;
 import main.util.IO;
 
-/**
- *
- * @author Bunnyspa
- */
 public class DonationDialog extends JDialog {
 
     private final App app;

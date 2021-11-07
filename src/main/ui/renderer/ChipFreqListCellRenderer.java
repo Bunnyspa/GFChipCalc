@@ -10,10 +10,6 @@ import main.ui.resource.AppImage;
 import main.util.Fn;
 import main.util.Ref;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ChipFreqListCellRenderer extends DefaultListCellRenderer {
 
     private final App app;

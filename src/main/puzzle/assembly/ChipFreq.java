@@ -2,10 +2,6 @@ package main.puzzle.assembly;
 
 import main.puzzle.Chip;
 
-/**
- *
- * @author Bunnyspa
- */
 public class ChipFreq {
 
     public final Chip chip;

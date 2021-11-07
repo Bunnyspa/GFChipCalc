@@ -9,11 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- *
- * @author Bunnyspa
- * @param <E>
- */
 public class PuzzleMatrix<E> implements Serializable {
 
     private int nRow, nCol;
