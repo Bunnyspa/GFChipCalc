@@ -672,3 +672,8 @@
 
 ### Added
 - PP-93 unit details
+
+## 8.1.0 (11/7/2021)
+
+### Added
+- PP-93 board templates
