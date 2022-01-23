@@ -656,7 +656,11 @@ public class IO {
         String id = it.next();
         Shape shape = v.isCurrent(7, 0, 0) ? Shape.byId(Integer.valueOf(it.next())) : Shape.byName(it.next());
         int star = Integer.valueOf(it.next());
-        Unit.Color color = Unit.Color.byId(Integer.valueOf(it.next()));
+
+        String colorString = it.next();
+        Unit.Color color = colorString.matches("\\d+")
+                ? Unit.Color.byId(Integer.valueOf(colorString))
+                : Unit.Color.byString(colorString);
 
         Stat pt = parseStat(it.next());
 

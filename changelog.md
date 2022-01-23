@@ -677,3 +677,8 @@
 
 ### Added
 - PP-93 board templates
+
+## 8.1.1 (1/24/2022)
+
+### Fixed
+- Fixed progress file loading issue

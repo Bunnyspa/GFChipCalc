@@ -587,7 +587,7 @@ public class Chip implements Serializable {
             id,
             String.valueOf(shape.id),
             String.valueOf(star),
-            String.valueOf(color),
+            String.valueOf(color.id),
             pt.toData(),
             String.valueOf(initLevel),
             String.valueOf(initRotation),

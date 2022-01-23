@@ -657,8 +657,20 @@ public enum Unit {
             }
         };
 
+        private static final Map<String, Color> STRINGS = new HashMap<String, Color>() {
+            {
+                for (Color color : Color.values()) {
+                    put(color.toString(), color);
+                }
+            }
+        };
+
         public static Color byId(int id) {
             return IDS.get(id);
+        }
+
+        public static Color byString(String s) {
+            return STRINGS.get(s);
         }
 
         public final int id;
