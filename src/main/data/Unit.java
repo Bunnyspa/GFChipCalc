@@ -424,25 +424,28 @@ public enum Unit {
                 new Stat(169, 55, 100, 91)
             },
             // Resonances
-            new int[]{10, 15, 18, 26},
+            new int[]{4, 10, 16, 20, 24, 28, 32},
             new Stat[]{
-                new Stat(10, 3, 8, 8),
-                new Stat(0, 4, 15, 20),
-                new Stat(10, 8, 15, 18),
-                new Stat(0, 0, 30, 0)
+                new Stat(10, 0, 8, 0),
+                new Stat(10, 8, 0, 10),
+                new Stat(15, 0, 8, 0),
+                new Stat(15, 15, 12, 0),
+                new Stat(18, 15, 0, 10),
+                new Stat(18, 0, 18, 0),
+                new Stat(26, 30, 0, 0)
             },
             // Iteration Stats
             new Stat[]{
-                new Stat(2, 0, 4, 0),
-                new Stat(1, 3, 0, 5),
+                new Stat(3, 0, 8, 0),
+                new Stat(3, 5, 0, 3),
                 new Stat(3, 0, 6, 0),
-                new Stat(3, 4, 0, 5),
-                new Stat(4, 0, 0, 6),
-                new Stat(5, 0, 9, 0),
-                new Stat(6, 2, 0, 8),
-                new Stat(6, 0, 9, 0),
-                new Stat(3, 5, 0, 11),
-                new Stat(8, 0, 0, 8)
+                new Stat(3, 5, 0, 3),
+                new Stat(3, 0, 0, 6),
+                new Stat(3, 0, 12, 0),
+                new Stat(6, 6, 0, 6),
+                new Stat(8, 0, 12, 0),
+                new Stat(8, 8, 0, 8),
+                new Stat(10, 0, 0, 8)
             },
             // Presets
             new StatPreset[]{
