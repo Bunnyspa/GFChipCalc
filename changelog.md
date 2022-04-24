@@ -682,3 +682,8 @@
 
 ### Fixed
 - Fixed progress file loading issue
+
+## 8.2.0 (4/24/2022)
+
+### Changed
+- PP-93 resonance and iteration changes https://github.com/Bunnyspa/GFChipCalc/pull/9
