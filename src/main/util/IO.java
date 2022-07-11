@@ -531,16 +531,15 @@ public class IO {
         String updateLatest = getVersion(URL_GITHUB_UPDATE, app.setting.updateVersion.toData());
         String path = new File("").getAbsolutePath();
         try {
-            String exePath = path + "\\" + FILENAME_UPDATE;
-            File exeFile = new File(exePath);
+            File exeFile = new File(path, FILENAME_UPDATE);
             if (!app.setting.updateVersion.isCurrent(updateLatest) || !exeFile.exists()) {
                 downloadUpdate();
                 app.setting.updateVersion = new Version2(updateLatest);
                 app.mf.settingFile_save();
             }
             if (exeFile.exists()) {
-                ProcessBuilder process = new ProcessBuilder("java", "-jar", exePath);
-                process.directory(new File(path + "\\"));
+                ProcessBuilder process = new ProcessBuilder("java", "-jar", exeFile.getAbsolutePath());
+                process.directory(path);
                 process.start();
                 System.exit(0);
             }
