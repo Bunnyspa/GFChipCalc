@@ -453,6 +453,59 @@ public enum Unit {
                         null, null,
                         new Stat(0, 0, 0, 0), new Stat(5, 5, 5, 5))
             }
+    ),
+    MK47("Mk 47", Color.BLUE,
+            // Grid
+            new int[][]{
+                    {6, 6, 6, 5, 5, 6, 6, 6},
+                    {6, 6, 6, 2, 2, 6, 6, 6},
+                    {6, 6, 1, 1, 1, 1, 6, 6},
+                    {6, 2, 1, 1, 1, 1, 2, 6},
+                    {3, 2, 1, 1, 1, 1, 2, 3},
+                    {3, 2, 1, 1, 1, 1, 2, 3},
+                    {3, 6, 6, 4, 4, 6, 6, 3},
+                    {6, 6, 5, 4, 4, 5, 6, 6}
+            },
+            // Innate Stat
+            new Stat(80, 142, 196, 313),
+            // Board Stats
+            new Stat[]{
+                    new Stat(60, 71, 66, 105),
+                    new Stat(72, 86, 79, 125),
+                    new Stat(84, 100, 92, 146),
+                    new Stat(102, 121, 111, 178),
+                    new Stat(120, 142, 131, 209)
+            },
+            // Resonances
+            new int[]{4, 10, 16, 24, 30, 34, 38},
+            new Stat[]{
+                    new Stat(10, 0, 6, 0),
+                    new Stat(0, 6, 0, 4),
+                    new Stat(15, 0, 6, 0),
+                    new Stat(0, 10, 0, 10),
+                    new Stat(30, 0, 12, 0),
+                    new Stat(0, 15, 0, 8),
+                    new Stat(40, 0, 0, 15)
+            },
+            // Iteration Stats
+            new Stat[]{
+                    new Stat(3, 0, 6, 0),
+                    new Stat(3, 6, 0, 3),
+                    new Stat(3, 0, 6, 0),
+                    new Stat(3, 6, 0, 3),
+                    new Stat(4, 0, 0, 6),
+                    new Stat(4, 0, 12, 0),
+                    new Stat(6, 6, 0, 6),
+                    new Stat(8, 0, 15, 0),
+                    new Stat(8, 8, 0, 8),
+                    new Stat(10, 0, 0, 8)
+            },
+            // Presets
+            new StatPreset[]{
+                    new StatPreset(Shape.Type._5A,
+                            null, null,
+                            new Stat(0, 0, 0, 0), new Stat(5, 5, 5, 5))
+            }
     );
 
     private static final Map<String, Unit> NAMES = new HashMap<String, Unit>() {
